@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Dashboard (Home)</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#6366f1", // Modified as per request
+            "secondary": "#64748b",
+            "success": "#10b981",
+            "danger": "#ef4444",
+            "background-light": "#f8fafc",
+            "background-dark": "#101122",
+            "text-light": "#1e293b",
+            "text-dark": "#e2e8f0",
+            "text-secondary-light": "#64748b",
+            "text-secondary-dark": "#94a3b8",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark">
+  <div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+    <div class="flex flex-row min-h-screen">
+      <!-- SideNavBar -->
+      <div
+        class="flex flex-col justify-between bg-white dark:bg-background-dark border-r border-slate-200 dark:border-slate-800 w-64 p-4">
+        <div class="flex flex-col gap-4">
+          <div class="flex gap-3 items-center mb-4">
+            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+              data-alt="User profile picture, an abstract purple gradient."
+              style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCzQwhBE_v9zuiCwaljxlwp13crpn9hwn1r4Qu7fEcPD_LWP3CXgnzY5dBxcYrTm4jUhC866fjqeqzgS1NHoGXBO2n84B0wHIQ1KE7v7Ew7ujcv5XPdhVC0xL_L_eZ75IpJo47VgFT7LVYSQg8Uc95Yr7WOM8KNda1TxSQK5fIgG0kwVhfh8eenngtEzfxcc_KflmLuTtCSdnpIAorstx40EieDWtsXFIcuN5_r2zfvBCCAv9vpbAnz6F0QS95DMVdC2F5XW-96LEcb");'>
+            </div>
+            <div class="flex flex-col">
+              <h1 class="text-text-light dark:text-text-dark text-base font-medium leading-normal">Olivia Rhye</h1>
+              <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">
+                olivia@email.com</p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 dark:bg-primary/20">
+              <span class="material-symbols-outlined text-primary text-2xl"
+                style="font-variation-settings: 'FILL' 1;">dashboard</span>
+              <p class="text-primary text-sm font-medium leading-normal">Dashboard</p>
+            </div>
+            <div
+              class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+              <span
+                class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark text-2xl">receipt_long</span>
+              <p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Transactions</p>
+            </div>
+            <div
+              class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+              <span
+                class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark text-2xl">pie_chart</span>
+              <p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Reports</p>
+            </div>
+            <div
+              class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+              <span
+                class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark text-2xl">settings</span>
+              <p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Settings</p>
+            </div>
+          </div>
+        </div>
+        <button
+          class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] gap-2">
+          <span class="material-symbols-outlined text-xl">add</span>
+          <span class="truncate">Add Transaction</span>
+        </button>
+      </div>
+      <!-- Main Content -->
+      <main class="flex-1 p-8">
+        <div class="layout-content-container flex flex-col max-w-7xl mx-auto">
+          <!-- PageHeading -->
+          <div class="flex flex-wrap justify-between gap-3 p-4 mb-4">
+            <div class="flex min-w-72 flex-col gap-3">
+              <p class="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-[-0.033em]">
+                Welcome back, Olivia!</p>
+              <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-normal leading-normal">
+                Here's a summary of your financial health.</p>
+            </div>
+          </div>
+          <!-- Stats -->
+          <div class="flex flex-wrap gap-6 p-4">
+            <div
+              class="flex min-w-[200px] flex-1 flex-col gap-2 rounded-xl p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+              <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-medium leading-normal">
+                Total Balance</p>
+              <p class="text-text-light dark:text-text-dark tracking-light text-3xl font-bold leading-tight">$12,545.00
+              </p>
+              <p class="text-success text-base font-medium leading-normal">+2.5% vs last month</p>
+            </div>
+            <div
+              class="flex min-w-[200px] flex-1 flex-col gap-2 rounded-xl p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+              <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-medium leading-normal">
+                Income (This Month)</p>
+              <p class="text-text-light dark:text-text-dark tracking-light text-3xl font-bold leading-tight">$2,500.00
+              </p>
+              <p class="text-success text-base font-medium leading-normal">+10.1% vs last month</p>
+            </div>
+            <div
+              class="flex min-w-[200px] flex-1 flex-col gap-2 rounded-xl p-6 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+              <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-medium leading-normal">
+                Expense (This Month)</p>
+              <p class="text-text-light dark:text-text-dark tracking-light text-3xl font-bold leading-tight">$850.75</p>
+              <p class="text-danger text-base font-medium leading-normal">-1.2% vs last month</p>
+            </div>
+          </div>
+          <!-- SectionHeader -->
+          <h2
+            class="text-text-light dark:text-text-dark text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-8">
+            Recent Transactions</h2>
+          <!-- Table -->
+          <div class="px-4 py-3 @container">
+            <div
+              class="flex overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+              <table class="flex-1">
+                <thead>
+                  <tr class="bg-white dark:bg-slate-900">
+                    <th
+                      class="px-4 py-3 text-left text-text-secondary-light dark:text-text-secondary-dark w-[400px] text-sm font-medium leading-normal">
+                      Transaction</th>
+                    <th
+                      class="px-4 py-3 text-left text-text-secondary-light dark:text-text-secondary-dark w-60 text-sm font-medium leading-normal">
+                      Category</th>
+                    <th
+                      class="px-4 py-3 text-left text-text-secondary-light dark:text-text-secondary-dark w-[400px] text-sm font-medium leading-normal">
+                      Date</th>
+                    <th
+                      class="px-4 py-3 text-right text-text-secondary-light dark:text-text-secondary-dark w-[400px] text-sm font-medium leading-normal">
+                      Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-t border-t-slate-200 dark:border-t-slate-800">
+                    <td
+                      class="h-[72px] px-4 py-2 w-[400px] text-text-light dark:text-text-dark text-sm font-normal leading-normal">
+                      Spotify Subscription</td>
+                    <td class="h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                      <span
+                        class="inline-flex items-center justify-center overflow-hidden rounded-full h-8 px-3 bg-slate-100 dark:bg-slate-800 text-text-light dark:text-text-dark text-sm font-medium leading-normal">Entertainment</span>
+                    </td>
+                    <td
+                      class="h-[72px] px-4 py-2 w-[400px] text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">
+                      Dec 12, 2023</td>
+                    <td class="h-[72px] px-4 py-2 w-[400px] text-danger text-sm font-medium leading-normal text-right">
+                      -$10.00</td>
+                  </tr>
+                  <tr class="border-t border-t-slate-200 dark:border-t-slate-800">
+                    <td
+                      class="h-[72px] px-4 py-2 w-[400px] text-text-light dark:text-text-dark text-sm font-normal leading-normal">
+                      Apple Store</td>
+                    <td class="h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                      <span
+                        class="inline-flex items-center justify-center overflow-hidden rounded-full h-8 px-3 bg-slate-100 dark:bg-slate-800 text-text-light dark:text-text-dark text-sm font-medium leading-normal">Electronics</span>
+                    </td>
+                    <td
+                      class="h-[72px] px-4 py-2 w-[400px] text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">
+                      Dec 10, 2023</td>
+                    <td class="h-[72px] px-4 py-2 w-[400px] text-danger text-sm font-medium leading-normal text-right">
+                      -$999.00</td>
+                  </tr>
+                  <tr class="border-t border-t-slate-200 dark:border-t-slate-800">
+                    <td
+                      class="h-[72px] px-4 py-2 w-[400px] text-text-light dark:text-text-dark text-sm font-normal leading-normal">
+                      Freelance Payment</td>
+                    <td class="h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                      <span
+                        class="inline-flex items-center justify-center overflow-hidden rounded-full h-8 px-3 bg-slate-100 dark:bg-slate-800 text-text-light dark:text-text-dark text-sm font-medium leading-normal">Income</span>
+                    </td>
+                    <td
+                      class="h-[72px] px-4 py-2 w-[400px] text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">
+                      Dec 08, 2023</td>
+                    <td class="h-[72px] px-4 py-2 w-[400px] text-success text-sm font-medium leading-normal text-right">
+                      +$1,200.00</td>
+                  </tr>
+                  <tr class="border-t border-t-slate-200 dark:border-t-slate-800">
+                    <td
+                      class="h-[72px] px-4 py-2 w-[400px] text-text-light dark:text-text-dark text-sm font-normal leading-normal">
+                      Starbucks Coffee</td>
+                    <td class="h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                      <span
+                        class="inline-flex items-center justify-center overflow-hidden rounded-full h-8 px-3 bg-slate-100 dark:bg-slate-800 text-text-light dark:text-text-dark text-sm font-medium leading-normal">Food
+                        &amp; Drink</span>
+                    </td>
+                    <td
+                      class="h-[72px] px-4 py-2 w-[400px] text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">
+                      Dec 07, 2023</td>
+                    <td class="h-[72px] px-4 py-2 w-[400px] text-danger text-sm font-medium leading-normal text-right">
+                      -$5.50</td>
+                  </tr>
+                  <tr class="border-t border-t-slate-200 dark:border-t-slate-800">
+                    <td
+                      class="h-[72px] px-4 py-2 w-[400px] text-text-light dark:text-text-dark text-sm font-normal leading-normal">
+                      Uber Ride</td>
+                    <td class="h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                      <span
+                        class="inline-flex items-center justify-center overflow-hidden rounded-full h-8 px-3 bg-slate-100 dark:bg-slate-800 text-text-light dark:text-text-dark text-sm font-medium leading-normal">Transport</span>
+                    </td>
+                    <td
+                      class="h-[72px] px-4 py-2 w-[400px] text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">
+                      Dec 06, 2023</td>
+                    <td class="h-[72px] px-4 py-2 w-[400px] text-danger text-sm font-medium leading-normal text-right">
+                      -$15.20</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+
+</html>
