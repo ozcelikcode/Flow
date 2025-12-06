@@ -1,15 +1,15 @@
-# Project Brief
+# Proje Özeti (Project Brief)
 
-## Goal
-Build a beautiful expense tracking application ("Harcama Takibi") based on the provided design in `code.html`.
+## Hedef
+`code.html` dosyasındaki tasarımı temel alarak güzel bir harcama takip uygulaması ("Harcama Takibi") geliştirmek.
 
-## Core Requirements
-- Use the design provided in `code.html`.
-- Functional expense tracking (add, view transactions).
-- Dashboard with statistics (Total Balance, Income, Expense).
-- Modern and responsive interface (as per the provided HTML/Tailwind).
+## Temel Gereksinimler
+- `code.html` tasarımını birebir uygulamak.
+- İşlevsel harcama takibi (ekleme, görüntüleme).
+- İstatistik paneli (Toplam Bakiye, Gelir, Gider).
+- Modern ve responsive arayüz (Tailwind CSS ile).
 
-## Success Metrics
-- A working application that matches the provided design.
-- Ability to add and view transactions.
-- Correct calculation of dashboard statistics.
+## Başarı Kriterleri
+- Tasarıma sadık çalışan bir uygulama.
+- Harcama ekleme ve listeleme özelliği.
+- Doğru çalışan dashboard istatistikleri.

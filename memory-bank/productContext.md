@@ -1,16 +1,16 @@
-# Product Context
+# Ürün Bağlamı (Product Context)
 
-## Problem Statement
-Users need a simple and beautiful way to track their daily expenses and incomes to maintain financial health.
+## Problem Tanımı
+Kullanıcıların finansal sağlıklarını korumak için günlük gelir ve giderlerini takip edebilecekleri basit ve şık bir yola ihtiyaçları var.
 
-## Solution
-An expense tracking dashboard that provides:
-- A clear overview of financial status (Balance, Income, Expense).
-- A list of recent transactions.
-- Categorization of expenses.
-- A user-friendly interface.
+## Çözüm
+Şunları sağlayan bir harcama takip paneli:
+- Finansal durumun net bir özeti (Bakiye, Gelir, Gider).
+- Son işlemlerin listesi.
+- Harcama kategorizasyonu.
+- Kullanıcı dostu arayüz.
 
-## User Experience Goals
-- **Visual Appeal**: The app should look premium and modern (leveraging the provided Tailwind design).
-- **Simplicity**: Easy to add transactions and view reports.
-- **Responsiveness**: Works well on different screen sizes.
+## Kullanıcı Deneyimi Hedefleri
+- **Görsel Çekicilik**: Uygulama premium ve modern hissettirmeli.
+- **Basitlik**: İşlem eklemek ve raporları görüntülemek kolay olmalı.
+- **Duyarlılık (Responsiveness)**: Farklı ekran boyutlarında iyi çalışmalı.

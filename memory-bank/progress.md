@@ -1,17 +1,17 @@
-# Progress
+# İlerleme (Progress)
 
-## Status
-- [x] Memory Bank Creation
-- [ ] Project Initialization
-- [ ] Component Porting
-- [ ] Logic Implementation
+## Durum
+- [x] Memory Bank Oluşturma (Flow dizininde)
+- [ ] Proje Başlatma (Vite + React)
+- [ ] Bileşenleri Taşıma
+- [ ] Mantık Uygulaması
 
-## Known Issues
-- None yet.
+## Bilinen Sorunlar
+- Yok.
 
-## Roadmap
-1.  Setup Project & Memory Bank.
-2.  Create UI Components from `code.html`.
-3.  Implement "Add Transaction" functionality.
-4.  Implement Dashboard Logic (Balance calc).
-5.  Refine UI/UX.
+## Yol Haritası
+1.  Proje ve Memory Bank Kurulumu.
+2.  `code.html`'den UI Bileşenlerini Oluşturma.
+3.  "İşlem Ekle" özelliğini uygulama.
+4.  Dashboard istatistiklerini bağlama.
+5.  UI/UX İyileştirmeleri.

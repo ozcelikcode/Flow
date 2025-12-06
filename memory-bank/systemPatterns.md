@@ -1,18 +1,18 @@
-# System Patterns
+# Sistem Modelleri (System Patterns)
 
-## Architecture
-The application will likely follow a Component-Based Architecture (likely React/Vite) to modularize the design found in `code.html`.
+## Mimari
+Uygulama, `code.html` içindeki tasarımı modüler hale getirmek için Bileşen Tabanlı Mimari (React/Vite) kullanacak.
 
-## Key Components
-Based on `code.html`:
-1.  **Layout**: Wrapper with Sidebar and Main Content.
-2.  **Sidebar**: Navigation (Dashboard, Transactions, Reports, Settings) and User Profile.
+## Ana Bileşenler
+`code.html` analizine göre:
+1.  **Layout**: Sidebar ve Ana İçerik kapsayıcısı.
+2.  **Sidebar**: Navigasyon (Dashboard, İşlemler, Raporlar, Ayarlar) ve Profil.
 3.  **Dashboard**:
-    *   **Header**: Welcome message and summary text.
-    *   **Stats Cards**: Total Balance, Income, Expense data display.
-    *   **Recent Transactions Table**: List displaying transaction details (Name, Category, Date, Amount).
-4.  **Transaction Modal/Form**: (To be implemented) For adding new transactions.
+    *   **Header**: Hoşgeldin mesajı ve özet.
+    *   **Stats Cards**: Toplam Bakiye, Gelir, Gider kartları.
+    *   **Recent Transactions Table**: İşlem detayları tablosu.
+4.  **Transaction Modal/Form**: (Yeni eklenecek) İşlem ekleme formu.
 
-## Design Patterns
-- **Tailwind CSS Utility Classes**: Preserving the styling from the source file.
-- **Responsive Design**: Using Tailwind's responsive prefixes (defaults).
+## Tasarım Desenleri
+- **Tailwind CSS Utility Classes**: Orijinal dosyadaki stiller korunacak.
+- **Responsive Design**: Tailwind responsive önekleri kullanılacak.

@@ -1,15 +1,16 @@
-# Active Context
+# Aktif Bağlam (Active Context)
 
-## Current Work Focus
-- Initializing the project structure.
-- Setting up the Memory Bank.
-- Analyzing `code.html` for component extraction.
+## Mevcut Odak
+- Proje dizini `Flow` olarak güncellendi.
+- Proje yapısının başlatılması.
+- `code.html` dosyasının bileşenlere ayrılması.
 
-## Recent Changes
-- Created Memory Bank files.
+## Son Değişiklikler
+- Proje konumu `Flow` klasörüne taşındı.
+- Bellek Bankası (Memory Bank) dosyaları Türkçe olarak oluşturuldu.
 
-## Next Steps
-- Initialize a Vite + React project.
-- Configure Tailwind CSS.
-- Break down `code.html` into React components.
-- Implement state management for transactions.
+## Sonraki Adımlar
+- Vite + React projesini başlatmak.
+- Tailwind CSS yapılandırması.
+- `code.html`'i React bileşenlerine dönüştürmek.
+- İşlemler için state yönetimini kurmak.

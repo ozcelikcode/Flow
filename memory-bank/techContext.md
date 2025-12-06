@@ -1,15 +1,15 @@
-# Tech Context
+# Teknoloji Bağlamı (Tech Context)
 
-## Tech Stack
-- **Frontend Framework**: Vite + React (Proposed for better component management).
-- **Styling**: Tailwind CSS (Required, based on `code.html`).
-- **Icons**: Material Symbols Outlined (via Google Fonts).
-- **Fonts**: Inter (Google Fonts).
+## Teknoloji Yığını
+- **Frontend Framework**: Vite + React (TypeScript).
+- **Stil**: Tailwind CSS (Zorunlu, `code.html` bazlı).
+- **İkonlar**: Material Symbols Outlined (Google Fonts).
+- **Fontlar**: Inter (Google Fonts).
 
-## Development Environment
-- OS: Windows
-- Node.js (assumed available)
+## Geliştirme Ortamı
+- İşletim Sistemi: Windows
+- Node.js
 
-## Constraints
-- Must use the design from `code.html`.
-- "Beautiful" application (implies high fidelity to design and smooth interactions).
+## Kısıtlamalar
+- `code.html` tasarımına sadık kalınmalı.
+- Uygulama "Güzel" ve premium hissettirmeli.
