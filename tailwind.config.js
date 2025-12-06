@@ -8,16 +8,17 @@ export default {
     theme: {
         extend: {
             colors: {
-                "primary": "#6366f1", // Modified as per request
+                "primary": "#6366f1",
                 "secondary": "#64748b",
                 "success": "#10b981",
                 "danger": "#ef4444",
                 "background-light": "#f8fafc",
-                "background-dark": "#101122",
+                "background-dark": "#000000",
+                "surface-dark": "#0a0a0a",
                 "text-light": "#1e293b",
-                "text-dark": "#e2e8f0",
+                "text-dark": "#f1f5f9",
                 "text-secondary-light": "#64748b",
-                "text-secondary-dark": "#94a3b8",
+                "text-secondary-dark": "#a1a1aa",
             },
             fontFamily: {
                 "display": ["Inter", "sans-serif"]

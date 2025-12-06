@@ -1,0 +1,24 @@
+/* Global outline removal for Recharts */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-layer,
+.recharts-bar-rectangle,
+.recharts-pie-sector,
+.recharts-cell {
+    outline: none !important;
+}
+
+.recharts-wrapper:focus,
+.recharts-surface:focus,
+.recharts-layer:focus,
+.recharts-bar-rectangle:focus,
+.recharts-pie-sector:focus,
+.recharts-cell:focus {
+    outline: none !important;
+}
+
+/* Remove focus outline from SVG elements */
+svg:focus,
+svg *:focus {
+    outline: none !important;
+}

@@ -1,9 +1,12 @@
 import { useTransactions } from '../context/TransactionContext';
+import { useSettings } from '../context/SettingsContext';
+
 import StatsCard from '../components/dashboard/StatsCard';
 import TransactionTable from '../components/dashboard/TransactionTable';
 
 export default function Dashboard() {
     const { transactions } = useTransactions();
+    const { formatAmount } = useSettings();
 
     // Calculate dynamic stats
     const totalIncome = transactions
@@ -35,19 +38,19 @@ export default function Dashboard() {
             <div className="flex flex-wrap gap-6 p-4">
                 <StatsCard
                     title="Total Balance"
-                    amount={`$${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                    amount={formatAmount(currentBalance)}
                     change="Based on transactions"
                     trend="up"
                 />
                 <StatsCard
                     title="Income (This Month)"
-                    amount={`$${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                    amount={formatAmount(totalIncome)}
                     change="Based on transactions"
                     trend="up"
                 />
                 <StatsCard
                     title="Expense (This Month)"
-                    amount={`$${totalExpense.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+                    amount={formatAmount(totalExpense)}
                     change="Based on transactions"
                     trend="down"
                     trendColor="danger"

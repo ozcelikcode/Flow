@@ -33,12 +33,19 @@ function AppContent() {
   );
 }
 
+
+import { SettingsProvider } from './context/SettingsContext';
+
+// ... (AppContent function remains same)
+
 export default function App() {
   return (
-    <TransactionProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </TransactionProvider>
+    <SettingsProvider>
+      <TransactionProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </TransactionProvider>
+    </SettingsProvider>
   );
 }
