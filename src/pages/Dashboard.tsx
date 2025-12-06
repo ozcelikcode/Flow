@@ -15,8 +15,7 @@ export default function Dashboard() {
         .reduce((acc, curr) => acc + curr.amount, 0);
 
     // Initial balance logic
-    const baseBalance = 12000;
-    const currentBalance = baseBalance + totalIncome - totalExpense;
+    const currentBalance = totalIncome - totalExpense;
 
     return (
         <>
@@ -24,7 +23,7 @@ export default function Dashboard() {
             <div className="flex flex-wrap justify-between gap-3 p-4 mb-4">
                 <div className="flex min-w-72 flex-col gap-3">
                     <p className="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-[-0.033em]">
-                        Welcome back, Olivia!
+                        Welcome back!
                     </p>
                     <p className="text-text-secondary-light dark:text-text-secondary-dark text-base font-normal leading-normal">
                         Here's a summary of your financial health.
@@ -37,19 +36,19 @@ export default function Dashboard() {
                 <StatsCard
                     title="Total Balance"
                     amount={`$${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-                    change="+2.5% vs last month"
+                    change="Based on transactions"
                     trend="up"
                 />
                 <StatsCard
                     title="Income (This Month)"
                     amount={`$${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-                    change="+10.1% vs last month"
+                    change="Based on transactions"
                     trend="up"
                 />
                 <StatsCard
                     title="Expense (This Month)"
                     amount={`$${totalExpense.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-                    change="-1.2% vs last month"
+                    change="Based on transactions"
                     trend="down"
                     trendColor="danger"
                 />

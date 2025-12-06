@@ -19,9 +19,9 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                                 style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCzQwhBE_v9zuiCwaljxlwp13crpn9hwn1r4Qu7fEcPD_LWP3CXgnzY5dBxcYrTm4jUhC866fjqeqzgS1NHoGXBO2n84B0wHIQ1KE7v7Ew7ujcv5XPdhVC0xL_L_eZ75IpJo47VgFT7LVYSQg8Uc95Yr7WOM8KNda1TxSQK5fIgG0kwVhfh8eenngtEzfxcc_KflmLuTtCSdnpIAorstx40EieDWtsXFIcuN5_r2zfvBCCAv9vpbAnz6F0QS95DMVdC2F5XW-96LEcb")' }}
                             ></div>
                             <div className="flex flex-col">
-                                <h1 className="text-text-light dark:text-text-dark text-base font-medium leading-normal">Olivia Rhye</h1>
+                                <h1 className="text-text-light dark:text-text-dark text-base font-medium leading-normal">My Wallet</h1>
                                 <p className="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">
-                                    olivia@email.com
+                                    Personal Finance
                                 </p>
                             </div>
                         </div>

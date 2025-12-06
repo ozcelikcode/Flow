@@ -12,19 +12,11 @@ interface TransactionContextType {
 
 const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
 
-const initialTransactions: Transaction[] = [
-    { id: '1', name: 'Spotify Subscription', category: 'Entertainment', date: 'Dec 12, 2023', amount: 10.00, type: 'expense' },
-    { id: '2', name: 'Apple Store', category: 'Electronics', date: 'Dec 10, 2023', amount: 999.00, type: 'expense' },
-    { id: '3', name: 'Freelance Payment', category: 'Income', date: 'Dec 08, 2023', amount: 1200.00, type: 'income' },
-    { id: '4', name: 'Starbucks Coffee', category: 'Food & Drink', date: 'Dec 07, 2023', amount: 5.50, type: 'expense' },
-    { id: '5', name: 'Uber Ride', category: 'Transport', date: 'Dec 06, 2023', amount: 15.20, type: 'expense' },
-];
-
 export function TransactionProvider({ children }: { children: ReactNode }) {
-    // Try to load from local storage or use initial
+    // Try to load from local storage or use initial empty array
     const [transactions, setTransactions] = useState<Transaction[]>(() => {
         const saved = localStorage.getItem('transactions');
-        return saved ? JSON.parse(saved) : initialTransactions;
+        return saved ? JSON.parse(saved) : [];
     });
 
     useEffect(() => {
