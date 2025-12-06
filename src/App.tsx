@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { TransactionProvider, useTransactions } from './context/TransactionContext';
+import { SettingsProvider } from './context/SettingsContext';
 import Layout from './components/layout/Layout';
-import AddTransactionModal from './components/dashboard/AddTransactionModal';
+import TransactionModal from './components/dashboard/TransactionModal';
 import Dashboard from './pages/Dashboard';
 import TransactionsPage from './pages/Transactions';
 import Reports from './pages/Reports';
@@ -21,22 +22,17 @@ function AppContent() {
         <Route path="/settings" element={<Settings />} />
       </Routes>
 
-      <AddTransactionModal
+      <TransactionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onAdd={(tx) => {
+        onSave={(tx) => {
           addTransaction(tx);
-          setIsModalOpen(false); // Close after add is safer or keep open? standard is close.
+          setIsModalOpen(false);
         }}
       />
     </Layout>
   );
 }
-
-
-import { SettingsProvider } from './context/SettingsContext';
-
-// ... (AppContent function remains same)
 
 export default function App() {
   return (

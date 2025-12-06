@@ -6,25 +6,25 @@ interface TransactionTableProps {
 }
 
 export default function TransactionTable({ transactions }: TransactionTableProps) {
-    const { formatAmount } = useSettings();
+    const { formatAmount, t } = useSettings();
 
     return (
-        <div className="px-4 pb-4 bg-white dark:bg-background-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="px-4 pb-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full min-w-[600px] border-collapse text-left">
                     <thead>
                         <tr className="border-b border-slate-200 dark:border-slate-800">
-                            <th className="px-4 py-3 text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Name</th>
-                            <th className="px-4 py-3 text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Category</th>
-                            <th className="px-4 py-3 text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Date</th>
-                            <th className="px-4 py-3 text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark text-right">Amount</th>
+                            <th className="px-4 py-3 text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">{t('nameColumn')}</th>
+                            <th className="px-4 py-3 text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">{t('categoryColumn')}</th>
+                            <th className="px-4 py-3 text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">{t('dateColumn')}</th>
+                            <th className="px-4 py-3 text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark text-right">{t('amountColumn')}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {transactions.length === 0 ? (
                             <tr>
                                 <td colSpan={4} className="px-4 py-8 text-center text-text-secondary-light dark:text-text-secondary-dark">
-                                    No transactions found.
+                                    {t('noTransactionsFound')}
                                 </td>
                             </tr>
                         ) : (

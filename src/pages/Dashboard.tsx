@@ -1,12 +1,11 @@
 import { useTransactions } from '../context/TransactionContext';
 import { useSettings } from '../context/SettingsContext';
-
 import StatsCard from '../components/dashboard/StatsCard';
 import TransactionTable from '../components/dashboard/TransactionTable';
 
 export default function Dashboard() {
     const { transactions } = useTransactions();
-    const { formatAmount } = useSettings();
+    const { formatAmount, t } = useSettings();
 
     // Calculate dynamic stats
     const totalIncome = transactions
@@ -26,10 +25,10 @@ export default function Dashboard() {
             <div className="flex flex-wrap justify-between gap-3 p-4 mb-4">
                 <div className="flex min-w-72 flex-col gap-3">
                     <p className="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-[-0.033em]">
-                        Welcome back!
+                        {t('welcomeBack')}
                     </p>
                     <p className="text-text-secondary-light dark:text-text-secondary-dark text-base font-normal leading-normal">
-                        Here's a summary of your financial health.
+                        {t('financialSummary')}
                     </p>
                 </div>
             </div>
@@ -37,21 +36,21 @@ export default function Dashboard() {
             {/* Stats */}
             <div className="flex flex-wrap gap-6 p-4">
                 <StatsCard
-                    title="Total Balance"
+                    title={t('totalBalance')}
                     amount={formatAmount(currentBalance)}
-                    change="Based on transactions"
+                    change={t('basedOnTransactions')}
                     trend="up"
                 />
                 <StatsCard
-                    title="Income (This Month)"
+                    title={t('income')}
                     amount={formatAmount(totalIncome)}
-                    change="Based on transactions"
+                    change={t('basedOnTransactions')}
                     trend="up"
                 />
                 <StatsCard
-                    title="Expense (This Month)"
+                    title={t('expense')}
                     amount={formatAmount(totalExpense)}
-                    change="Based on transactions"
+                    change={t('basedOnTransactions')}
                     trend="down"
                     trendColor="danger"
                 />
@@ -59,7 +58,7 @@ export default function Dashboard() {
 
             {/* SectionHeader */}
             <h2 className="text-text-light dark:text-text-dark text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-8">
-                Recent Transactions
+                {t('recentTransactions')}
             </h2>
 
             {/* Table - Show only last 5? For now show all or limit */}

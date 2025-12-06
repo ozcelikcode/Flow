@@ -1,22 +1,22 @@
 import { useSettings } from '../context/SettingsContext';
 
 export default function Settings() {
-    const { theme, setTheme, currency, setCurrency, rates, updateRates, isUpdatingRates } = useSettings();
+    const { theme, setTheme, currency, setCurrency, rates, updateRates, isUpdatingRates, language, setLanguage, t } = useSettings();
 
     return (
         <div className="p-4">
             <h2 className="text-text-light dark:text-text-dark text-[22px] font-bold leading-tight tracking-[-0.015em] pb-6">
-                Settings
+                {t('settings')}
             </h2>
 
             <div className="flex flex-col gap-6 max-w-2xl text-text-light dark:text-text-dark">
                 {/* Appearance */}
                 <section className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <h3 className="text-lg font-semibold mb-4">Appearance</h3>
+                    <h3 className="text-lg font-semibold mb-4">{t('appearance')}</h3>
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="font-medium">Theme</p>
-                            <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Customize how the app looks on your device</p>
+                            <p className="font-medium">{t('theme')}</p>
+                            <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('themeDescription')}</p>
                         </div>
                         <div className="flex bg-slate-100 dark:bg-slate-900 rounded-lg p-1">
                             <button
@@ -26,7 +26,7 @@ export default function Settings() {
                                         : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-text-light dark:hover:text-text-dark'
                                     }`}
                             >
-                                Light
+                                {t('light')}
                             </button>
                             <button
                                 onClick={() => setTheme('dark')}
@@ -35,7 +35,38 @@ export default function Settings() {
                                         : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-text-light dark:hover:text-text-dark'
                                     }`}
                             >
-                                Dark
+                                {t('dark')}
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Language */}
+                <section className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <h3 className="text-lg font-semibold mb-4">{t('language')}</h3>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="font-medium">{t('language')}</p>
+                            <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('languageDescription')}</p>
+                        </div>
+                        <div className="flex bg-slate-100 dark:bg-slate-900 rounded-lg p-1">
+                            <button
+                                onClick={() => setLanguage('en')}
+                                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${language === 'en'
+                                        ? 'bg-white dark:bg-slate-800 text-primary shadow-sm'
+                                        : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-text-light dark:hover:text-text-dark'
+                                    }`}
+                            >
+                                English
+                            </button>
+                            <button
+                                onClick={() => setLanguage('tr')}
+                                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${language === 'tr'
+                                        ? 'bg-white dark:bg-slate-800 text-primary shadow-sm'
+                                        : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-text-light dark:hover:text-text-dark'
+                                    }`}
+                            >
+                                Türkçe
                             </button>
                         </div>
                     </div>
@@ -43,10 +74,10 @@ export default function Settings() {
 
                 {/* Currency Preferences */}
                 <section className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <h3 className="text-lg font-semibold mb-4">Currency</h3>
+                    <h3 className="text-lg font-semibold mb-4">{t('currency')}</h3>
                     <div className="flex flex-col gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">Display Currency</label>
+                            <label className="block text-sm font-medium mb-1">{t('displayCurrency')}</label>
                             <select
                                 value={currency}
                                 onChange={(e) => setCurrency(e.target.value as 'USD' | 'EUR' | 'TRY')}
@@ -61,7 +92,7 @@ export default function Settings() {
                         {/* Exchange Rates Info */}
                         <div className="mt-2 p-4 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <div className="flex items-center justify-between mb-3">
-                                <p className="text-sm font-medium">Exchange Rates (Base: USD)</p>
+                                <p className="text-sm font-medium">{t('exchangeRates')}</p>
                                 <button
                                     onClick={updateRates}
                                     disabled={isUpdatingRates}
@@ -70,7 +101,7 @@ export default function Settings() {
                                     <span className={`material-symbols-outlined text-lg ${isUpdatingRates ? 'animate-spin' : ''}`}>
                                         {isUpdatingRates ? 'progress_activity' : 'sync'}
                                     </span>
-                                    {isUpdatingRates ? 'Updating...' : 'Update Rates'}
+                                    {isUpdatingRates ? t('updating') : t('updateRates')}
                                 </button>
                             </div>
 
@@ -90,7 +121,7 @@ export default function Settings() {
                             </div>
 
                             <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-3 text-center">
-                                Last updated: {rates.lastUpdated}
+                                {t('lastUpdated')}: {rates.lastUpdated}
                             </p>
                         </div>
                     </div>

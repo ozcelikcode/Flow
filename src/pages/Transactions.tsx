@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTransactions } from '../context/TransactionContext';
+import { useSettings } from '../context/SettingsContext';
 import {
     DndContext,
     closestCenter,
@@ -18,10 +19,13 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { Transaction } from '../types';
+import TransactionModal from '../components/dashboard/TransactionModal';
 
 export default function TransactionsPage() {
     const { transactions, reorderTransactions, deleteTransaction, updateTransaction } = useTransactions();
-    const [editingId, setEditingId] = useState<string | null>(null);
+    const { t, formatAmount } = useSettings();
+    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -40,13 +44,39 @@ export default function TransactionsPage() {
         }
     };
 
+    const handleEdit = (transaction: Transaction) => {
+        setEditingTransaction(transaction);
+        setIsModalOpen(true);
+    };
+
+    const handleSave = (updates: Omit<Transaction, 'id'>) => {
+        if (editingTransaction) {
+            updateTransaction(editingTransaction.id, updates);
+        }
+        setEditingTransaction(null);
+        setIsModalOpen(false);
+    };
+
+    const handleDelete = () => {
+        if (editingTransaction) {
+            deleteTransaction(editingTransaction.id);
+        }
+        setEditingTransaction(null);
+        setIsModalOpen(false);
+    };
+
+    const handleCloseModal = () => {
+        setEditingTransaction(null);
+        setIsModalOpen(false);
+    };
+
     return (
         <div className="p-4">
             <h2 className="text-text-light dark:text-text-dark text-[22px] font-bold leading-tight tracking-[-0.015em] pb-6">
-                All Transactions
+                {t('allTransactions')}
             </h2>
-            <p className="text-sm text-text-secondary-light mb-4">
-                Drag rows to reorder. Click Edit to modify details.
+            <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
+                {t('dragToReorder')}
             </p>
 
             <div className="flex flex-col gap-2">
@@ -59,37 +89,44 @@ export default function TransactionsPage() {
                         items={transactions}
                         strategy={verticalListSortingStrategy}
                     >
-                        {transactions.map((transaction) => (
-                            <SortableItem
-                                key={transaction.id}
-                                transaction={transaction}
-                                onDelete={deleteTransaction}
-                                isEditing={editingId === transaction.id}
-                                onEdit={() => setEditingId(transaction.id)}
-                                onSave={(updates) => {
-                                    updateTransaction(transaction.id, updates);
-                                    setEditingId(null);
-                                }}
-                                onCancelEdit={() => setEditingId(null)}
-                            />
-                        ))}
+                        {transactions.length === 0 ? (
+                            <div className="text-center py-12 text-text-secondary-light dark:text-text-secondary-dark">
+                                {t('noTransactions')}
+                            </div>
+                        ) : (
+                            transactions.map((transaction) => (
+                                <SortableItem
+                                    key={transaction.id}
+                                    transaction={transaction}
+                                    onEdit={() => handleEdit(transaction)}
+                                    formatAmount={formatAmount}
+                                    t={t}
+                                />
+                            ))
+                        )}
                     </SortableContext>
                 </DndContext>
             </div>
+
+            <TransactionModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onSave={handleSave}
+                onDelete={handleDelete}
+                editTransaction={editingTransaction}
+            />
         </div>
     );
 }
 
 interface SortableItemProps {
     transaction: Transaction;
-    onDelete: (id: string) => void;
-    isEditing: boolean;
     onEdit: () => void;
-    onSave: (updates: Partial<Transaction>) => void;
-    onCancelEdit: () => void;
+    formatAmount: (amount: number) => string;
+    t: (key: any) => string;
 }
 
-function SortableItem({ transaction, onDelete, isEditing, onEdit, onSave, onCancelEdit }: SortableItemProps) {
+function SortableItem({ transaction, onEdit, formatAmount, t }: SortableItemProps) {
     const {
         attributes,
         listeners,
@@ -103,74 +140,40 @@ function SortableItem({ transaction, onDelete, isEditing, onEdit, onSave, onCanc
         transition,
     };
 
-    const [editName, setEditName] = useState(transaction.name);
-    const [editAmount, setEditAmount] = useState(transaction.amount.toString());
-
-    const handleSave = () => {
-        onSave({ name: editName, amount: parseFloat(editAmount) });
-    };
-
     return (
         <div
             ref={setNodeRef}
             style={style}
-            className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm"
+            className="flex items-center justify-between p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm"
         >
             <div className="flex items-center gap-4 flex-1">
-                <button {...attributes} {...listeners} className="cursor-grab touch-none p-2 text-slate-400 hover:text-slate-600">
+                <button
+                    {...attributes}
+                    {...listeners}
+                    className="cursor-grab touch-none p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
+                >
                     <span className="material-symbols-outlined">drag_indicator</span>
                 </button>
 
-                {isEditing ? (
-                    <div className="flex gap-2 flex-1 items-center">
-                        <input
-                            value={editName}
-                            onChange={e => setEditName(e.target.value)}
-                            className="border rounded px-2 py-1 w-full"
-                        />
-                        <input
-                            value={editAmount}
-                            onChange={e => setEditAmount(e.target.value)}
-                            className="border rounded px-2 py-1 w-24"
-                            type="number"
-                        />
-                    </div>
-                ) : (
-                    <div className="flex-1">
-                        <p className="font-medium text-text-light dark:text-text-dark">{transaction.name}</p>
-                        <p className="text-sm text-text-secondary-light">{transaction.date} • {transaction.category}</p>
-                    </div>
-                )}
+                <div className="flex-1">
+                    <p className="font-medium text-text-light dark:text-text-dark">{transaction.name}</p>
+                    <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                        {transaction.date} • {transaction.category}
+                    </p>
+                </div>
             </div>
 
             <div className="flex items-center gap-4">
-                {!isEditing && (
-                    <span className={`font-bold ${transaction.type === 'income' ? 'text-success' : 'text-danger'}`}>
-                        {transaction.type === 'expense' ? '-' : '+'}${Math.abs(transaction.amount).toFixed(2)}
-                    </span>
-                )}
+                <span className={`font-bold ${transaction.type === 'income' ? 'text-success' : 'text-danger'}`}>
+                    {transaction.type === 'expense' ? '-' : '+'}{formatAmount(transaction.amount)}
+                </span>
 
-                <div className="flex gap-2">
-                    {isEditing ? (
-                        <>
-                            <button onClick={handleSave} className="text-success hover:bg-success/10 p-1 rounded">
-                                <span className="material-symbols-outlined">check</span>
-                            </button>
-                            <button onClick={onCancelEdit} className="text-text-secondary-light hover:bg-slate-100 p-1 rounded">
-                                <span className="material-symbols-outlined">close</span>
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <button onClick={onEdit} className="text-primary hover:bg-primary/10 p-1 rounded">
-                                <span className="material-symbols-outlined">edit</span>
-                            </button>
-                            <button onClick={() => onDelete(transaction.id)} className="text-danger hover:bg-danger/10 p-1 rounded">
-                                <span className="material-symbols-outlined">delete</span>
-                            </button>
-                        </>
-                    )}
-                </div>
+                <button
+                    onClick={onEdit}
+                    className="text-primary hover:bg-primary/10 p-2 rounded-lg transition-colors"
+                >
+                    <span className="material-symbols-outlined">{t('edit') === 'Düzenle' ? 'edit' : 'edit'}</span>
+                </button>
             </div>
         </div>
     );

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { translations, type Language, type TranslationKey } from '../i18n/translations';
 
 type Currency = 'USD' | 'EUR' | 'TRY';
 
@@ -19,6 +20,9 @@ interface SettingsContextType {
     rates: CurrencyRates;
     updateRates: () => Promise<void>;
     isUpdatingRates: boolean;
+    language: Language;
+    setLanguage: (language: Language) => void;
+    t: (key: TranslationKey) => string;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -39,7 +43,6 @@ const CURRENCY_LOCALES: Record<Currency, { locale: string; currency: string }> =
 export function SettingsProvider({ children }: { children: ReactNode }) {
     const [theme, setThemeState] = useState<'light' | 'dark'>(() => {
         const saved = localStorage.getItem('theme');
-        // Check system preference if no saved theme
         if (!saved) {
             return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
@@ -51,6 +54,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         return (saved as Currency) || 'USD';
     });
 
+    const [language, setLanguageState] = useState<Language>(() => {
+        const saved = localStorage.getItem('language');
+        return (saved as Language) || 'en';
+    });
+
     const [rates, setRates] = useState<CurrencyRates>(() => {
         const saved = localStorage.getItem('currencyRates');
         return saved ? JSON.parse(saved) : DEFAULT_RATES;
@@ -58,7 +66,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
     const [isUpdatingRates, setIsUpdatingRates] = useState(false);
 
-    // Apply theme on mount and change
+    // Apply theme
     useEffect(() => {
         localStorage.setItem('theme', theme);
         if (theme === 'dark') {
@@ -73,6 +81,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }, [currency]);
 
     useEffect(() => {
+        localStorage.setItem('language', language);
+    }, [language]);
+
+    useEffect(() => {
         localStorage.setItem('currencyRates', JSON.stringify(rates));
     }, [rates]);
 
@@ -84,10 +96,17 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         setCurrencyState(newCurrency);
     };
 
+    const setLanguage = (newLanguage: Language) => {
+        setLanguageState(newLanguage);
+    };
+
+    const t = (key: TranslationKey): string => {
+        return translations[language][key] || translations.en[key] || key;
+    };
+
     const updateRates = async () => {
         setIsUpdatingRates(true);
         try {
-            // Using exchangerate-api.com free tier (or fallback to mock data)
             const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
             if (response.ok) {
                 const data = await response.json();
@@ -95,18 +114,17 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                     USD: 1,
                     EUR: data.rates.EUR || DEFAULT_RATES.EUR,
                     TRY: data.rates.TRY || DEFAULT_RATES.TRY,
-                    lastUpdated: new Date().toLocaleString('tr-TR'),
+                    lastUpdated: new Date().toLocaleString(language === 'tr' ? 'tr-TR' : 'en-US'),
                 };
                 setRates(newRates);
             } else {
                 throw new Error('API error');
             }
         } catch (error) {
-            console.error('Failed to fetch rates, using cached/default values:', error);
-            // Keep existing rates but update timestamp to show attempt
+            console.error('Failed to fetch rates:', error);
             setRates(prev => ({
                 ...prev,
-                lastUpdated: `${new Date().toLocaleString('tr-TR')} (offline)`,
+                lastUpdated: `${new Date().toLocaleString(language === 'tr' ? 'tr-TR' : 'en-US')} (offline)`,
             }));
         } finally {
             setIsUpdatingRates(false);
@@ -134,7 +152,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             formatAmount,
             rates,
             updateRates,
-            isUpdatingRates
+            isUpdatingRates,
+            language,
+            setLanguage,
+            t
         }}>
             {children}
         </SettingsContext.Provider>

@@ -4,15 +4,15 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 export default function Reports() {
     const { transactions } = useTransactions();
-    const { theme } = useSettings();
+    const { theme, t } = useSettings();
 
     // Aggregate Data
     const income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
     const expense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
 
     const data = [
-        { name: 'Income', value: income },
-        { name: 'Expense', value: expense },
+        { name: t('incomeType'), value: income },
+        { name: t('expenseType'), value: expense },
     ];
 
     const categoryData = transactions
@@ -38,12 +38,12 @@ export default function Reports() {
     return (
         <div className="p-4">
             <h2 className="text-text-light dark:text-text-dark text-[22px] font-bold leading-tight tracking-[-0.015em] pb-6">
-                Financial Reports
+                {t('financialReports')}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm focus:outline-none" style={{ outline: 'none' }}>
-                    <h3 className="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">Income vs Expense</h3>
+                    <h3 className="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">{t('incomeVsExpense')}</h3>
                     <div className="h-64" style={{ outline: 'none' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={data} style={{ outline: 'none' }}>
@@ -73,7 +73,7 @@ export default function Reports() {
                 </div>
 
                 <div className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm focus:outline-none" style={{ outline: 'none' }}>
-                    <h3 className="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">Expense by Category</h3>
+                    <h3 className="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">{t('expenseByCategory')}</h3>
                     <div className="h-64" style={{ outline: 'none' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart style={{ outline: 'none' }}>
