@@ -10,7 +10,8 @@ import {
     Plus,
     Wallet,
     Menu,
-    X
+    X,
+    Tag
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -72,6 +73,7 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                         <NavItem icon={LayoutDashboard} label={t('dashboard')} to="/" onClick={handleNavClick} />
                         <NavItem icon={Receipt} label={t('transactions')} to="/transactions" onClick={handleNavClick} />
                         <NavItem icon={PieChart} label={t('reports')} to="/reports" onClick={handleNavClick} />
+                        <NavItem icon={Tag} label={t('categories')} to="/categories" onClick={handleNavClick} />
                         <NavItem icon={Settings} label={t('settings')} to="/settings" onClick={handleNavClick} />
                     </div>
                 </div>
@@ -96,6 +98,7 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                             <NavItem icon={LayoutDashboard} label={t('dashboard')} to="/" />
                             <NavItem icon={Receipt} label={t('transactions')} to="/transactions" />
                             <NavItem icon={PieChart} label={t('reports')} to="/reports" />
+                            <NavItem icon={Tag} label={t('categories')} to="/categories" />
                             <NavItem icon={Settings} label={t('settings')} to="/settings" />
                         </div>
                     </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Transaction, RecurrenceType, PriceTier } from '../../types';
 import { useSettings } from '../../context/SettingsContext';
+import { useCategories } from '../../context/CategoryContext';
 import Modal from '../ui/Modal';
 import { Plus, X } from 'lucide-react';
 
@@ -20,6 +21,7 @@ export default function TransactionModal({
     editTransaction
 }: TransactionModalProps) {
     const { currency, t, language } = useSettings();
+    const { addCategory, getExpenseCategories, getIncomeCategories } = useCategories();
 
     const [name, setName] = useState('');
     const [amount, setAmount] = useState('');
@@ -32,6 +34,10 @@ export default function TransactionModal({
     const [recurrence, setRecurrence] = useState<RecurrenceType>('once');
     const [priceTiers, setPriceTiers] = useState<PriceTier[]>([]);
     const [isActive, setIsActive] = useState(true);
+
+    // Quick add category
+    const [showQuickAdd, setShowQuickAdd] = useState(false);
+    const [quickCategoryName, setQuickCategoryName] = useState('');
 
     // Currency symbols
     const currencySymbols = {
@@ -47,19 +53,52 @@ export default function TransactionModal({
         TRY: 0.029,
     };
 
-    // Categories with translations
-    const categories = [
-        { value: 'Food & Drink', label: t('foodAndDrink') },
-        { value: 'Transportation', label: t('transportation') },
-        { value: 'Entertainment', label: t('entertainment') },
-        { value: 'Shopping', label: t('shopping') },
-        { value: 'Bills', label: t('bills') },
-        { value: 'Subscription', label: t('subscriptionCategory') },
-        { value: 'Salary', label: t('salary') },
-        { value: 'Freelance', label: t('freelance') },
-        { value: 'Investment', label: t('investment') },
-        { value: 'Other', label: t('other') },
-    ];
+    // Get translated category label
+    const getCategoryLabel = (categoryName: string) => {
+        const translationKey = {
+            'Food & Drink': 'foodAndDrink',
+            'Transportation': 'transportation',
+            'Entertainment': 'entertainment',
+            'Shopping': 'shopping',
+            'Bills': 'bills',
+            'Subscription': 'subscriptionCategory',
+            'Salary': 'salary',
+            'Freelance': 'freelance',
+            'Investment': 'investment',
+            'Other': 'other',
+            'Health': 'health',
+            'Education': 'education',
+            'Gift': 'gift',
+        }[categoryName];
+
+        if (translationKey) {
+            return t(translationKey as any);
+        }
+        return categoryName; // For custom categories
+    };
+
+    // Get available categories based on transaction type
+    const getAvailableCategories = () => {
+        if (type === 'expense') {
+            return getExpenseCategories();
+        } else {
+            return getIncomeCategories();
+        }
+    };
+
+    const handleQuickAddCategory = () => {
+        if (quickCategoryName.trim()) {
+            const newCat = addCategory({
+                name: quickCategoryName.trim(),
+                icon: 'Tag',
+                description: '',
+                type: type === 'expense' ? 'expense' : 'income'
+            });
+            setCategory(newCat.name);
+            setQuickCategoryName('');
+            setShowQuickAdd(false);
+        }
+    };
 
     // Pre-fill form when editing
     useEffect(() => {
@@ -359,15 +398,64 @@ export default function TransactionModal({
                         <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
                             {t('category')}
                         </label>
-                        <select
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        >
-                            {categories.map(cat => (
-                                <option key={cat.value} value={cat.value}>{cat.label}</option>
-                            ))}
-                        </select>
+                        {showQuickAdd ? (
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={quickCategoryName}
+                                    onChange={(e) => setQuickCategoryName(e.target.value)}
+                                    placeholder={language === 'tr' ? 'Yeni kategori adı' : 'New category name'}
+                                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleQuickAddCategory();
+                                        } else if (e.key === 'Escape') {
+                                            setShowQuickAdd(false);
+                                            setQuickCategoryName('');
+                                        }
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleQuickAddCategory}
+                                    className="p-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowQuickAdd(false);
+                                        setQuickCategoryName('');
+                                    }}
+                                    className="p-2 bg-slate-200 dark:bg-slate-700 text-text-secondary-light dark:text-text-secondary-dark rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex gap-2">
+                                <select
+                                    value={category}
+                                    onChange={(e) => setCategory(e.target.value)}
+                                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                >
+                                    {getAvailableCategories().map(cat => (
+                                        <option key={cat.id} value={cat.name}>{getCategoryLabel(cat.name)}</option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowQuickAdd(true)}
+                                    className="p-2 bg-slate-100 dark:bg-slate-800 text-primary rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                    title={t('addQuickCategory')}
+                                >
+                                    <Plus className="w-4 h-4" />
+                                </button>
+                            </div>
+                        )}
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">

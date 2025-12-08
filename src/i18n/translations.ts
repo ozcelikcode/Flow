@@ -21,6 +21,7 @@ export const translations = {
         transactions: 'Transactions',
         reports: 'Reports',
         settings: 'Settings',
+        categories: 'Categories',
         myWallet: 'My Wallet',
         personalFinance: 'Personal Finance',
         addTransaction: 'Add Transaction',
@@ -67,6 +68,20 @@ export const translations = {
         noActivity: 'No activity',
         positiveDays: 'Positive days',
         negativeDays: 'Negative days',
+
+        // Categories
+        addCategory: 'Add Category',
+        editCategory: 'Edit Category',
+        deleteCategory: 'Delete Category',
+        deleteCategoryConfirm: 'Are you sure you want to delete this category? This action cannot be undone.',
+        categoryName: 'Category Name',
+        categoryDescription: 'Description',
+        categoryType: 'Category Type',
+        categoryIcon: 'Icon',
+        expenseCategories: 'Expense Categories',
+        incomeCategories: 'Income Categories',
+        custom: 'Custom',
+        addQuickCategory: 'Add New',
 
         // Settings
         appearance: 'Appearance',
@@ -152,6 +167,7 @@ export const translations = {
         transactions: 'İşlemler',
         reports: 'Raporlar',
         settings: 'Ayarlar',
+        categories: 'Kategoriler',
         myWallet: 'Cüzdanım',
         personalFinance: 'Kişisel Finans',
         addTransaction: 'İşlem Ekle',
@@ -198,6 +214,20 @@ export const translations = {
         noActivity: 'Aktivite yok',
         positiveDays: 'Pozitif günler',
         negativeDays: 'Negatif günler',
+
+        // Categories
+        addCategory: 'Kategori Ekle',
+        editCategory: 'Kategori Düzenle',
+        deleteCategory: 'Kategori Sil',
+        deleteCategoryConfirm: 'Bu kategoriyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+        categoryName: 'Kategori Adı',
+        categoryDescription: 'Açıklama',
+        categoryType: 'Kategori Türü',
+        categoryIcon: 'İkon',
+        expenseCategories: 'Gider Kategorileri',
+        incomeCategories: 'Gelir Kategorileri',
+        custom: 'Özel',
+        addQuickCategory: 'Yeni Ekle',
 
         // Settings
         appearance: 'Görünüm',

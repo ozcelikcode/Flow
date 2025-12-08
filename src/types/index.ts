@@ -5,6 +5,15 @@ export interface PriceTier {
     amount: number; // USD bazında fiyat
 }
 
+export interface Category {
+    id: string;
+    name: string; // Internal name (key)
+    icon: string; // Lucide icon name
+    description?: string;
+    type: 'income' | 'expense' | 'both'; // Hangi işlem türlerinde kullanılabilir
+    isCustom: boolean; // Kullanıcı tarafından oluşturuldu mu?
+}
+
 export interface Transaction {
     id: string;
     name: string;
