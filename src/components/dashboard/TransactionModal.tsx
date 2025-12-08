@@ -316,7 +316,7 @@ export default function TransactionModal({
                                             <input
                                                 type="number"
                                                 step="0.01"
-                                                value={tier.amount / toUsdRates[inputCurrency] || ''}
+                                                value={Number((tier.amount / toUsdRates[inputCurrency]).toFixed(2)) || ''}
                                                 onChange={(e) => updatePriceTier(index, parseFloat(e.target.value) || 0)}
                                                 className="w-full pl-6 pr-2 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-text-light dark:text-text-dark focus:outline-none focus:ring-1 focus:ring-primary/50"
                                                 placeholder="0.00"
