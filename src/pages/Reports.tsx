@@ -1,11 +1,14 @@
 import { useTransactions } from '../context/TransactionContext';
 import { useSettings } from '../context/SettingsContext';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import {
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+    PieChart, Pie, Cell, AreaChart, Area
+} from 'recharts';
+import { TrendingUp, TrendingDown, Calendar } from 'lucide-react';
 
 export default function Reports() {
     const { transactions } = useTransactions();
-    const { theme, t, translateCategory, formatAmount, rates, currency } = useSettings();
+    const { theme, t, translateCategory, formatAmount, rates, currency, language } = useSettings();
 
     // Get conversion rate for selected currency
     const rate = rates[currency];
@@ -33,6 +36,49 @@ export default function Reports() {
             return acc;
         }, [] as { name: string; value: number }[]);
 
+    // Generate last 30 days spending data
+    const generateDailySpendingData = () => {
+        const today = new Date();
+        const last30Days: { date: string; amount: number; displayDate: string }[] = [];
+
+        for (let i = 29; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            const dateStr = date.toISOString().split('T')[0];
+            const displayDate = date.toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
+                month: 'short',
+                day: 'numeric'
+            });
+
+            last30Days.push({
+                date: dateStr,
+                displayDate,
+                amount: 0
+            });
+        }
+
+        // Aggregate expenses by date
+        transactions
+            .filter(tx => tx.type === 'expense')
+            .forEach(tx => {
+                // Parse transaction date
+                const txDate = new Date(tx.date);
+                if (!isNaN(txDate.getTime())) {
+                    const txDateStr = txDate.toISOString().split('T')[0];
+                    const dayData = last30Days.find(d => d.date === txDateStr);
+                    if (dayData) {
+                        dayData.amount += tx.amount * rate;
+                    }
+                }
+            });
+
+        return last30Days;
+    };
+
+    const dailySpendingData = generateDailySpendingData();
+    const maxDailySpending = Math.max(...dailySpendingData.map(d => d.amount));
+    const avgDailySpending = dailySpendingData.reduce((sum, d) => sum + d.amount, 0) / 30;
+
     const COLORS = ['#6366f1', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6', '#ec4899'];
 
     // Dark mode colors
@@ -40,6 +86,7 @@ export default function Reports() {
     const tooltipBg = theme === 'dark' ? '#1e293b' : '#ffffff';
     const tooltipBorder = theme === 'dark' ? '#334155' : '#e2e8f0';
     const tooltipText = theme === 'dark' ? '#f1f5f9' : '#1e293b';
+    const gridColor = theme === 'dark' ? '#334155' : '#e2e8f0';
 
     // Currency symbol for Y-axis
     const currencySymbols: Record<string, string> = {
@@ -79,6 +126,29 @@ export default function Reports() {
         );
     };
 
+    // Custom tooltip component for better styling
+    const CustomTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
+            return (
+                <div
+                    className="px-3 py-2 rounded-lg shadow-lg border"
+                    style={{
+                        backgroundColor: tooltipBg,
+                        borderColor: tooltipBorder,
+                        minWidth: '120px',
+                        maxWidth: '200px',
+                    }}
+                >
+                    <p className="text-xs font-medium mb-1" style={{ color: axisColor }}>{label}</p>
+                    <p className="text-sm font-bold" style={{ color: tooltipText }}>
+                        {formatTooltipValue(payload[0].value)}
+                    </p>
+                </div>
+            );
+        }
+        return null;
+    };
+
     const netBalance = income - expense;
     const isProfit = netBalance >= 0;
 
@@ -88,9 +158,85 @@ export default function Reports() {
                 {t('financialReports')}
             </h2>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+            {/* Daily Spending Trend - Full Width */}
+            <div className="bg-white dark:bg-surface-dark p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm mb-4 sm:mb-6">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base sm:text-lg font-semibold text-text-light dark:text-text-dark flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-primary" />
+                        {t('dailySpendingTrend')}
+                    </h3>
+                    <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
+                        {t('last30Days')}
+                    </span>
+                </div>
+
+                {/* Stats Summary */}
+                <div className="flex flex-wrap gap-4 mb-4">
+                    <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
+                        <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                            {language === 'tr' ? 'Ort. Günlük' : 'Avg. Daily'}:
+                        </span>
+                        <span className="text-xs font-bold text-text-light dark:text-text-dark">
+                            {formatAmount(avgDailySpending / rate)}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-danger"></div>
+                        <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                            {language === 'tr' ? 'Maks' : 'Max'}:
+                        </span>
+                        <span className="text-xs font-bold text-danger">
+                            {formatAmount(maxDailySpending / rate)}
+                        </span>
+                    </div>
+                </div>
+
+                <div className="h-48 sm:h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={dailySpendingData}>
+                            <defs>
+                                <linearGradient id="colorSpending" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} opacity={0.5} vertical={false} />
+                            <XAxis
+                                dataKey="displayDate"
+                                stroke={axisColor}
+                                tick={{ fill: axisColor, fontSize: 10 }}
+                                tickLine={false}
+                                axisLine={false}
+                                interval="preserveStartEnd"
+                                minTickGap={30}
+                            />
+                            <YAxis
+                                stroke={axisColor}
+                                tick={{ fill: axisColor, fontSize: 10 }}
+                                tickFormatter={formatYAxis}
+                                tickLine={false}
+                                axisLine={false}
+                                width={45}
+                            />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Area
+                                type="monotone"
+                                dataKey="amount"
+                                stroke="#6366f1"
+                                strokeWidth={2}
+                                fill="url(#colorSpending)"
+                                dot={false}
+                                activeDot={{ r: 4, fill: '#6366f1', stroke: '#fff', strokeWidth: 2 }}
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Income vs Expense Chart */}
-                <div className="bg-white dark:bg-surface-dark p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm" style={{ outline: 'none' }}>
+                <div className="bg-white dark:bg-surface-dark p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-text-light dark:text-text-dark">{t('incomeVsExpense')}</h3>
 
                     {/* Legend */}
@@ -107,9 +253,9 @@ export default function Reports() {
                         </div>
                     </div>
 
-                    <div className="h-48 sm:h-56" style={{ outline: 'none' }}>
+                    <div className="h-48 sm:h-56">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={data} style={{ outline: 'none' }}>
+                            <BarChart data={data}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} stroke={axisColor} />
                                 <XAxis
                                     dataKey="name"
@@ -122,23 +268,10 @@ export default function Reports() {
                                     tickFormatter={formatYAxis}
                                     width={50}
                                 />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: tooltipBg,
-                                        borderColor: tooltipBorder,
-                                        color: tooltipText,
-                                        borderRadius: '8px',
-                                        outline: 'none',
-                                        fontSize: '12px'
-                                    }}
-                                    itemStyle={{ color: tooltipText }}
-                                    cursor={{ fill: 'transparent' }}
-                                    formatter={(value: number) => [formatTooltipValue(value), '']}
-                                />
+                                <Tooltip content={<CustomTooltip />} />
                                 <Bar
                                     dataKey="value"
                                     shape={<CustomBar />}
-                                    style={{ outline: 'none' }}
                                 />
                             </BarChart>
                         </ResponsiveContainer>
@@ -165,14 +298,14 @@ export default function Reports() {
                 </div>
 
                 {/* Expense by Category Chart */}
-                <div className="bg-white dark:bg-surface-dark p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm" style={{ outline: 'none' }}>
+                <div className="bg-white dark:bg-surface-dark p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-text-light dark:text-text-dark">{t('expenseByCategory')}</h3>
 
                     {categoryData.length > 0 ? (
                         <>
-                            <div className="h-48 sm:h-56" style={{ outline: 'none' }}>
+                            <div className="h-48 sm:h-56">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart style={{ outline: 'none' }}>
+                                    <PieChart>
                                         <Pie
                                             data={categoryData}
                                             cx="50%"
@@ -182,29 +315,16 @@ export default function Reports() {
                                             paddingAngle={3}
                                             dataKey="value"
                                             stroke="none"
-                                            style={{ outline: 'none' }}
                                         >
                                             {categoryData.map((_, index) => (
                                                 <Cell
                                                     key={`cell-${index}`}
                                                     fill={COLORS[index % COLORS.length]}
                                                     stroke="none"
-                                                    style={{ outline: 'none' }}
                                                 />
                                             ))}
                                         </Pie>
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: tooltipBg,
-                                                borderColor: tooltipBorder,
-                                                color: tooltipText,
-                                                borderRadius: '8px',
-                                                outline: 'none',
-                                                fontSize: '12px'
-                                            }}
-                                            itemStyle={{ color: tooltipText }}
-                                            formatter={(value: number) => [formatTooltipValue(value), '']}
-                                        />
+                                        <Tooltip content={<CustomTooltip />} />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>

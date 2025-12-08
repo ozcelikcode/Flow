@@ -58,6 +58,8 @@ export const translations = {
         financialReports: 'Financial Reports',
         incomeVsExpense: 'Income vs Expense',
         expenseByCategory: 'Expense by Category',
+        dailySpendingTrend: 'Daily Spending Trend',
+        last30Days: 'Last 30 Days',
 
         // Settings
         appearance: 'Appearance',
@@ -180,6 +182,8 @@ export const translations = {
         financialReports: 'Finansal Raporlar',
         incomeVsExpense: 'Gelir vs Gider',
         expenseByCategory: 'Kategoriye Göre Gider',
+        dailySpendingTrend: 'Günlük Harcama Trendi',
+        last30Days: 'Son 30 Gün',
 
         // Settings
         appearance: 'Görünüm',
