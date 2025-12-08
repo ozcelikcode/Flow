@@ -4,11 +4,14 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 export default function Reports() {
     const { transactions } = useTransactions();
-    const { theme, t, translateCategory } = useSettings();
+    const { theme, t, translateCategory, formatAmount, rates, currency } = useSettings();
 
-    // Aggregate Data
-    const income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
-    const expense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+    // Get conversion rate for selected currency
+    const rate = rates[currency];
+
+    // Aggregate Data - convert to selected currency
+    const income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0) * rate;
+    const expense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0) * rate;
 
     const data = [
         { name: t('incomeType'), value: income },
@@ -20,10 +23,11 @@ export default function Reports() {
         .reduce((acc, t) => {
             const translatedCategory = translateCategory(t.category);
             const existing = acc.find(c => c.name === translatedCategory);
+            const convertedAmount = t.amount * rate;
             if (existing) {
-                existing.value += t.amount;
+                existing.value += convertedAmount;
             } else {
-                acc.push({ name: translatedCategory, value: t.amount });
+                acc.push({ name: translatedCategory, value: convertedAmount });
             }
             return acc;
         }, [] as { name: string; value: number }[]);
@@ -35,6 +39,27 @@ export default function Reports() {
     const tooltipBg = theme === 'dark' ? '#1e293b' : '#ffffff';
     const tooltipBorder = theme === 'dark' ? '#334155' : '#e2e8f0';
     const tooltipText = theme === 'dark' ? '#f1f5f9' : '#1e293b';
+
+    // Currency symbol for Y-axis
+    const currencySymbols: Record<string, string> = {
+        USD: '$',
+        EUR: '€',
+        TRY: '₺'
+    };
+    const currencySymbol = currencySymbols[currency];
+
+    // Custom Y-axis tick formatter
+    const formatYAxis = (value: number) => {
+        if (value >= 1000) {
+            return `${currencySymbol}${(value / 1000).toFixed(1)}k`;
+        }
+        return `${currencySymbol}${value.toFixed(0)}`;
+    };
+
+    // Custom tooltip formatter
+    const formatTooltipValue = (value: number) => {
+        return formatAmount(value / rate); // Convert back to USD then format
+    };
 
     return (
         <div className="p-4">
@@ -50,7 +75,11 @@ export default function Reports() {
                             <BarChart data={data} style={{ outline: 'none' }}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} stroke={axisColor} />
                                 <XAxis dataKey="name" stroke={axisColor} tick={{ fill: axisColor }} />
-                                <YAxis stroke={axisColor} tick={{ fill: axisColor }} />
+                                <YAxis
+                                    stroke={axisColor}
+                                    tick={{ fill: axisColor }}
+                                    tickFormatter={formatYAxis}
+                                />
                                 <Tooltip
                                     contentStyle={{
                                         backgroundColor: tooltipBg,
@@ -61,6 +90,7 @@ export default function Reports() {
                                     }}
                                     itemStyle={{ color: tooltipText }}
                                     cursor={{ fill: 'transparent' }}
+                                    formatter={(value: number) => [formatTooltipValue(value), '']}
                                 />
                                 <Bar
                                     dataKey="value"
@@ -107,6 +137,7 @@ export default function Reports() {
                                         outline: 'none'
                                     }}
                                     itemStyle={{ color: tooltipText }}
+                                    formatter={(value: number) => [formatTooltipValue(value), '']}
                                 />
                             </PieChart>
                         </ResponsiveContainer>

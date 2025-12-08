@@ -65,8 +65,8 @@ export default function AddTransactionModal({ isOpen, onClose, onAdd }: AddTrans
                             type="button"
                             onClick={() => setType('expense')}
                             className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${type === 'expense'
-                                    ? 'bg-danger/10 text-danger border border-danger/20'
-                                    : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark border border-transparent'
+                                ? 'bg-danger/10 text-danger border border-danger/20'
+                                : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark border border-transparent'
                                 }`}
                         >
                             Expense
@@ -75,8 +75,8 @@ export default function AddTransactionModal({ isOpen, onClose, onAdd }: AddTrans
                             type="button"
                             onClick={() => setType('income')}
                             className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${type === 'income'
-                                    ? 'bg-success/10 text-success border border-success/20'
-                                    : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark border border-transparent'
+                                ? 'bg-success/10 text-success border border-success/20'
+                                : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark border border-transparent'
                                 }`}
                         >
                             Income
@@ -91,7 +91,7 @@ export default function AddTransactionModal({ isOpen, onClose, onAdd }: AddTrans
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        placeholder="e.g. Starbucks"
+                        placeholder="e.g. Kahve Dünyası"
                         required
                     />
                 </div>
