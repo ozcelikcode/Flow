@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Transaction } from '../types';
+import { processSubscriptions } from '../services/subscriptionService';
 
 interface TransactionContextType {
     transactions: Transaction[];
@@ -8,6 +9,7 @@ interface TransactionContextType {
     deleteTransaction: (id: string) => void;
     updateTransaction: (id: string, updatedTx: Partial<Omit<Transaction, 'id'>>) => void;
     reorderTransactions: (newTransactions: Transaction[]) => void;
+    processSubscriptionUpdates: () => void;
 }
 
 const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
@@ -22,6 +24,25 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         localStorage.setItem('transactions', JSON.stringify(transactions));
     }, [transactions]);
+
+    // Process subscriptions on mount and periodically
+    const processSubscriptionUpdates = useCallback(() => {
+        const { updated, hasChanges } = processSubscriptions(transactions);
+        if (hasChanges) {
+            setTransactions(updated);
+        }
+    }, [transactions]);
+
+    // Check subscriptions on mount and every hour
+    useEffect(() => {
+        processSubscriptionUpdates();
+
+        const interval = setInterval(() => {
+            processSubscriptionUpdates();
+        }, 60 * 60 * 1000); // Check every hour
+
+        return () => clearInterval(interval);
+    }, []); // Only run on mount
 
     const addTransaction = (newTx: Omit<Transaction, 'id'>) => {
         const transaction: Transaction = {
@@ -44,7 +65,14 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <TransactionContext.Provider value={{ transactions, addTransaction, deleteTransaction, updateTransaction, reorderTransactions }}>
+        <TransactionContext.Provider value={{
+            transactions,
+            addTransaction,
+            deleteTransaction,
+            updateTransaction,
+            reorderTransactions,
+            processSubscriptionUpdates
+        }}>
             {children}
         </TransactionContext.Provider>
     );

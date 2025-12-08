@@ -20,10 +20,11 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import type { Transaction } from '../types';
 import TransactionModal from '../components/dashboard/TransactionModal';
+import { getSubscriptionInfo } from '../services/subscriptionService';
 
 export default function TransactionsPage() {
     const { transactions, reorderTransactions, deleteTransaction, updateTransaction } = useTransactions();
-    const { t, formatAmount, translateCategory } = useSettings();
+    const { t, formatAmount, translateCategory, language } = useSettings();
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -101,6 +102,8 @@ export default function TransactionsPage() {
                                     onEdit={() => handleEdit(transaction)}
                                     formatAmount={formatAmount}
                                     translateCategory={translateCategory}
+                                    language={language}
+                                    t={t}
                                 />
                             ))
                         )}
@@ -124,9 +127,11 @@ interface SortableItemProps {
     onEdit: () => void;
     formatAmount: (amount: number) => string;
     translateCategory: (category: string) => string;
+    language: 'en' | 'tr';
+    t: (key: any) => string;
 }
 
-function SortableItem({ transaction, onEdit, formatAmount, translateCategory }: SortableItemProps) {
+function SortableItem({ transaction, onEdit, formatAmount, translateCategory, language, t }: SortableItemProps) {
     const {
         attributes,
         listeners,
@@ -139,6 +144,8 @@ function SortableItem({ transaction, onEdit, formatAmount, translateCategory }: 
         transform: CSS.Transform.toString(transform),
         transition,
     };
+
+    const subInfo = getSubscriptionInfo(transaction, language);
 
     return (
         <div
@@ -156,17 +163,44 @@ function SortableItem({ transaction, onEdit, formatAmount, translateCategory }: 
                 </button>
 
                 <div className="flex-1">
-                    <p className="font-medium text-text-light dark:text-text-dark">{transaction.name}</p>
+                    <div className="flex items-center gap-2">
+                        <p className="font-medium text-text-light dark:text-text-dark">{transaction.name}</p>
+                        {subInfo.isSubscription && (
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${subInfo.isActive
+                                    ? 'bg-primary/10 text-primary'
+                                    : 'bg-slate-200 dark:bg-slate-700 text-text-secondary-light dark:text-text-secondary-dark'
+                                }`}>
+                                {subInfo.recurrenceLabel}
+                            </span>
+                        )}
+                    </div>
                     <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
                         {transaction.date} • {translateCategory(transaction.category)}
+                        {subInfo.isSubscription && subInfo.nextBillingDate && (
+                            <span className="ml-2">
+                                • {t('nextBilling')}: {new Date(subInfo.nextBillingDate).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                        )}
                     </p>
+                    {subInfo.isSubscription && subInfo.nextPeriodPrice && (
+                        <p className="text-xs text-warning mt-1">
+                            {t('priceWillChange')} {formatAmount(subInfo.nextPeriodPrice)} {t('onPeriod')} {subInfo.currentPeriod + 1}
+                        </p>
+                    )}
                 </div>
             </div>
 
             <div className="flex items-center gap-4">
-                <span className={`font-bold ${transaction.type === 'income' ? 'text-success' : 'text-danger'}`}>
-                    {transaction.type === 'expense' ? '-' : '+'}{formatAmount(transaction.amount)}
-                </span>
+                <div className="text-right">
+                    <span className={`font-bold ${transaction.type === 'income' ? 'text-success' : 'text-danger'}`}>
+                        {transaction.type === 'expense' ? '-' : '+'}{formatAmount(transaction.amount)}
+                    </span>
+                    {subInfo.isSubscription && (
+                        <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                            {t('currentPeriod')}: {subInfo.currentPeriod}
+                        </p>
+                    )}
+                </div>
 
                 <button
                     onClick={onEdit}
