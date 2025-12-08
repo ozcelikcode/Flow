@@ -40,6 +40,23 @@ export default function Dashboard() {
         value
     }));
 
+    // Subscription stats
+    const activeSubscriptions = transactions.filter(t =>
+        t.recurrence && t.recurrence !== 'once' && t.isActive !== false
+    );
+    const subscriptionCount = activeSubscriptions.length;
+
+    // Calculate total monthly subscription cost
+    const monthlySubscriptionCost = activeSubscriptions.reduce((total, sub) => {
+        let monthlyCost = sub.amount;
+        if (sub.recurrence === 'yearly') {
+            monthlyCost = sub.amount / 12;
+        } else if (sub.recurrence === 'daily') {
+            monthlyCost = sub.amount * 30;
+        }
+        return total + monthlyCost;
+    }, 0);
+
     const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
     return (
@@ -88,36 +105,58 @@ export default function Dashboard() {
                         <span className="material-symbols-outlined text-primary">insights</span>
                         {t('quickStats')}
                     </h3>
-                    <div className="space-y-4">
-                        {/* Avg Monthly Expense */}
-                        <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-primary text-xl">trending_down</span>
+                    <div className="grid grid-cols-2 gap-3">
+                        {/* Avg Expense */}
+                        <div className="flex flex-col p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-primary text-lg">trending_down</span>
                                 </div>
-                                <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('avgMonthlyExpense')}</span>
+                                <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{t('avgMonthlyExpense')}</span>
                             </div>
                             <span className="font-bold text-text-light dark:text-text-dark">{formatAmount(avgExpense)}</span>
                         </div>
 
                         {/* Top Category */}
-                        <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-warning text-xl">category</span>
+                        <div className="flex flex-col p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-warning text-lg">category</span>
                                 </div>
-                                <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('topCategory')}</span>
+                                <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{t('topCategory')}</span>
                             </div>
-                            <span className="font-bold text-text-light dark:text-text-dark">
+                            <span className="font-bold text-text-light dark:text-text-dark truncate">
                                 {topCategory ? translateCategory(topCategory[0]) : t('noData')}
                             </span>
                         </div>
 
-                        {/* Transaction Count */}
-                        <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                        {/* Active Subscriptions */}
+                        <div className="flex flex-col p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-purple-500 text-lg">autorenew</span>
+                                </div>
+                                <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{t('activeSubscriptions')}</span>
+                            </div>
+                            <span className="font-bold text-text-light dark:text-text-dark">{subscriptionCount}</span>
+                        </div>
+
+                        {/* Monthly Subscription Cost */}
+                        <div className="flex flex-col p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="w-8 h-8 rounded-full bg-danger/10 flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-danger text-lg">payments</span>
+                                </div>
+                                <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{t('totalSubscriptionCost')}</span>
+                            </div>
+                            <span className="font-bold text-danger">{formatAmount(monthlySubscriptionCost)}</span>
+                        </div>
+
+                        {/* Transaction Count - Full Width */}
+                        <div className="col-span-2 flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-success text-xl">receipt_long</span>
+                                <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-success text-lg">receipt_long</span>
                                 </div>
                                 <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('transactionCount')}</span>
                             </div>

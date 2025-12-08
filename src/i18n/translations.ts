@@ -40,6 +40,8 @@ export const translations = {
         avgMonthlyExpense: 'Avg. Monthly Expense',
         topCategory: 'Top Category',
         transactionCount: 'Transaction Count',
+        activeSubscriptions: 'Active Subscriptions',
+        totalSubscriptionCost: 'Monthly Sub. Cost',
         thisMonth: 'This Month',
         noData: 'No data',
 
@@ -160,6 +162,8 @@ export const translations = {
         avgMonthlyExpense: 'Ort. Aylık Gider',
         topCategory: 'En Çok Harcama',
         transactionCount: 'İşlem Sayısı',
+        activeSubscriptions: 'Aktif Abonelikler',
+        totalSubscriptionCost: 'Aylık Ab. Maliyeti',
         thisMonth: 'Bu Ay',
         noData: 'Veri yok',
 
