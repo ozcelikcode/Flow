@@ -37,16 +37,17 @@ export default function TransactionsPage() {
     });
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+    // Fast sensors for instant drag response
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
-                distance: 8,
+                distance: 3, // Very short distance for instant activation
             },
         }),
         useSensor(TouchSensor, {
             activationConstraint: {
-                delay: 250,
-                tolerance: 5,
+                delay: 100, // Shorter delay for mobile
+                tolerance: 3,
             },
         }),
         useSensor(KeyboardSensor, {
@@ -359,15 +360,17 @@ function SortableGridItem({ transaction, onEdit, formatAmount, translateCategory
         listeners,
         setNodeRef,
         transform,
-        transition,
         isDragging
     } = useSortable({ id: transaction.id, disabled: !isDraggable });
 
-    const style = {
+    // Instant transform without slow transition
+    const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-        zIndex: isDragging ? 1000 : 1,
+        transition: isDragging ? 'none' : 'transform 100ms ease',
+        opacity: isDragging ? 0.8 : 1,
+        zIndex: isDragging ? 1000 : 'auto',
+        scale: isDragging ? '1.02' : '1',
+        cursor: isDraggable ? (isDragging ? 'grabbing' : 'grab') : 'default',
     };
 
     const subInfo = getSubscriptionInfo(transaction, language);
@@ -376,19 +379,12 @@ function SortableGridItem({ transaction, onEdit, formatAmount, translateCategory
         <div
             ref={setNodeRef}
             style={style}
-            className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 p-4 hover:shadow-lg hover:border-primary/30 transition-all group relative"
+            {...(isDraggable ? { ...attributes, ...listeners } : {})}
+            className={`bg-white dark:bg-surface-dark rounded-xl border p-4 group relative ${isDragging
+                ? 'border-primary shadow-xl'
+                : 'border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-primary/30'
+                }`}
         >
-            {/* Drag Handle */}
-            {isDraggable && (
-                <button
-                    {...attributes}
-                    {...listeners}
-                    className="absolute top-2 right-2 cursor-grab touch-none p-1 text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                    <GripVertical className="w-4 h-4" />
-                </button>
-            )}
-
             {/* Amount Header */}
             <div className={`text-lg sm:text-xl font-bold mb-2 ${transaction.type === 'income' ? 'text-success' : 'text-danger'}`}>
                 {transaction.type === 'expense' ? '-' : '+'}{formatAmount(transaction.amount)}
@@ -419,10 +415,14 @@ function SortableGridItem({ transaction, onEdit, formatAmount, translateCategory
                 )}
             </div>
 
-            {/* Edit Button */}
+            {/* Edit Button - stops drag propagation */}
             <button
-                onClick={onEdit}
-                className="mt-3 w-full py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-primary text-xs font-medium flex items-center justify-center gap-1 hover:bg-primary/5 transition-colors"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit();
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="mt-3 w-full py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-primary text-xs font-medium flex items-center justify-center gap-1 hover:bg-primary/5 active:bg-primary/10 transition-colors cursor-pointer"
             >
                 <Pencil className="w-3 h-3" />
                 {language === 'tr' ? 'Düzenle' : 'Edit'}
