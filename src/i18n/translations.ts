@@ -60,6 +60,13 @@ export const translations = {
         expenseByCategory: 'Expense by Category',
         dailySpendingTrend: 'Daily Spending Trend',
         last30Days: 'Last 30 Days',
+        yearlyActivityMap: 'Yearly Activity Map',
+        incomeLabel: 'Income',
+        expenseLabel: 'Expense',
+        netLabel: 'Net',
+        noActivity: 'No activity',
+        positiveDays: 'Positive days',
+        negativeDays: 'Negative days',
 
         // Settings
         appearance: 'Appearance',
@@ -184,6 +191,13 @@ export const translations = {
         expenseByCategory: 'Kategoriye Göre Gider',
         dailySpendingTrend: 'Günlük Harcama Trendi',
         last30Days: 'Son 30 Gün',
+        yearlyActivityMap: 'Yıllık Aktivite Haritası',
+        incomeLabel: 'Gelir',
+        expenseLabel: 'Gider',
+        netLabel: 'Net',
+        noActivity: 'Aktivite yok',
+        positiveDays: 'Pozitif günler',
+        negativeDays: 'Negatif günler',
 
         // Settings
         appearance: 'Görünüm',

@@ -4,7 +4,8 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
-import { TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, Calendar, Grid3X3 } from 'lucide-react';
+import YearlyActivityMap from '../components/reports/YearlyActivityMap';
 
 export default function Reports() {
     const { transactions } = useTransactions();
@@ -36,6 +37,55 @@ export default function Reports() {
             return acc;
         }, [] as { name: string; value: number }[]);
 
+    // Parse localized date string to Date object
+    const parseLocalizedDate = (dateStr: string): Date | null => {
+        let date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+            return date;
+        }
+
+        const trMonths: Record<string, number> = {
+            'Oca': 0, 'Şub': 1, 'Mar': 2, 'Nis': 3, 'May': 4, 'Haz': 5,
+            'Tem': 6, 'Ağu': 7, 'Eyl': 8, 'Eki': 9, 'Kas': 10, 'Ara': 11
+        };
+
+        const trMatch = dateStr.match(/(\d{1,2})\s+(\w+)\s+(\d{4})/);
+        if (trMatch) {
+            const day = parseInt(trMatch[1]);
+            const monthStr = trMatch[2];
+            const year = parseInt(trMatch[3]);
+            const month = trMonths[monthStr];
+            if (month !== undefined) {
+                return new Date(year, month, day);
+            }
+        }
+
+        const enMonths: Record<string, number> = {
+            'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+            'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+        };
+
+        const enMatch = dateStr.match(/(\w+)\s+(\d{1,2}),?\s+(\d{4})/);
+        if (enMatch) {
+            const monthStr = enMatch[1];
+            const day = parseInt(enMatch[2]);
+            const year = parseInt(enMatch[3]);
+            const month = enMonths[monthStr];
+            if (month !== undefined) {
+                return new Date(year, month, day);
+            }
+        }
+
+        return null;
+    };
+
+    const toLocalDateKey = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     // Generate last 30 days spending data
     const generateDailySpendingData = () => {
         const today = new Date();
@@ -44,7 +94,7 @@ export default function Reports() {
         for (let i = 29; i >= 0; i--) {
             const date = new Date(today);
             date.setDate(date.getDate() - i);
-            const dateStr = date.toISOString().split('T')[0];
+            const dateStr = toLocalDateKey(date);
             const displayDate = date.toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
                 month: 'short',
                 day: 'numeric'
@@ -61,10 +111,9 @@ export default function Reports() {
         transactions
             .filter(tx => tx.type === 'expense')
             .forEach(tx => {
-                // Parse transaction date
-                const txDate = new Date(tx.date);
-                if (!isNaN(txDate.getTime())) {
-                    const txDateStr = txDate.toISOString().split('T')[0];
+                const txDate = parseLocalizedDate(tx.date);
+                if (txDate) {
+                    const txDateStr = toLocalDateKey(txDate);
                     const dayData = last30Days.find(d => d.date === txDateStr);
                     if (dayData) {
                         dayData.amount += tx.amount * rate;
@@ -157,6 +206,23 @@ export default function Reports() {
             <h2 className="text-text-light dark:text-text-dark text-xl sm:text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4 sm:pb-6">
                 {t('financialReports')}
             </h2>
+
+            {/* Yearly Activity Map - GitHub Style */}
+            <div className="bg-white dark:bg-surface-dark p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm mb-4 sm:mb-6">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base sm:text-lg font-semibold text-text-light dark:text-text-dark flex items-center gap-2">
+                        <Grid3X3 className="w-5 h-5 text-primary" />
+                        {t('yearlyActivityMap')}
+                    </h3>
+                </div>
+                <YearlyActivityMap
+                    transactions={transactions}
+                    formatAmount={formatAmount}
+                    t={t}
+                    language={language}
+                    rate={rate}
+                />
+            </div>
 
             {/* Daily Spending Trend - Full Width */}
             <div className="bg-white dark:bg-surface-dark p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm mb-4 sm:mb-6">
