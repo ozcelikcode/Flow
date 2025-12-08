@@ -180,16 +180,18 @@ export default function Reports() {
         if (active && payload && payload.length) {
             return (
                 <div
-                    className="px-3 py-2 rounded-lg shadow-lg border"
+                    className="px-3 py-2 rounded-lg shadow-xl border pointer-events-none"
                     style={{
                         backgroundColor: tooltipBg,
                         borderColor: tooltipBorder,
                         minWidth: '120px',
                         maxWidth: '200px',
+                        zIndex: 100,
                     }}
                 >
-                    <p className="text-xs font-medium mb-1" style={{ color: axisColor }}>{label}</p>
+                    {label && <p className="text-xs font-medium mb-1" style={{ color: axisColor }}>{label}</p>}
                     <p className="text-sm font-bold" style={{ color: tooltipText }}>
+                        {payload[0].name && <span className="font-normal text-xs mr-1">{payload[0].name}:</span>}
                         {formatTooltipValue(payload[0].value)}
                     </p>
                 </div>
@@ -285,7 +287,7 @@ export default function Reports() {
                                 axisLine={false}
                                 width={45}
                             />
-                            <Tooltip content={<CustomTooltip />} />
+                            <Tooltip content={<CustomTooltip />} wrapperStyle={{ outline: 'none' }} />
                             <Area
                                 type="monotone"
                                 dataKey="amount"
@@ -334,7 +336,7 @@ export default function Reports() {
                                     tickFormatter={formatYAxis}
                                     width={50}
                                 />
-                                <Tooltip content={<CustomTooltip />} />
+                                <Tooltip content={<CustomTooltip />} wrapperStyle={{ outline: 'none' }} />
                                 <Bar
                                     dataKey="value"
                                     shape={<CustomBar />}
@@ -390,7 +392,7 @@ export default function Reports() {
                                                 />
                                             ))}
                                         </Pie>
-                                        <Tooltip content={<CustomTooltip />} />
+                                        <Tooltip content={<CustomTooltip />} wrapperStyle={{ outline: 'none' }} />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
