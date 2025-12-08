@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTransactions } from '../context/TransactionContext';
 import { useSettings } from '../context/SettingsContext';
+import { useCategories } from '../context/CategoryContext';
 import {
     DndContext,
     closestCenter,
@@ -16,22 +17,25 @@ import {
     SortableContext,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
+    rectSortingStrategy,
     useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { Transaction } from '../types';
 import TransactionModal from '../components/dashboard/TransactionModal';
 import { getSubscriptionInfo } from '../services/subscriptionService';
-import { GripVertical, Pencil, List, LayoutGrid } from 'lucide-react';
+import { GripVertical, Pencil, List, LayoutGrid, X } from 'lucide-react';
 
 export default function TransactionsPage() {
     const { transactions, reorderTransactions, deleteTransaction, updateTransaction } = useTransactions();
     const { t, formatAmount, translateCategory, language } = useSettings();
+    const { categories, getCategoryDisplayName } = useCategories();
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
         return (localStorage.getItem('transactionViewMode') as 'list' | 'grid') || 'list';
     });
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -49,6 +53,18 @@ export default function TransactionsPage() {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
+
+    // Get unique categories from transactions
+    const transactionCategories = useMemo(() => {
+        const categorySet = new Set(transactions.map(t => t.category));
+        return Array.from(categorySet);
+    }, [transactions]);
+
+    // Filter transactions by selected category
+    const filteredTransactions = useMemo(() => {
+        if (!selectedCategory) return transactions;
+        return transactions.filter(t => t.category === selectedCategory);
+    }, [transactions, selectedCategory]);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -91,6 +107,14 @@ export default function TransactionsPage() {
         localStorage.setItem('transactionViewMode', mode);
     };
 
+    const getCategoryLabel = (categoryName: string) => {
+        const cat = categories.find(c => c.name === categoryName);
+        if (cat) {
+            return getCategoryDisplayName(cat, language);
+        }
+        return translateCategory(categoryName);
+    };
+
     return (
         <div>
             <div className="flex items-center justify-between pb-4 sm:pb-6">
@@ -123,30 +147,62 @@ export default function TransactionsPage() {
                 </div>
             </div>
 
-            {viewMode === 'list' && (
+            {/* Category Filter */}
+            {transactionCategories.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                    <button
+                        onClick={() => setSelectedCategory(null)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${!selectedCategory
+                            ? 'bg-primary text-white'
+                            : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark hover:bg-slate-200 dark:hover:bg-slate-700'
+                            }`}
+                    >
+                        {language === 'tr' ? 'Tümü' : 'All'} ({transactions.length})
+                    </button>
+                    {transactionCategories.map(cat => {
+                        const count = transactions.filter(t => t.category === cat).length;
+                        return (
+                            <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 ${selectedCategory === cat
+                                    ? 'bg-primary text-white'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark hover:bg-slate-200 dark:hover:bg-slate-700'
+                                    }`}
+                            >
+                                {getCategoryLabel(cat)}
+                                <span className="opacity-70">({count})</span>
+                                {selectedCategory === cat && <X className="w-3 h-3" />}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+
+            {viewMode === 'list' && !selectedCategory && (
                 <p className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
                     {t('dragToReorder')}
                 </p>
             )}
 
-            {viewMode === 'list' ? (
-                <div className="flex flex-col gap-2 sm:gap-3">
-                    <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleDragEnd}
-                    >
-                        <SortableContext
-                            items={transactions}
-                            strategy={verticalListSortingStrategy}
-                        >
-                            {transactions.length === 0 ? (
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <SortableContext
+                    items={filteredTransactions}
+                    strategy={viewMode === 'list' ? verticalListSortingStrategy : rectSortingStrategy}
+                >
+                    {viewMode === 'list' ? (
+                        <div className="flex flex-col gap-2 sm:gap-3">
+                            {filteredTransactions.length === 0 ? (
                                 <div className="text-center py-12 text-text-secondary-light dark:text-text-secondary-dark">
                                     {t('noTransactions')}
                                 </div>
                             ) : (
-                                transactions.map((transaction) => (
-                                    <SortableItem
+                                filteredTransactions.map((transaction) => (
+                                    <SortableListItem
                                         key={transaction.id}
                                         transaction={transaction}
                                         onEdit={() => handleEdit(transaction)}
@@ -154,33 +210,34 @@ export default function TransactionsPage() {
                                         translateCategory={translateCategory}
                                         language={language}
                                         t={t}
+                                        isDraggable={!selectedCategory}
                                     />
                                 ))
                             )}
-                        </SortableContext>
-                    </DndContext>
-                </div>
-            ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                    {transactions.length === 0 ? (
-                        <div className="col-span-full text-center py-12 text-text-secondary-light dark:text-text-secondary-dark">
-                            {t('noTransactions')}
                         </div>
                     ) : (
-                        transactions.map((transaction) => (
-                            <GridItem
-                                key={transaction.id}
-                                transaction={transaction}
-                                onEdit={() => handleEdit(transaction)}
-                                formatAmount={formatAmount}
-                                translateCategory={translateCategory}
-                                language={language}
-                                t={t}
-                            />
-                        ))
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                            {filteredTransactions.length === 0 ? (
+                                <div className="col-span-full text-center py-12 text-text-secondary-light dark:text-text-secondary-dark">
+                                    {t('noTransactions')}
+                                </div>
+                            ) : (
+                                filteredTransactions.map((transaction) => (
+                                    <SortableGridItem
+                                        key={transaction.id}
+                                        transaction={transaction}
+                                        onEdit={() => handleEdit(transaction)}
+                                        formatAmount={formatAmount}
+                                        translateCategory={translateCategory}
+                                        language={language}
+                                        isDraggable={!selectedCategory}
+                                    />
+                                ))
+                            )}
+                        </div>
                     )}
-                </div>
-            )}
+                </SortableContext>
+            </DndContext>
 
             <TransactionModal
                 isOpen={isModalOpen}
@@ -193,27 +250,31 @@ export default function TransactionsPage() {
     );
 }
 
-interface ItemProps {
+interface ListItemProps {
     transaction: Transaction;
     onEdit: () => void;
     formatAmount: (amount: number) => string;
     translateCategory: (category: string) => string;
     language: 'en' | 'tr';
     t: (key: any) => string;
+    isDraggable: boolean;
 }
 
-function SortableItem({ transaction, onEdit, formatAmount, translateCategory, language, t }: ItemProps) {
+function SortableListItem({ transaction, onEdit, formatAmount, translateCategory, language, t, isDraggable }: ListItemProps) {
     const {
         attributes,
         listeners,
         setNodeRef,
         transform,
         transition,
-    } = useSortable({ id: transaction.id });
+        isDragging
+    } = useSortable({ id: transaction.id, disabled: !isDraggable });
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
+        opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 1000 : 1,
     };
 
     const subInfo = getSubscriptionInfo(transaction, language);
@@ -225,13 +286,15 @@ function SortableItem({ transaction, onEdit, formatAmount, translateCategory, la
             className="flex items-start sm:items-center justify-between p-3 sm:p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm gap-2 sm:gap-4"
         >
             <div className="flex items-start sm:items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                <button
-                    {...attributes}
-                    {...listeners}
-                    className="cursor-grab touch-none p-1 sm:p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 shrink-0 mt-1 sm:mt-0"
-                >
-                    <GripVertical className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
+                {isDraggable && (
+                    <button
+                        {...attributes}
+                        {...listeners}
+                        className="cursor-grab touch-none p-1 sm:p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 shrink-0 mt-1 sm:mt-0"
+                    >
+                        <GripVertical className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </button>
+                )}
 
                 <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-1 sm:gap-2">
@@ -281,14 +344,51 @@ function SortableItem({ transaction, onEdit, formatAmount, translateCategory, la
     );
 }
 
-function GridItem({ transaction, onEdit, formatAmount, translateCategory, language }: ItemProps) {
+interface GridItemProps {
+    transaction: Transaction;
+    onEdit: () => void;
+    formatAmount: (amount: number) => string;
+    translateCategory: (category: string) => string;
+    language: 'en' | 'tr';
+    isDraggable: boolean;
+}
+
+function SortableGridItem({ transaction, onEdit, formatAmount, translateCategory, language, isDraggable }: GridItemProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: transaction.id, disabled: !isDraggable });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 1000 : 1,
+    };
+
     const subInfo = getSubscriptionInfo(transaction, language);
 
     return (
         <div
-            onClick={onEdit}
-            className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 p-4 cursor-pointer hover:shadow-lg hover:border-primary/30 transition-all group"
+            ref={setNodeRef}
+            style={style}
+            className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 p-4 hover:shadow-lg hover:border-primary/30 transition-all group relative"
         >
+            {/* Drag Handle */}
+            {isDraggable && (
+                <button
+                    {...attributes}
+                    {...listeners}
+                    className="absolute top-2 right-2 cursor-grab touch-none p-1 text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                    <GripVertical className="w-4 h-4" />
+                </button>
+            )}
+
             {/* Amount Header */}
             <div className={`text-lg sm:text-xl font-bold mb-2 ${transaction.type === 'income' ? 'text-success' : 'text-danger'}`}>
                 {transaction.type === 'expense' ? '-' : '+'}{formatAmount(transaction.amount)}
@@ -319,13 +419,14 @@ function GridItem({ transaction, onEdit, formatAmount, translateCategory, langua
                 )}
             </div>
 
-            {/* Edit Hint */}
-            <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 opacity-0 group-hover:opacity-100 transition-opacity">
-                <p className="text-[10px] text-primary text-center flex items-center justify-center gap-1">
-                    <Pencil className="w-3 h-3" />
-                    {language === 'tr' ? 'Düzenle' : 'Edit'}
-                </p>
-            </div>
+            {/* Edit Button */}
+            <button
+                onClick={onEdit}
+                className="mt-3 w-full py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-primary text-xs font-medium flex items-center justify-center gap-1 hover:bg-primary/5 transition-colors"
+            >
+                <Pencil className="w-3 h-3" />
+                {language === 'tr' ? 'Düzenle' : 'Edit'}
+            </button>
         </div>
     );
 }

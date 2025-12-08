@@ -280,38 +280,42 @@ export default function YearlyActivityMap({
 
             {/* Heatmap Container */}
             <div className="overflow-x-auto pb-2">
-                <div className="min-w-full">
+                <div className="w-full">
                     {/* Month Labels */}
-                    <div className="flex mb-2 ml-10 relative h-4">
-                        {monthPositions.map((pos, idx) => (
-                            <div
-                                key={idx}
-                                className="absolute text-[11px] text-text-secondary-light dark:text-text-secondary-dark"
-                                style={{ left: `${pos.position * 16}px` }}
-                            >
-                                {pos.month}
-                            </div>
-                        ))}
+                    <div className="flex mb-2 ml-10">
+                        {monthPositions.map((pos, idx) => {
+                            const nextPos = monthPositions[idx + 1]?.position || weekColumns.length;
+                            const width = ((nextPos - pos.position) / weekColumns.length) * 100;
+                            return (
+                                <div
+                                    key={idx}
+                                    className="text-[11px] text-text-secondary-light dark:text-text-secondary-dark"
+                                    style={{ width: `${width}%` }}
+                                >
+                                    {pos.month}
+                                </div>
+                            );
+                        })}
                     </div>
 
                     <div className="flex">
                         {/* Day Labels */}
-                        <div className="flex flex-col gap-[3px] mr-2 text-[11px] text-text-secondary-light dark:text-text-secondary-dark w-8">
+                        <div className="flex flex-col gap-[3px] mr-2 text-[11px] text-text-secondary-light dark:text-text-secondary-dark w-8 shrink-0">
                             {[0, 1, 2, 3, 4, 5, 6].map(dayIdx => (
-                                <div key={dayIdx} className="h-[13px] flex items-center justify-end pr-1">
+                                <div key={dayIdx} className="h-3 sm:h-4 flex items-center justify-end pr-1">
                                     {dayIdx % 2 === 0 && days[Math.floor(dayIdx / 2)]}
                                 </div>
                             ))}
                         </div>
 
-                        {/* Grid */}
-                        <div className="flex gap-[3px] flex-1">
+                        {/* Grid - fills remaining width */}
+                        <div className="flex-1 grid gap-[2px] sm:gap-[3px]" style={{ gridTemplateColumns: `repeat(${weekColumns.length}, 1fr)` }}>
                             {weekColumns.map((week, weekIdx) => (
-                                <div key={weekIdx} className="flex flex-col gap-[3px]">
+                                <div key={weekIdx} className="flex flex-col gap-[2px] sm:gap-[3px]">
                                     {week.map((day, dayIdx) => (
                                         <div
                                             key={`${weekIdx}-${dayIdx}`}
-                                            className={`w-[13px] h-[13px] rounded-sm cursor-pointer transition-colors ${getCellColor(day.status)}`}
+                                            className={`aspect-square w-full min-h-3 sm:min-h-4 rounded-sm cursor-pointer transition-colors ${getCellColor(day.status)}`}
                                             onMouseEnter={(e) => handleMouseEnter(day, e)}
                                             onMouseLeave={handleMouseLeave}
                                         />
