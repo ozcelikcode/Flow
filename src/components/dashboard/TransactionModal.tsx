@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Transaction, RecurrenceType, PriceTier } from '../../types';
 import { useSettings } from '../../context/SettingsContext';
 import Modal from '../ui/Modal';
+import { Plus, X } from 'lucide-react';
 
 interface TransactionModalProps {
     isOpen: boolean;
@@ -290,7 +291,7 @@ export default function TransactionModal({
                                 onClick={addPriceTier}
                                 className="text-xs text-primary hover:text-primary/80 font-medium flex items-center gap-1"
                             >
-                                <span className="material-symbols-outlined text-sm">add</span>
+                                <Plus className="w-3.5 h-3.5" />
                                 {t('addPriceTier')}
                             </button>
                         </div>
@@ -326,7 +327,7 @@ export default function TransactionModal({
                                             onClick={() => removePriceTier(index)}
                                             className="text-danger hover:text-danger/80 p-1"
                                         >
-                                            <span className="material-symbols-outlined text-sm">close</span>
+                                            <X className="w-4 h-4" />
                                         </button>
                                     </div>
                                 ))}

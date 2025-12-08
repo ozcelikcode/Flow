@@ -4,6 +4,16 @@ import { Link } from 'react-router-dom';
 import StatsCard from '../components/dashboard/StatsCard';
 import TransactionTable from '../components/dashboard/TransactionTable';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import {
+    TrendingDown,
+    FolderOpen,
+    RefreshCw,
+    CreditCard,
+    FileText,
+    ChartPie,
+    ArrowRight,
+    BarChart3
+} from 'lucide-react';
 
 export default function Dashboard() {
     const { transactions } = useTransactions();
@@ -102,7 +112,7 @@ export default function Dashboard() {
                 {/* Quick Stats */}
                 <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
                     <h3 className="text-lg font-bold text-text-light dark:text-text-dark mb-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary">insights</span>
+                        <BarChart3 className="w-5 h-5 text-primary" />
                         {t('quickStats')}
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
@@ -110,7 +120,7 @@ export default function Dashboard() {
                         <div className="flex flex-col p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-primary text-lg">trending_down</span>
+                                    <TrendingDown className="w-4 h-4 text-primary" />
                                 </div>
                                 <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{t('avgMonthlyExpense')}</span>
                             </div>
@@ -121,7 +131,7 @@ export default function Dashboard() {
                         <div className="flex flex-col p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-warning text-lg">category</span>
+                                    <FolderOpen className="w-4 h-4 text-warning" />
                                 </div>
                                 <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{t('topCategory')}</span>
                             </div>
@@ -134,7 +144,7 @@ export default function Dashboard() {
                         <div className="flex flex-col p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-purple-500 text-lg">autorenew</span>
+                                    <RefreshCw className="w-4 h-4 text-purple-500" />
                                 </div>
                                 <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{t('activeSubscriptions')}</span>
                             </div>
@@ -145,7 +155,7 @@ export default function Dashboard() {
                         <div className="flex flex-col p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-danger/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-danger text-lg">payments</span>
+                                    <CreditCard className="w-4 h-4 text-danger" />
                                 </div>
                                 <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{t('totalSubscriptionCost')}</span>
                             </div>
@@ -156,7 +166,7 @@ export default function Dashboard() {
                         <div className="col-span-2 flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-success text-lg">receipt_long</span>
+                                    <FileText className="w-4 h-4 text-success" />
                                 </div>
                                 <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('transactionCount')}</span>
                             </div>
@@ -169,7 +179,7 @@ export default function Dashboard() {
                 <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-bold text-text-light dark:text-text-dark flex items-center gap-2">
-                            <span className="material-symbols-outlined text-primary">pie_chart</span>
+                            <ChartPie className="w-5 h-5 text-primary" />
                             {t('categoryDistribution')}
                         </h3>
                         <Link
@@ -177,7 +187,7 @@ export default function Dashboard() {
                             className="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
                         >
                             {t('viewReports')}
-                            <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                            <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
 

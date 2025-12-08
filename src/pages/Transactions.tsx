@@ -21,6 +21,7 @@ import { CSS } from '@dnd-kit/utilities';
 import type { Transaction } from '../types';
 import TransactionModal from '../components/dashboard/TransactionModal';
 import { getSubscriptionInfo } from '../services/subscriptionService';
+import { GripVertical, Pencil } from 'lucide-react';
 
 export default function TransactionsPage() {
     const { transactions, reorderTransactions, deleteTransaction, updateTransaction } = useTransactions();
@@ -159,7 +160,7 @@ function SortableItem({ transaction, onEdit, formatAmount, translateCategory, la
                     {...listeners}
                     className="cursor-grab touch-none p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                 >
-                    <span className="material-symbols-outlined">drag_indicator</span>
+                    <GripVertical className="w-5 h-5" />
                 </button>
 
                 <div className="flex-1">
@@ -206,7 +207,7 @@ function SortableItem({ transaction, onEdit, formatAmount, translateCategory, la
                     onClick={onEdit}
                     className="text-primary hover:bg-primary/10 p-2 rounded-lg transition-colors"
                 >
-                    <span className="material-symbols-outlined">edit</span>
+                    <Pencil className="w-5 h-5" />
                 </button>
             </div>
         </div>

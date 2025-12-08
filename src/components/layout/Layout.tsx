@@ -1,6 +1,14 @@
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSettings } from '../../context/SettingsContext';
+import {
+    LayoutDashboard,
+    Receipt,
+    PieChart,
+    Settings,
+    Plus,
+    Wallet
+} from 'lucide-react';
 
 interface LayoutProps {
     children: ReactNode;
@@ -18,7 +26,7 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                     <div className="flex flex-col gap-4">
                         <div className="flex gap-3 items-center mb-4">
                             <div className="bg-primary/20 rounded-full size-10 flex items-center justify-center">
-                                <span className="material-symbols-outlined text-primary text-xl">account_balance_wallet</span>
+                                <Wallet className="text-primary w-5 h-5" />
                             </div>
                             <div className="flex flex-col">
                                 <h1 className="text-text-light dark:text-text-dark text-base font-medium leading-normal">{t('myWallet')}</h1>
@@ -28,17 +36,17 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                             </div>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <NavItem icon="dashboard" label={t('dashboard')} to="/" />
-                            <NavItem icon="receipt_long" label={t('transactions')} to="/transactions" />
-                            <NavItem icon="pie_chart" label={t('reports')} to="/reports" />
-                            <NavItem icon="settings" label={t('settings')} to="/settings" />
+                            <NavItem icon={LayoutDashboard} label={t('dashboard')} to="/" />
+                            <NavItem icon={Receipt} label={t('transactions')} to="/transactions" />
+                            <NavItem icon={PieChart} label={t('reports')} to="/reports" />
+                            <NavItem icon={Settings} label={t('settings')} to="/settings" />
                         </div>
                     </div>
                     <button
                         onClick={onAddTransactionClick}
                         className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] gap-2 hover:bg-primary/90 transition-colors"
                     >
-                        <span className="material-symbols-outlined text-xl">add</span>
+                        <Plus className="w-5 h-5" />
                         <span className="truncate">{t('addTransaction')}</span>
                     </button>
                 </div>
@@ -54,7 +62,13 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
     );
 }
 
-function NavItem({ icon, label, to }: { icon: string; label: string; to: string }) {
+interface NavItemProps {
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    to: string;
+}
+
+function NavItem({ icon: Icon, label, to }: NavItemProps) {
     return (
         <NavLink
             to={to}
@@ -67,16 +81,11 @@ function NavItem({ icon, label, to }: { icon: string; label: string; to: string 
         >
             {({ isActive }) => (
                 <>
-                    <span
-                        className={`material-symbols-outlined text-2xl ${isActive ? 'text-primary' : 'text-text-secondary-light dark:text-text-secondary-dark'
-                            }`}
-                        style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}
-                    >
-                        {icon}
-                    </span>
+                    <Icon
+                        className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-text-secondary-light dark:text-text-secondary-dark'}`}
+                    />
                     <p
-                        className={`text-sm font-medium leading-normal ${isActive ? 'text-primary' : 'text-text-light dark:text-text-dark'
-                            }`}
+                        className={`text-sm font-medium leading-normal ${isActive ? 'text-primary' : 'text-text-light dark:text-text-dark'}`}
                     >
                         {label}
                     </p>

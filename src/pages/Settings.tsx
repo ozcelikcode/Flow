@@ -1,4 +1,5 @@
 import { useSettings } from '../context/SettingsContext';
+import { RefreshCw } from 'lucide-react';
 
 export default function Settings() {
     const { theme, setTheme, currency, setCurrency, rates, updateRates, isUpdatingRates, language, setLanguage, t } = useSettings();
@@ -98,9 +99,7 @@ export default function Settings() {
                                     disabled={isUpdatingRates}
                                     className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
-                                    <span className={`material-symbols-outlined text-lg ${isUpdatingRates ? 'animate-spin' : ''}`}>
-                                        {isUpdatingRates ? 'progress_activity' : 'sync'}
-                                    </span>
+                                    <RefreshCw className={`w-4 h-4 ${isUpdatingRates ? 'animate-spin' : ''}`} />
                                     {isUpdatingRates ? t('updating') : t('updateRates')}
                                 </button>
                             </div>

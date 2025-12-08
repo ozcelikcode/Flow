@@ -1,6 +1,7 @@
 import { useTransactions } from '../context/TransactionContext';
 import { useSettings } from '../context/SettingsContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 export default function Reports() {
     const { transactions } = useTransactions();
@@ -63,8 +64,8 @@ export default function Reports() {
 
     // Custom bar shape to show different colors
     const CustomBar = (props: any) => {
-        const { fill, x, y, width, height, payload } = props;
-        const barColor = payload.color || fill;
+        const { x, y, width, height, payload } = props;
+        const barColor = payload.color;
         return (
             <rect
                 x={x}
@@ -77,6 +78,9 @@ export default function Reports() {
             />
         );
     };
+
+    const netBalance = income - expense;
+    const isProfit = netBalance >= 0;
 
     return (
         <div className="p-4">
@@ -135,13 +139,20 @@ export default function Reports() {
                     </div>
 
                     {/* Balance Summary */}
-                    <div className={`mt-4 p-3 rounded-lg ${income >= expense ? 'bg-success/10' : 'bg-danger/10'}`}>
+                    <div className={`mt-4 p-3 rounded-lg ${isProfit ? 'bg-success/10' : 'bg-danger/10'}`}>
                         <div className="flex items-center justify-between">
-                            <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                                {income >= expense ? '💰 Net Kazanç' : '📉 Net Kayıp'}
-                            </span>
-                            <span className={`font-bold ${income >= expense ? 'text-success' : 'text-danger'}`}>
-                                {income >= expense ? '+' : '-'}{formatAmount(Math.abs(income - expense) / rate)}
+                            <div className="flex items-center gap-2">
+                                {isProfit ? (
+                                    <TrendingUp className="w-5 h-5 text-success" />
+                                ) : (
+                                    <TrendingDown className="w-5 h-5 text-danger" />
+                                )}
+                                <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                                    {isProfit ? (t('incomeType') + ' > ' + t('expenseType')) : (t('expenseType') + ' > ' + t('incomeType'))}
+                                </span>
+                            </div>
+                            <span className={`font-bold ${isProfit ? 'text-success' : 'text-danger'}`}>
+                                {isProfit ? '+' : '-'}{formatAmount(Math.abs(netBalance) / rate)}
                             </span>
                         </div>
                     </div>
