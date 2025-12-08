@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 export default function Reports() {
     const { transactions } = useTransactions();
-    const { theme, t } = useSettings();
+    const { theme, t, translateCategory } = useSettings();
 
     // Aggregate Data
     const income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
@@ -18,11 +18,12 @@ export default function Reports() {
     const categoryData = transactions
         .filter(t => t.type === 'expense')
         .reduce((acc, t) => {
-            const existing = acc.find(c => c.name === t.category);
+            const translatedCategory = translateCategory(t.category);
+            const existing = acc.find(c => c.name === translatedCategory);
             if (existing) {
                 existing.value += t.amount;
             } else {
-                acc.push({ name: t.category, value: t.amount });
+                acc.push({ name: translatedCategory, value: t.amount });
             }
             return acc;
         }, [] as { name: string; value: number }[]);
@@ -63,7 +64,7 @@ export default function Reports() {
                                 />
                                 <Bar
                                     dataKey="value"
-                                    fill="#6366f1"
+                                    fill="#43be5dff"
                                     radius={[4, 4, 0, 0]}
                                     style={{ outline: 'none' }}
                                 />

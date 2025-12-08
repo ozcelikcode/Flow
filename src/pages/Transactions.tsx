@@ -23,7 +23,7 @@ import TransactionModal from '../components/dashboard/TransactionModal';
 
 export default function TransactionsPage() {
     const { transactions, reorderTransactions, deleteTransaction, updateTransaction } = useTransactions();
-    const { t, formatAmount } = useSettings();
+    const { t, formatAmount, translateCategory } = useSettings();
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -100,7 +100,7 @@ export default function TransactionsPage() {
                                     transaction={transaction}
                                     onEdit={() => handleEdit(transaction)}
                                     formatAmount={formatAmount}
-                                    t={t}
+                                    translateCategory={translateCategory}
                                 />
                             ))
                         )}
@@ -123,10 +123,10 @@ interface SortableItemProps {
     transaction: Transaction;
     onEdit: () => void;
     formatAmount: (amount: number) => string;
-    t: (key: any) => string;
+    translateCategory: (category: string) => string;
 }
 
-function SortableItem({ transaction, onEdit, formatAmount, t }: SortableItemProps) {
+function SortableItem({ transaction, onEdit, formatAmount, translateCategory }: SortableItemProps) {
     const {
         attributes,
         listeners,
@@ -158,7 +158,7 @@ function SortableItem({ transaction, onEdit, formatAmount, t }: SortableItemProp
                 <div className="flex-1">
                     <p className="font-medium text-text-light dark:text-text-dark">{transaction.name}</p>
                     <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                        {transaction.date} • {transaction.category}
+                        {transaction.date} • {translateCategory(transaction.category)}
                     </p>
                 </div>
             </div>
@@ -172,7 +172,7 @@ function SortableItem({ transaction, onEdit, formatAmount, t }: SortableItemProp
                     onClick={onEdit}
                     className="text-primary hover:bg-primary/10 p-2 rounded-lg transition-colors"
                 >
-                    <span className="material-symbols-outlined">{t('edit') === 'Düzenle' ? 'edit' : 'edit'}</span>
+                    <span className="material-symbols-outlined">edit</span>
                 </button>
             </div>
         </div>

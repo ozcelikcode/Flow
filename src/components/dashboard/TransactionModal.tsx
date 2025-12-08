@@ -58,7 +58,8 @@ export default function TransactionModal({
     useEffect(() => {
         if (editTransaction) {
             setName(editTransaction.name);
-            setAmount(editTransaction.amount.toString());
+            // Round to 2 decimal places for display
+            setAmount(Number(editTransaction.amount.toFixed(2)).toString());
             setCategory(editTransaction.category);
             setType(editTransaction.type);
             // Convert date back to input format
@@ -66,7 +67,8 @@ export default function TransactionModal({
             if (!isNaN(parsedDate.getTime())) {
                 setDate(parsedDate.toISOString().split('T')[0]);
             }
-            setInputCurrency('USD'); // Amount is stored in USD
+            // Use the current settings currency for editing (amount is stored in USD)
+            setInputCurrency(currency);
         } else {
             // Reset form for new transaction
             setName('');
@@ -118,8 +120,8 @@ export default function TransactionModal({
                             type="button"
                             onClick={() => setType('expense')}
                             className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${type === 'expense'
-                                    ? 'bg-danger/10 text-danger border border-danger/20'
-                                    : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark border border-transparent'
+                                ? 'bg-danger/10 text-danger border border-danger/20'
+                                : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark border border-transparent'
                                 }`}
                         >
                             {t('expenseType')}
@@ -128,8 +130,8 @@ export default function TransactionModal({
                             type="button"
                             onClick={() => setType('income')}
                             className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${type === 'income'
-                                    ? 'bg-success/10 text-success border border-success/20'
-                                    : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark border border-transparent'
+                                ? 'bg-success/10 text-success border border-success/20'
+                                : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark border border-transparent'
                                 }`}
                         >
                             {t('incomeType')}

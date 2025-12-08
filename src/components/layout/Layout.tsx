@@ -14,7 +14,7 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
         <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
             <div className="flex flex-row min-h-screen">
                 {/* SideNavBar */}
-                <div className="flex flex-col justify-between bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 w-64 p-4 sticky top-0 h-screen">
+                <div className="flex flex-col justify-between bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 w-64 p-4 fixed top-0 left-0 h-screen z-40">
                     <div className="flex flex-col gap-4">
                         <div className="flex gap-3 items-center mb-4">
                             <div className="bg-primary/20 rounded-full size-10 flex items-center justify-center">
@@ -44,7 +44,7 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                 </div>
 
                 {/* Main Content */}
-                <main className="flex-1 p-8">
+                <main className="flex-1 p-8 ml-64">
                     <div className="layout-content-container flex flex-col max-w-7xl mx-auto">
                         {children}
                     </div>

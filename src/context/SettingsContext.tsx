@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { translations, type Language, type TranslationKey } from '../i18n/translations';
+import { translations, categoryKeys, type Language, type TranslationKey } from '../i18n/translations';
 
 type Currency = 'USD' | 'EUR' | 'TRY';
 
@@ -23,6 +23,7 @@ interface SettingsContextType {
     language: Language;
     setLanguage: (language: Language) => void;
     t: (key: TranslationKey) => string;
+    translateCategory: (category: string) => string;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -104,6 +105,15 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         return translations[language][key] || translations.en[key] || key;
     };
 
+    // Translate category names based on current language
+    const translateCategory = (category: string): string => {
+        const key = categoryKeys[category];
+        if (key && translations[language][key as TranslationKey]) {
+            return translations[language][key as TranslationKey];
+        }
+        return category; // Return original if no translation found
+    };
+
     const updateRates = async () => {
         setIsUpdatingRates(true);
         try {
@@ -155,7 +165,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             isUpdatingRates,
             language,
             setLanguage,
-            t
+            t,
+            translateCategory
         }}>
             {children}
         </SettingsContext.Provider>

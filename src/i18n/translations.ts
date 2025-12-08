@@ -1,5 +1,18 @@
 export type Language = 'en' | 'tr';
 
+// Category key mapping
+export const categoryKeys: Record<string, string> = {
+    'Food & Drink': 'foodAndDrink',
+    'Transportation': 'transportation',
+    'Entertainment': 'entertainment',
+    'Shopping': 'shopping',
+    'Bills': 'bills',
+    'Salary': 'salary',
+    'Freelance': 'freelance',
+    'Investment': 'investment',
+    'Other': 'other',
+};
+
 export const translations = {
     en: {
         // Navigation
@@ -20,6 +33,18 @@ export const translations = {
         expense: 'Expense (This Month)',
         basedOnTransactions: 'Based on transactions',
         recentTransactions: 'Recent Transactions',
+
+        // Dashboard - Quick Stats
+        quickStats: 'Quick Stats',
+        avgMonthlyExpense: 'Avg. Monthly Expense',
+        topCategory: 'Top Category',
+        transactionCount: 'Transaction Count',
+        thisMonth: 'This Month',
+        noData: 'No data',
+
+        // Dashboard - Category Distribution
+        categoryDistribution: 'Category Distribution',
+        viewReports: 'View Reports',
 
         // Transactions Page
         allTransactions: 'All Transactions',
@@ -101,6 +126,18 @@ export const translations = {
         expense: 'Gider (Bu Ay)',
         basedOnTransactions: 'İşlemlere dayalı',
         recentTransactions: 'Son İşlemler',
+
+        // Dashboard - Quick Stats
+        quickStats: 'Hızlı İstatistikler',
+        avgMonthlyExpense: 'Ort. Aylık Gider',
+        topCategory: 'En Çok Harcama',
+        transactionCount: 'İşlem Sayısı',
+        thisMonth: 'Bu Ay',
+        noData: 'Veri yok',
+
+        // Dashboard - Category Distribution
+        categoryDistribution: 'Kategori Dağılımı',
+        viewReports: 'Raporları Gör',
 
         // Transactions Page
         allTransactions: 'Tüm İşlemler',

@@ -6,7 +6,7 @@ interface TransactionTableProps {
 }
 
 export default function TransactionTable({ transactions }: TransactionTableProps) {
-    const { formatAmount, t } = useSettings();
+    const { formatAmount, t, translateCategory } = useSettings();
 
     return (
         <div className="px-4 pb-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
@@ -37,8 +37,8 @@ export default function TransactionTable({ transactions }: TransactionTableProps
                                         <p className="font-medium text-text-light dark:text-text-dark">{transaction.name}</p>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-secondary/10 text-secondary">
-                                            {transaction.category}
+                                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary">
+                                            {translateCategory(transaction.category)}
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-sm text-text-secondary-light dark:text-text-secondary-dark">
