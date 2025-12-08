@@ -21,7 +21,7 @@ export default function TransactionModal({
     editTransaction
 }: TransactionModalProps) {
     const { currency, t, language } = useSettings();
-    const { addCategory, getExpenseCategories, getIncomeCategories } = useCategories();
+    const { addCategory, getExpenseCategories, getIncomeCategories, getCategoryDisplayName } = useCategories();
 
     const [name, setName] = useState('');
     const [amount, setAmount] = useState('');
@@ -53,30 +53,6 @@ export default function TransactionModal({
         TRY: 0.029,
     };
 
-    // Get translated category label
-    const getCategoryLabel = (categoryName: string) => {
-        const translationKey = {
-            'Food & Drink': 'foodAndDrink',
-            'Transportation': 'transportation',
-            'Entertainment': 'entertainment',
-            'Shopping': 'shopping',
-            'Bills': 'bills',
-            'Subscription': 'subscriptionCategory',
-            'Salary': 'salary',
-            'Freelance': 'freelance',
-            'Investment': 'investment',
-            'Other': 'other',
-            'Health': 'health',
-            'Education': 'education',
-            'Gift': 'gift',
-        }[categoryName];
-
-        if (translationKey) {
-            return t(translationKey as any);
-        }
-        return categoryName; // For custom categories
-    };
-
     // Get available categories based on transaction type
     const getAvailableCategories = () => {
         if (type === 'expense') {
@@ -88,8 +64,11 @@ export default function TransactionModal({
 
     const handleQuickAddCategory = () => {
         if (quickCategoryName.trim()) {
+            const trimmedName = quickCategoryName.trim();
             const newCat = addCategory({
-                name: quickCategoryName.trim(),
+                name: trimmedName,
+                nameEn: trimmedName,
+                nameTr: trimmedName,
                 icon: 'Tag',
                 description: '',
                 type: type === 'expense' ? 'expense' : 'income'
@@ -443,7 +422,7 @@ export default function TransactionModal({
                                     className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
                                 >
                                     {getAvailableCategories().map(cat => (
-                                        <option key={cat.id} value={cat.name}>{getCategoryLabel(cat.name)}</option>
+                                        <option key={cat.id} value={cat.name}>{getCategoryDisplayName(cat, language)}</option>
                                     ))}
                                 </select>
                                 <button

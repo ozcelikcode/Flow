@@ -86,21 +86,22 @@ export default function Reports() {
         return `${year}-${month}-${day}`;
     };
 
-    // Generate last 30 days spending data
+    // Generate current month's daily spending data (1st to today)
     const generateDailySpendingData = () => {
         const today = new Date();
-        const last30Days: { date: string; amount: number; displayDate: string }[] = [];
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth();
+        const todayDate = today.getDate();
 
-        for (let i = 29; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
+        const monthDays: { date: string; amount: number; displayDate: string }[] = [];
+
+        // From 1st of current month to today
+        for (let day = 1; day <= todayDate; day++) {
+            const date = new Date(currentYear, currentMonth, day);
             const dateStr = toLocalDateKey(date);
-            const displayDate = date.toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
-                month: 'short',
-                day: 'numeric'
-            });
+            const displayDate = day.toString(); // Just show day number
 
-            last30Days.push({
+            monthDays.push({
                 date: dateStr,
                 displayDate,
                 amount: 0
@@ -114,19 +115,23 @@ export default function Reports() {
                 const txDate = parseLocalizedDate(tx.date);
                 if (txDate) {
                     const txDateStr = toLocalDateKey(txDate);
-                    const dayData = last30Days.find(d => d.date === txDateStr);
+                    const dayData = monthDays.find(d => d.date === txDateStr);
                     if (dayData) {
                         dayData.amount += tx.amount * rate;
                     }
                 }
             });
 
-        return last30Days;
+        return monthDays;
     };
 
     const dailySpendingData = generateDailySpendingData();
-    const maxDailySpending = Math.max(...dailySpendingData.map(d => d.amount));
-    const avgDailySpending = dailySpendingData.reduce((sum, d) => sum + d.amount, 0) / 30;
+    const maxDailySpending = Math.max(...dailySpendingData.map(d => d.amount), 0);
+    const daysWithData = dailySpendingData.filter(d => d.amount > 0).length || 1;
+    const avgDailySpending = dailySpendingData.reduce((sum, d) => sum + d.amount, 0) / daysWithData;
+
+    // Get current month name
+    const currentMonthName = new Date().toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { month: 'long', year: 'numeric' });
 
     const COLORS = ['#6366f1', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6', '#ec4899'];
 
@@ -233,8 +238,8 @@ export default function Reports() {
                         <Calendar className="w-5 h-5 text-primary" />
                         {t('dailySpendingTrend')}
                     </h3>
-                    <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
-                        {t('last30Days')}
+                    <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full capitalize">
+                        {currentMonthName}
                     </span>
                 </div>
 

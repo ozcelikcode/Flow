@@ -1,24 +1,24 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { Category } from '../types';
 
-// Default categories
+// Default categories with bilingual names
 const DEFAULT_CATEGORIES: Category[] = [
     // Expense categories
-    { id: 'food-drink', name: 'Food & Drink', icon: 'UtensilsCrossed', description: 'Restaurants, groceries, coffee', type: 'expense', isCustom: false },
-    { id: 'transportation', name: 'Transportation', icon: 'Car', description: 'Gas, public transit, parking', type: 'expense', isCustom: false },
-    { id: 'entertainment', name: 'Entertainment', icon: 'Gamepad2', description: 'Movies, games, events', type: 'expense', isCustom: false },
-    { id: 'shopping', name: 'Shopping', icon: 'ShoppingBag', description: 'Clothing, electronics, gifts', type: 'expense', isCustom: false },
-    { id: 'bills', name: 'Bills', icon: 'Receipt', description: 'Utilities, phone, internet', type: 'expense', isCustom: false },
-    { id: 'subscription', name: 'Subscription', icon: 'RefreshCw', description: 'Streaming, software, memberships', type: 'expense', isCustom: false },
-    { id: 'health', name: 'Health', icon: 'Heart', description: 'Medical, pharmacy, gym', type: 'expense', isCustom: false },
-    { id: 'education', name: 'Education', icon: 'GraduationCap', description: 'Courses, books, training', type: 'expense', isCustom: false },
+    { id: 'food-drink', name: 'Food & Drink', nameEn: 'Food & Drink', nameTr: 'Yiyecek ve İçecek', icon: 'UtensilsCrossed', description: 'Restaurants, groceries, coffee', type: 'expense', isCustom: false },
+    { id: 'transportation', name: 'Transportation', nameEn: 'Transportation', nameTr: 'Ulaşım', icon: 'Car', description: 'Gas, public transit, parking', type: 'expense', isCustom: false },
+    { id: 'entertainment', name: 'Entertainment', nameEn: 'Entertainment', nameTr: 'Eğlence', icon: 'Gamepad2', description: 'Movies, games, events', type: 'expense', isCustom: false },
+    { id: 'shopping', name: 'Shopping', nameEn: 'Shopping', nameTr: 'Alışveriş', icon: 'ShoppingBag', description: 'Clothing, electronics, gifts', type: 'expense', isCustom: false },
+    { id: 'bills', name: 'Bills', nameEn: 'Bills', nameTr: 'Faturalar', icon: 'Receipt', description: 'Utilities, phone, internet', type: 'expense', isCustom: false },
+    { id: 'subscription', name: 'Subscription', nameEn: 'Subscription', nameTr: 'Abonelik', icon: 'RefreshCw', description: 'Streaming, software, memberships', type: 'expense', isCustom: false },
+    { id: 'health', name: 'Health', nameEn: 'Health', nameTr: 'Sağlık', icon: 'Heart', description: 'Medical, pharmacy, gym', type: 'expense', isCustom: false },
+    { id: 'education', name: 'Education', nameEn: 'Education', nameTr: 'Eğitim', icon: 'GraduationCap', description: 'Courses, books, training', type: 'expense', isCustom: false },
     // Income categories
-    { id: 'salary', name: 'Salary', icon: 'Banknote', description: 'Monthly salary, wages', type: 'income', isCustom: false },
-    { id: 'freelance', name: 'Freelance', icon: 'Laptop', description: 'Project work, consulting', type: 'income', isCustom: false },
-    { id: 'investment', name: 'Investment', icon: 'TrendingUp', description: 'Dividends, interest, gains', type: 'income', isCustom: false },
-    { id: 'gift', name: 'Gift', icon: 'Gift', description: 'Money received as gift', type: 'income', isCustom: false },
+    { id: 'salary', name: 'Salary', nameEn: 'Salary', nameTr: 'Maaş', icon: 'Banknote', description: 'Monthly salary, wages', type: 'income', isCustom: false },
+    { id: 'freelance', name: 'Freelance', nameEn: 'Freelance', nameTr: 'Serbest Çalışma', icon: 'Laptop', description: 'Project work, consulting', type: 'income', isCustom: false },
+    { id: 'investment', name: 'Investment', nameEn: 'Investment', nameTr: 'Yatırım', icon: 'TrendingUp', description: 'Dividends, interest, gains', type: 'income', isCustom: false },
+    { id: 'gift', name: 'Gift', nameEn: 'Gift', nameTr: 'Hediye', icon: 'Gift', description: 'Money received as gift', type: 'income', isCustom: false },
     // Both
-    { id: 'other', name: 'Other', icon: 'MoreHorizontal', description: 'Miscellaneous transactions', type: 'both', isCustom: false },
+    { id: 'other', name: 'Other', nameEn: 'Other', nameTr: 'Diğer', icon: 'MoreHorizontal', description: 'Miscellaneous transactions', type: 'both', isCustom: false },
 ];
 
 interface CategoryContextType {
@@ -29,6 +29,7 @@ interface CategoryContextType {
     getCategoryByName: (name: string) => Category | undefined;
     getExpenseCategories: () => Category[];
     getIncomeCategories: () => Category[];
+    getCategoryDisplayName: (category: Category, language: 'en' | 'tr') => string;
 }
 
 const CategoryContext = createContext<CategoryContextType | null>(null);
@@ -39,12 +40,24 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
+                // Migrate old categories that don't have nameEn/nameTr
+                const migrated = parsed.map((c: any) => ({
+                    ...c,
+                    nameEn: c.nameEn || c.name,
+                    nameTr: c.nameTr || c.name,
+                }));
                 // Merge with defaults to ensure all default categories exist
-                const existingIds = new Set(parsed.map((c: Category) => c.id));
-                const merged = [...parsed];
+                const existingIds = new Set(migrated.map((c: Category) => c.id));
+                const merged = [...migrated];
                 DEFAULT_CATEGORIES.forEach(dc => {
                     if (!existingIds.has(dc.id)) {
                         merged.push(dc);
+                    } else {
+                        // Update default category translations if they exist
+                        const idx = merged.findIndex((c: Category) => c.id === dc.id);
+                        if (idx !== -1 && !merged[idx].isCustom) {
+                            merged[idx] = { ...merged[idx], nameEn: dc.nameEn, nameTr: dc.nameTr };
+                        }
                     }
                 });
                 return merged;
@@ -85,7 +98,7 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
     };
 
     const getCategoryByName = (name: string): Category | undefined => {
-        return categories.find(c => c.name === name);
+        return categories.find(c => c.name === name || c.nameEn === name || c.nameTr === name);
     };
 
     const getExpenseCategories = (): Category[] => {
@@ -96,6 +109,10 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
         return categories.filter(c => c.type === 'income' || c.type === 'both');
     };
 
+    const getCategoryDisplayName = (category: Category, language: 'en' | 'tr'): string => {
+        return language === 'tr' ? category.nameTr : category.nameEn;
+    };
+
     return (
         <CategoryContext.Provider value={{
             categories,
@@ -104,7 +121,8 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
             deleteCategory,
             getCategoryByName,
             getExpenseCategories,
-            getIncomeCategories
+            getIncomeCategories,
+            getCategoryDisplayName
         }}>
             {children}
         </CategoryContext.Provider>

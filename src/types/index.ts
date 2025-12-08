@@ -7,7 +7,9 @@ export interface PriceTier {
 
 export interface Category {
     id: string;
-    name: string; // Internal name (key)
+    name: string; // Internal name (key) - used as fallback and for default categories
+    nameEn: string; // English display name
+    nameTr: string; // Turkish display name
     icon: string; // Lucide icon name
     description?: string;
     type: 'income' | 'expense' | 'both'; // Hangi işlem türlerinde kullanılabilir

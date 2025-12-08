@@ -21,7 +21,7 @@ const getIconComponent = (iconName: string) => {
 };
 
 export default function Categories() {
-    const { categories, addCategory, updateCategory, deleteCategory } = useCategories();
+    const { categories, addCategory, updateCategory, deleteCategory, getCategoryDisplayName } = useCategories();
     const { t, language } = useSettings();
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -29,13 +29,15 @@ export default function Categories() {
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
     // Form state
-    const [formName, setFormName] = useState('');
+    const [formNameEn, setFormNameEn] = useState('');
+    const [formNameTr, setFormNameTr] = useState('');
     const [formIcon, setFormIcon] = useState('Tag');
     const [formDescription, setFormDescription] = useState('');
     const [formType, setFormType] = useState<'income' | 'expense' | 'both'>('expense');
 
     const resetForm = () => {
-        setFormName('');
+        setFormNameEn('');
+        setFormNameTr('');
         setFormIcon('Tag');
         setFormDescription('');
         setFormType('expense');
@@ -47,7 +49,8 @@ export default function Categories() {
     };
 
     const openEditModal = (category: Category) => {
-        setFormName(category.name);
+        setFormNameEn(category.nameEn);
+        setFormNameTr(category.nameTr);
         setFormIcon(category.icon);
         setFormDescription(category.description || '');
         setFormType(category.type);
@@ -55,11 +58,13 @@ export default function Categories() {
     };
 
     const handleSave = () => {
-        if (!formName.trim()) return;
+        if (!formNameEn.trim() || !formNameTr.trim()) return;
 
         if (editingCategory) {
             updateCategory(editingCategory.id, {
-                name: formName,
+                name: formNameEn, // Use English as key
+                nameEn: formNameEn,
+                nameTr: formNameTr,
                 icon: formIcon,
                 description: formDescription,
                 type: formType
@@ -67,7 +72,9 @@ export default function Categories() {
             setEditingCategory(null);
         } else {
             addCategory({
-                name: formName,
+                name: formNameEn, // Use English as key
+                nameEn: formNameEn,
+                nameTr: formNameTr,
                 icon: formIcon,
                 description: formDescription,
                 type: formType
@@ -123,6 +130,7 @@ export default function Categories() {
                         <CategoryCard
                             key={category.id}
                             category={category}
+                            displayName={getCategoryDisplayName(category, language)}
                             onEdit={() => openEditModal(category)}
                             onDelete={() => setDeleteConfirm(category.id)}
                             typeLabels={typeLabels}
@@ -143,6 +151,7 @@ export default function Categories() {
                         <CategoryCard
                             key={category.id}
                             category={category}
+                            displayName={getCategoryDisplayName(category, language)}
                             onEdit={() => openEditModal(category)}
                             onDelete={() => setDeleteConfirm(category.id)}
                             typeLabels={typeLabels}
@@ -155,8 +164,8 @@ export default function Categories() {
             {/* Add/Edit Modal */}
             {(isAddModalOpen || editingCategory) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="bg-white dark:bg-surface-dark rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-800">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+                    <div className="bg-white dark:bg-surface-dark rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-surface-dark">
                             <h3 className="text-lg font-bold text-text-light dark:text-text-dark">
                                 {editingCategory ? t('editCategory') : t('addCategory')}
                             </h3>
@@ -169,17 +178,31 @@ export default function Categories() {
                         </div>
 
                         <div className="p-6 space-y-4">
-                            {/* Name */}
+                            {/* English Name */}
                             <div>
                                 <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
-                                    {t('categoryName')}
+                                    {language === 'tr' ? 'İngilizce İsim' : 'English Name'} <span className="text-danger">*</span>
                                 </label>
                                 <input
                                     type="text"
-                                    value={formName}
-                                    onChange={(e) => setFormName(e.target.value)}
+                                    value={formNameEn}
+                                    onChange={(e) => setFormNameEn(e.target.value)}
                                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                    placeholder={language === 'tr' ? 'Kategori adı' : 'Category name'}
+                                    placeholder="e.g. Food & Drink"
+                                />
+                            </div>
+
+                            {/* Turkish Name */}
+                            <div>
+                                <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                                    {language === 'tr' ? 'Türkçe İsim' : 'Turkish Name'} <span className="text-danger">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formNameTr}
+                                    onChange={(e) => setFormNameTr(e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                    placeholder="örn. Yiyecek ve İçecek"
                                 />
                             </div>
 
@@ -256,10 +279,16 @@ export default function Categories() {
                                         return <IconComp className="w-5 h-5 text-primary" />;
                                     })()}
                                 </div>
-                                <div>
-                                    <p className="font-medium text-text-light dark:text-text-dark">
-                                        {formName || (language === 'tr' ? 'Önizleme' : 'Preview')}
-                                    </p>
+                                <div className="flex-1">
+                                    <div className="flex gap-2 text-sm">
+                                        <span className="text-text-light dark:text-text-dark font-medium">
+                                            🇬🇧 {formNameEn || 'English'}
+                                        </span>
+                                        <span className="text-text-secondary-light dark:text-text-secondary-dark">|</span>
+                                        <span className="text-text-light dark:text-text-dark font-medium">
+                                            🇹🇷 {formNameTr || 'Türkçe'}
+                                        </span>
+                                    </div>
                                     <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
                                         {formDescription || (language === 'tr' ? 'Açıklama' : 'Description')}
                                     </p>
@@ -276,7 +305,7 @@ export default function Categories() {
                                 </button>
                                 <button
                                     onClick={handleSave}
-                                    disabled={!formName.trim()}
+                                    disabled={!formNameEn.trim() || !formNameTr.trim()}
                                     className="flex-1 py-2.5 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                                 >
                                     <Check className="w-4 h-4" />
@@ -321,13 +350,14 @@ export default function Categories() {
 
 interface CategoryCardProps {
     category: Category;
+    displayName: string;
     onEdit: () => void;
     onDelete: () => void;
     typeLabels: Record<string, string>;
     t: (key: any) => string;
 }
 
-function CategoryCard({ category, onEdit, onDelete, typeLabels, t }: CategoryCardProps) {
+function CategoryCard({ category, displayName, onEdit, onDelete, typeLabels, t }: CategoryCardProps) {
     const IconComp = getIconComponent(category.icon);
 
     return (
@@ -340,7 +370,7 @@ function CategoryCard({ category, onEdit, onDelete, typeLabels, t }: CategoryCar
 
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                    <p className="font-medium text-text-light dark:text-text-dark truncate">{category.name}</p>
+                    <p className="font-medium text-text-light dark:text-text-dark truncate">{displayName}</p>
                     {category.isCustom && (
                         <span className="px-1.5 py-0.5 text-[10px] font-medium bg-primary/10 text-primary rounded">
                             {t('custom')}
