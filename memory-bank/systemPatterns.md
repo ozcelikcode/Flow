@@ -1,18 +1,65 @@
 # Sistem Modelleri (System Patterns)
 
 ## Mimari
-Uygulama, `code.html` içindeki tasarımı modüler hale getirmek için Bileşen Tabanlı Mimari (React/Vite) kullanacak.
+Uygulama, React/Vite ile Bileşen Tabanlı Mimari kullanmaktadır.
 
 ## Ana Bileşenler
-`code.html` analizine göre:
-1.  **Layout**: Sidebar ve Ana İçerik kapsayıcısı.
-2.  **Sidebar**: Navigasyon (Dashboard, İşlemler, Raporlar, Ayarlar) ve Profil.
-3.  **Dashboard**:
-    *   **Header**: Hoşgeldin mesajı ve özet.
-    *   **Stats Cards**: Toplam Bakiye, Gelir, Gider kartları.
-    *   **Recent Transactions Table**: İşlem detayları tablosu.
-4.  **Transaction Modal/Form**: (Yeni eklenecek) İşlem ekleme formu.
+
+### Layout
+- Sabit sidebar (desktop) / hamburger menü (mobil)
+- Ana içerik alanı
+- Sayfa yönlendirmesi (React Router)
+
+### Dashboard
+- Finansal özet kartları (StatsCard)
+- Hızlı istatistikler grid'i
+- Kategori dağılımı pasta grafiği
+- Son işlemler tablosu (TransactionTable)
+
+### Transactions
+- Liste görünümü (sürükle-bırak sıralama)
+- Grid görünümü (kart tabanlı)
+- Görünüm modu tercihi localStorage'da
+
+### Categories
+- Gider/Gelir kategorileri ayrı listeleme
+- Kategori kartları (ikon, isim, açıklama, tip)
+- Ekleme/düzenleme modal
+
+### Reports
+- Gelir vs Gider bar grafiği
+- Kategoriye göre harcama pasta grafiği
+- Günlük harcama trend grafiği
+- Yıllık aktivite haritası (GitHub tarzı)
+
+### Settings
+- Tema seçimi (açık/koyu)
+- Dil seçimi (İngilizce/Türkçe)
+- Para birimi seçimi (USD, EUR, TRY)
 
 ## Tasarım Desenleri
-- **Tailwind CSS Utility Classes**: Orijinal dosyadaki stiller korunacak.
-- **Responsive Design**: Tailwind responsive önekleri kullanılacak.
+
+### State Yönetimi
+- Context API ile global state
+- Her context kendi localStorage yönetimi yapar
+- Custom hooks ile context erişimi
+
+### Çeviri Sistemi
+- `translations.ts` içinde tüm çeviriler
+- `t()` fonksiyonu ile erişim
+- Kategoriler için `getCategoryDisplayName(category, language)`
+
+### Para Birimi
+- Tüm tutarlar USD olarak saklanır
+- Gösterim anında seçili para birimine dönüştürülür
+- `formatAmount()` fonksiyonu ile formatlama
+
+### Tema
+- Tailwind dark: prefix ile dark mode
+- HTML root'unda `dark` class ile kontrol
+- System preference desteği
+
+### Responsive Design
+- Mobile-first yaklaşım
+- Tailwind breakpoints: sm, md, lg, xl
+- Mobil için özel hamburger menü

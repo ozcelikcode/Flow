@@ -22,13 +22,16 @@ import { CSS } from '@dnd-kit/utilities';
 import type { Transaction } from '../types';
 import TransactionModal from '../components/dashboard/TransactionModal';
 import { getSubscriptionInfo } from '../services/subscriptionService';
-import { GripVertical, Pencil } from 'lucide-react';
+import { GripVertical, Pencil, List, LayoutGrid } from 'lucide-react';
 
 export default function TransactionsPage() {
     const { transactions, reorderTransactions, deleteTransaction, updateTransaction } = useTransactions();
     const { t, formatAmount, translateCategory, language } = useSettings();
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
+        return (localStorage.getItem('transactionViewMode') as 'list' | 'grid') || 'list';
+    });
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -62,9 +65,9 @@ export default function TransactionsPage() {
         setIsModalOpen(true);
     };
 
-    const handleSave = (updates: Omit<Transaction, 'id'>) => {
+    const handleSave = (updatedData: Omit<Transaction, 'id'>) => {
         if (editingTransaction) {
-            updateTransaction(editingTransaction.id, updates);
+            updateTransaction(editingTransaction.id, updatedData);
         }
         setEditingTransaction(null);
         setIsModalOpen(false);
@@ -83,45 +86,101 @@ export default function TransactionsPage() {
         setIsModalOpen(false);
     };
 
+    const toggleViewMode = (mode: 'list' | 'grid') => {
+        setViewMode(mode);
+        localStorage.setItem('transactionViewMode', mode);
+    };
+
     return (
         <div>
-            <h2 className="text-text-light dark:text-text-dark text-xl sm:text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4 sm:pb-6">
-                {t('allTransactions')}
-            </h2>
-            <p className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
-                {t('dragToReorder')}
-            </p>
+            <div className="flex items-center justify-between pb-4 sm:pb-6">
+                <h2 className="text-text-light dark:text-text-dark text-xl sm:text-[22px] font-bold leading-tight tracking-[-0.015em]">
+                    {t('allTransactions')}
+                </h2>
 
-            <div className="flex flex-col gap-2 sm:gap-3">
-                <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                >
-                    <SortableContext
-                        items={transactions}
-                        strategy={verticalListSortingStrategy}
+                {/* View Toggle */}
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                    <button
+                        onClick={() => toggleViewMode('list')}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'list'
+                            ? 'bg-white dark:bg-surface-dark text-primary shadow-sm'
+                            : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-text-light dark:hover:text-text-dark'
+                            }`}
                     >
-                        {transactions.length === 0 ? (
-                            <div className="text-center py-12 text-text-secondary-light dark:text-text-secondary-dark">
-                                {t('noTransactions')}
-                            </div>
-                        ) : (
-                            transactions.map((transaction) => (
-                                <SortableItem
-                                    key={transaction.id}
-                                    transaction={transaction}
-                                    onEdit={() => handleEdit(transaction)}
-                                    formatAmount={formatAmount}
-                                    translateCategory={translateCategory}
-                                    language={language}
-                                    t={t}
-                                />
-                            ))
-                        )}
-                    </SortableContext>
-                </DndContext>
+                        <List className="w-4 h-4" />
+                        <span className="hidden sm:inline">{t('listView')}</span>
+                    </button>
+                    <button
+                        onClick={() => toggleViewMode('grid')}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'grid'
+                            ? 'bg-white dark:bg-surface-dark text-primary shadow-sm'
+                            : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-text-light dark:hover:text-text-dark'
+                            }`}
+                    >
+                        <LayoutGrid className="w-4 h-4" />
+                        <span className="hidden sm:inline">{t('gridView')}</span>
+                    </button>
+                </div>
             </div>
+
+            {viewMode === 'list' && (
+                <p className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
+                    {t('dragToReorder')}
+                </p>
+            )}
+
+            {viewMode === 'list' ? (
+                <div className="flex flex-col gap-2 sm:gap-3">
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <SortableContext
+                            items={transactions}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {transactions.length === 0 ? (
+                                <div className="text-center py-12 text-text-secondary-light dark:text-text-secondary-dark">
+                                    {t('noTransactions')}
+                                </div>
+                            ) : (
+                                transactions.map((transaction) => (
+                                    <SortableItem
+                                        key={transaction.id}
+                                        transaction={transaction}
+                                        onEdit={() => handleEdit(transaction)}
+                                        formatAmount={formatAmount}
+                                        translateCategory={translateCategory}
+                                        language={language}
+                                        t={t}
+                                    />
+                                ))
+                            )}
+                        </SortableContext>
+                    </DndContext>
+                </div>
+            ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                    {transactions.length === 0 ? (
+                        <div className="col-span-full text-center py-12 text-text-secondary-light dark:text-text-secondary-dark">
+                            {t('noTransactions')}
+                        </div>
+                    ) : (
+                        transactions.map((transaction) => (
+                            <GridItem
+                                key={transaction.id}
+                                transaction={transaction}
+                                onEdit={() => handleEdit(transaction)}
+                                formatAmount={formatAmount}
+                                translateCategory={translateCategory}
+                                language={language}
+                                t={t}
+                            />
+                        ))
+                    )}
+                </div>
+            )}
 
             <TransactionModal
                 isOpen={isModalOpen}
@@ -134,7 +193,7 @@ export default function TransactionsPage() {
     );
 }
 
-interface SortableItemProps {
+interface ItemProps {
     transaction: Transaction;
     onEdit: () => void;
     formatAmount: (amount: number) => string;
@@ -143,7 +202,7 @@ interface SortableItemProps {
     t: (key: any) => string;
 }
 
-function SortableItem({ transaction, onEdit, formatAmount, translateCategory, language, t }: SortableItemProps) {
+function SortableItem({ transaction, onEdit, formatAmount, translateCategory, language, t }: ItemProps) {
     const {
         attributes,
         listeners,
@@ -179,8 +238,8 @@ function SortableItem({ transaction, onEdit, formatAmount, translateCategory, la
                         <p className="font-medium text-sm sm:text-base text-text-light dark:text-text-dark truncate">{transaction.name}</p>
                         {subInfo.isSubscription && (
                             <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium shrink-0 ${subInfo.isActive
-                                    ? 'bg-primary/10 text-primary'
-                                    : 'bg-slate-200 dark:bg-slate-700 text-text-secondary-light dark:text-text-secondary-dark'
+                                ? 'bg-primary/10 text-primary'
+                                : 'bg-slate-200 dark:bg-slate-700 text-text-secondary-light dark:text-text-secondary-dark'
                                 }`}>
                                 {subInfo.recurrenceLabel}
                             </span>
@@ -217,6 +276,55 @@ function SortableItem({ transaction, onEdit, formatAmount, translateCategory, la
                 >
                     <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
+            </div>
+        </div>
+    );
+}
+
+function GridItem({ transaction, onEdit, formatAmount, translateCategory, language }: ItemProps) {
+    const subInfo = getSubscriptionInfo(transaction, language);
+
+    return (
+        <div
+            onClick={onEdit}
+            className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 p-4 cursor-pointer hover:shadow-lg hover:border-primary/30 transition-all group"
+        >
+            {/* Amount Header */}
+            <div className={`text-lg sm:text-xl font-bold mb-2 ${transaction.type === 'income' ? 'text-success' : 'text-danger'}`}>
+                {transaction.type === 'expense' ? '-' : '+'}{formatAmount(transaction.amount)}
+            </div>
+
+            {/* Name */}
+            <p className="font-medium text-sm text-text-light dark:text-text-dark truncate mb-1">
+                {transaction.name}
+            </p>
+
+            {/* Category */}
+            <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark truncate mb-2">
+                {translateCategory(transaction.category)}
+            </p>
+
+            {/* Date & Badge */}
+            <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] text-text-secondary-light dark:text-text-secondary-dark">
+                    {transaction.date.split(',')[0]}
+                </p>
+                {subInfo.isSubscription && (
+                    <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-medium ${subInfo.isActive
+                        ? 'bg-primary/10 text-primary'
+                        : 'bg-slate-200 dark:bg-slate-700 text-text-secondary-light dark:text-text-secondary-dark'
+                        }`}>
+                        {subInfo.recurrenceLabel}
+                    </span>
+                )}
+            </div>
+
+            {/* Edit Hint */}
+            <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 opacity-0 group-hover:opacity-100 transition-opacity">
+                <p className="text-[10px] text-primary text-center flex items-center justify-center gap-1">
+                    <Pencil className="w-3 h-3" />
+                    {language === 'tr' ? 'Düzenle' : 'Edit'}
+                </p>
             </div>
         </div>
     );

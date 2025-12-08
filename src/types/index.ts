@@ -11,7 +11,8 @@ export interface Category {
     nameEn: string; // English display name
     nameTr: string; // Turkish display name
     icon: string; // Lucide icon name
-    description?: string;
+    descriptionEn?: string; // English description
+    descriptionTr?: string; // Turkish description
     type: 'income' | 'expense' | 'both'; // Hangi işlem türlerinde kullanılabilir
     isCustom: boolean; // Kullanıcı tarafından oluşturuldu mu?
 }

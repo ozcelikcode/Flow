@@ -1,24 +1,24 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { Category } from '../types';
 
-// Default categories with bilingual names
+// Default categories with bilingual names and descriptions
 const DEFAULT_CATEGORIES: Category[] = [
     // Expense categories
-    { id: 'food-drink', name: 'Food & Drink', nameEn: 'Food & Drink', nameTr: 'Yiyecek ve İçecek', icon: 'UtensilsCrossed', description: 'Restaurants, groceries, coffee', type: 'expense', isCustom: false },
-    { id: 'transportation', name: 'Transportation', nameEn: 'Transportation', nameTr: 'Ulaşım', icon: 'Car', description: 'Gas, public transit, parking', type: 'expense', isCustom: false },
-    { id: 'entertainment', name: 'Entertainment', nameEn: 'Entertainment', nameTr: 'Eğlence', icon: 'Gamepad2', description: 'Movies, games, events', type: 'expense', isCustom: false },
-    { id: 'shopping', name: 'Shopping', nameEn: 'Shopping', nameTr: 'Alışveriş', icon: 'ShoppingBag', description: 'Clothing, electronics, gifts', type: 'expense', isCustom: false },
-    { id: 'bills', name: 'Bills', nameEn: 'Bills', nameTr: 'Faturalar', icon: 'Receipt', description: 'Utilities, phone, internet', type: 'expense', isCustom: false },
-    { id: 'subscription', name: 'Subscription', nameEn: 'Subscription', nameTr: 'Abonelik', icon: 'RefreshCw', description: 'Streaming, software, memberships', type: 'expense', isCustom: false },
-    { id: 'health', name: 'Health', nameEn: 'Health', nameTr: 'Sağlık', icon: 'Heart', description: 'Medical, pharmacy, gym', type: 'expense', isCustom: false },
-    { id: 'education', name: 'Education', nameEn: 'Education', nameTr: 'Eğitim', icon: 'GraduationCap', description: 'Courses, books, training', type: 'expense', isCustom: false },
+    { id: 'food-drink', name: 'Food & Drink', nameEn: 'Food & Drink', nameTr: 'Yiyecek ve İçecek', icon: 'UtensilsCrossed', descriptionEn: 'Restaurants, groceries, coffee', descriptionTr: 'Restoranlar, market, kahve', type: 'expense', isCustom: false },
+    { id: 'transportation', name: 'Transportation', nameEn: 'Transportation', nameTr: 'Ulaşım', icon: 'Car', descriptionEn: 'Gas, public transit, parking', descriptionTr: 'Benzin, toplu taşıma, otopark', type: 'expense', isCustom: false },
+    { id: 'entertainment', name: 'Entertainment', nameEn: 'Entertainment', nameTr: 'Eğlence', icon: 'Gamepad2', descriptionEn: 'Movies, games, events', descriptionTr: 'Sinema, oyunlar, etkinlikler', type: 'expense', isCustom: false },
+    { id: 'shopping', name: 'Shopping', nameEn: 'Shopping', nameTr: 'Alışveriş', icon: 'ShoppingBag', descriptionEn: 'Clothing, electronics, gifts', descriptionTr: 'Giyim, elektronik, hediyeler', type: 'expense', isCustom: false },
+    { id: 'bills', name: 'Bills', nameEn: 'Bills', nameTr: 'Faturalar', icon: 'Receipt', descriptionEn: 'Utilities, phone, internet', descriptionTr: 'Fatura, telefon, internet', type: 'expense', isCustom: false },
+    { id: 'subscription', name: 'Subscription', nameEn: 'Subscription', nameTr: 'Abonelik', icon: 'RefreshCw', descriptionEn: 'Streaming, software, memberships', descriptionTr: 'Yayın, yazılım, üyelikler', type: 'expense', isCustom: false },
+    { id: 'health', name: 'Health', nameEn: 'Health', nameTr: 'Sağlık', icon: 'Heart', descriptionEn: 'Medical, pharmacy, gym', descriptionTr: 'Tıbbi, eczane, spor salonu', type: 'expense', isCustom: false },
+    { id: 'education', name: 'Education', nameEn: 'Education', nameTr: 'Eğitim', icon: 'GraduationCap', descriptionEn: 'Courses, books, training', descriptionTr: 'Kurslar, kitaplar, eğitim', type: 'expense', isCustom: false },
     // Income categories
-    { id: 'salary', name: 'Salary', nameEn: 'Salary', nameTr: 'Maaş', icon: 'Banknote', description: 'Monthly salary, wages', type: 'income', isCustom: false },
-    { id: 'freelance', name: 'Freelance', nameEn: 'Freelance', nameTr: 'Serbest Çalışma', icon: 'Laptop', description: 'Project work, consulting', type: 'income', isCustom: false },
-    { id: 'investment', name: 'Investment', nameEn: 'Investment', nameTr: 'Yatırım', icon: 'TrendingUp', description: 'Dividends, interest, gains', type: 'income', isCustom: false },
-    { id: 'gift', name: 'Gift', nameEn: 'Gift', nameTr: 'Hediye', icon: 'Gift', description: 'Money received as gift', type: 'income', isCustom: false },
+    { id: 'salary', name: 'Salary', nameEn: 'Salary', nameTr: 'Maaş', icon: 'Banknote', descriptionEn: 'Monthly salary, wages', descriptionTr: 'Aylık maaş, ücretler', type: 'income', isCustom: false },
+    { id: 'freelance', name: 'Freelance', nameEn: 'Freelance', nameTr: 'Serbest Çalışma', icon: 'Laptop', descriptionEn: 'Project work, consulting', descriptionTr: 'Proje işleri, danışmanlık', type: 'income', isCustom: false },
+    { id: 'investment', name: 'Investment', nameEn: 'Investment', nameTr: 'Yatırım', icon: 'TrendingUp', descriptionEn: 'Dividends, interest, gains', descriptionTr: 'Temettüler, faiz, kazançlar', type: 'income', isCustom: false },
+    { id: 'gift', name: 'Gift', nameEn: 'Gift', nameTr: 'Hediye', icon: 'Gift', descriptionEn: 'Money received as gift', descriptionTr: 'Hediye olarak alınan para', type: 'income', isCustom: false },
     // Both
-    { id: 'other', name: 'Other', nameEn: 'Other', nameTr: 'Diğer', icon: 'MoreHorizontal', description: 'Miscellaneous transactions', type: 'both', isCustom: false },
+    { id: 'other', name: 'Other', nameEn: 'Other', nameTr: 'Diğer', icon: 'MoreHorizontal', descriptionEn: 'Miscellaneous transactions', descriptionTr: 'Çeşitli işlemler', type: 'both', isCustom: false },
 ];
 
 interface CategoryContextType {

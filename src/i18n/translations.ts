@@ -54,6 +54,8 @@ export const translations = {
         allTransactions: 'All Transactions',
         dragToReorder: 'Drag rows to reorder. Click Edit to modify details.',
         noTransactions: 'No transactions yet. Add one to get started!',
+        listView: 'List',
+        gridView: 'Grid',
 
         // Reports
         financialReports: 'Financial Reports',
@@ -200,6 +202,8 @@ export const translations = {
         allTransactions: 'Tüm İşlemler',
         dragToReorder: 'Sıralamak için sürükleyin. Düzenlemek için Düzenle\'ye tıklayın.',
         noTransactions: 'Henüz işlem yok. Başlamak için bir tane ekleyin!',
+        listView: 'Liste',
+        gridView: 'Izgara',
 
         // Reports
         financialReports: 'Finansal Raporlar',

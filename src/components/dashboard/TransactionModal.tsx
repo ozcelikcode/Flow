@@ -70,7 +70,8 @@ export default function TransactionModal({
                 nameEn: trimmedName,
                 nameTr: trimmedName,
                 icon: 'Tag',
-                description: '',
+                descriptionEn: '',
+                descriptionTr: '',
                 type: type === 'expense' ? 'expense' : 'income'
             });
             setCategory(newCat.name);

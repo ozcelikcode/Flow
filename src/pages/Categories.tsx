@@ -5,13 +5,33 @@ import type { Category } from '../types';
 import * as LucideIcons from 'lucide-react';
 import { Plus, Pencil, Trash2, X, Check } from 'lucide-react';
 
-// Available icons for selection
+// Available icons for selection - expanded list
 const AVAILABLE_ICONS = [
-    'UtensilsCrossed', 'Car', 'Gamepad2', 'ShoppingBag', 'Receipt', 'RefreshCw',
-    'Heart', 'GraduationCap', 'Banknote', 'Laptop', 'TrendingUp', 'Gift',
-    'MoreHorizontal', 'Home', 'Plane', 'Coffee', 'Music', 'Book', 'Camera',
-    'Phone', 'Wifi', 'Zap', 'Droplet', 'Flame', 'Leaf', 'Star', 'Award',
-    'Briefcase', 'Building', 'CreditCard', 'DollarSign', 'Package', 'Truck'
+    // Food & Lifestyle
+    'UtensilsCrossed', 'Coffee', 'Wine', 'Pizza', 'Cookie', 'Apple', 'Beef',
+    // Transportation
+    'Car', 'Bus', 'Train', 'Plane', 'Bike', 'Ship', 'Fuel', 'Truck',
+    // Entertainment
+    'Gamepad2', 'Film', 'Music', 'Tv', 'Headphones', 'Ticket', 'Dice1',
+    // Shopping
+    'ShoppingBag', 'ShoppingCart', 'Store', 'Package', 'Gift', 'Tag',
+    // Finance
+    'Banknote', 'CreditCard', 'Wallet', 'PiggyBank', 'DollarSign', 'Receipt', 'Calculator',
+    // Work
+    'Briefcase', 'Laptop', 'Monitor', 'Keyboard', 'Building', 'Building2',
+    // Health
+    'Heart', 'HeartPulse', 'Pill', 'Stethoscope', 'Dumbbell', 'Activity',
+    // Education
+    'GraduationCap', 'Book', 'BookOpen', 'Pencil', 'Library', 'School',
+    // Tech
+    'Smartphone', 'Phone', 'Wifi', 'Globe', 'Cloud', 'Database',
+    // Home
+    'Home', 'Sofa', 'Lamp', 'Key', 'Lock', 'Wrench', 'Hammer',
+    // Nature
+    'Leaf', 'Trees', 'Sun', 'Moon', 'Snowflake', 'Umbrella', 'Droplet', 'Flame',
+    // Other
+    'TrendingUp', 'TrendingDown', 'RefreshCw', 'MoreHorizontal', 'Star', 'Award', 'Zap',
+    'Camera', 'Image', 'Video', 'Mic', 'Sparkles', 'PartyPopper'
 ];
 
 // Get icon component by name
@@ -32,14 +52,16 @@ export default function Categories() {
     const [formNameEn, setFormNameEn] = useState('');
     const [formNameTr, setFormNameTr] = useState('');
     const [formIcon, setFormIcon] = useState('Tag');
-    const [formDescription, setFormDescription] = useState('');
+    const [formDescEn, setFormDescEn] = useState('');
+    const [formDescTr, setFormDescTr] = useState('');
     const [formType, setFormType] = useState<'income' | 'expense' | 'both'>('expense');
 
     const resetForm = () => {
         setFormNameEn('');
         setFormNameTr('');
         setFormIcon('Tag');
-        setFormDescription('');
+        setFormDescEn('');
+        setFormDescTr('');
         setFormType('expense');
     };
 
@@ -52,7 +74,8 @@ export default function Categories() {
         setFormNameEn(category.nameEn);
         setFormNameTr(category.nameTr);
         setFormIcon(category.icon);
-        setFormDescription(category.description || '');
+        setFormDescEn(category.descriptionEn || '');
+        setFormDescTr(category.descriptionTr || '');
         setFormType(category.type);
         setEditingCategory(category);
     };
@@ -62,21 +85,23 @@ export default function Categories() {
 
         if (editingCategory) {
             updateCategory(editingCategory.id, {
-                name: formNameEn, // Use English as key
+                name: formNameEn,
                 nameEn: formNameEn,
                 nameTr: formNameTr,
                 icon: formIcon,
-                description: formDescription,
+                descriptionEn: formDescEn,
+                descriptionTr: formDescTr,
                 type: formType
             });
             setEditingCategory(null);
         } else {
             addCategory({
-                name: formNameEn, // Use English as key
+                name: formNameEn,
                 nameEn: formNameEn,
                 nameTr: formNameTr,
                 icon: formIcon,
-                description: formDescription,
+                descriptionEn: formDescEn,
+                descriptionTr: formDescTr,
                 type: formType
             });
             setIsAddModalOpen(false);
@@ -102,6 +127,10 @@ export default function Categories() {
         expense: language === 'tr' ? 'Gider' : 'Expense',
         income: language === 'tr' ? 'Gelir' : 'Income',
         both: language === 'tr' ? 'Her İkisi' : 'Both'
+    };
+
+    const getDescription = (cat: Category) => {
+        return language === 'tr' ? cat.descriptionTr : cat.descriptionEn;
     };
 
     return (
@@ -131,6 +160,7 @@ export default function Categories() {
                             key={category.id}
                             category={category}
                             displayName={getCategoryDisplayName(category, language)}
+                            description={getDescription(category)}
                             onEdit={() => openEditModal(category)}
                             onDelete={() => setDeleteConfirm(category.id)}
                             typeLabels={typeLabels}
@@ -152,6 +182,7 @@ export default function Categories() {
                             key={category.id}
                             category={category}
                             displayName={getCategoryDisplayName(category, language)}
+                            description={getDescription(category)}
                             onEdit={() => openEditModal(category)}
                             onDelete={() => setDeleteConfirm(category.id)}
                             typeLabels={typeLabels}
@@ -165,7 +196,7 @@ export default function Categories() {
             {(isAddModalOpen || editingCategory) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
                     <div className="bg-white dark:bg-surface-dark rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-surface-dark">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-surface-dark z-10">
                             <h3 className="text-lg font-bold text-text-light dark:text-text-dark">
                                 {editingCategory ? t('editCategory') : t('addCategory')}
                             </h3>
@@ -178,46 +209,66 @@ export default function Categories() {
                         </div>
 
                         <div className="p-6 space-y-4">
-                            {/* English Name */}
-                            <div>
-                                <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
-                                    {language === 'tr' ? 'İngilizce İsim' : 'English Name'} <span className="text-danger">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formNameEn}
-                                    onChange={(e) => setFormNameEn(e.target.value)}
-                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                    placeholder="e.g. Food & Drink"
-                                />
+                            {/* Names Section */}
+                            <div className="grid grid-cols-2 gap-3">
+                                {/* English Name */}
+                                <div>
+                                    <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                                        🇬🇧 {language === 'tr' ? 'İngilizce İsim' : 'English Name'} <span className="text-danger">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formNameEn}
+                                        onChange={(e) => setFormNameEn(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                                        placeholder="Food & Drink"
+                                    />
+                                </div>
+
+                                {/* Turkish Name */}
+                                <div>
+                                    <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                                        🇹🇷 {language === 'tr' ? 'Türkçe İsim' : 'Turkish Name'} <span className="text-danger">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formNameTr}
+                                        onChange={(e) => setFormNameTr(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                                        placeholder="Yiyecek ve İçecek"
+                                    />
+                                </div>
                             </div>
 
-                            {/* Turkish Name */}
-                            <div>
-                                <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
-                                    {language === 'tr' ? 'Türkçe İsim' : 'Turkish Name'} <span className="text-danger">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formNameTr}
-                                    onChange={(e) => setFormNameTr(e.target.value)}
-                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                    placeholder="örn. Yiyecek ve İçecek"
-                                />
-                            </div>
+                            {/* Descriptions Section */}
+                            <div className="grid grid-cols-2 gap-3">
+                                {/* English Description */}
+                                <div>
+                                    <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                                        🇬🇧 {language === 'tr' ? 'İngilizce Açıklama' : 'English Description'}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formDescEn}
+                                        onChange={(e) => setFormDescEn(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                                        placeholder="Restaurants, groceries"
+                                    />
+                                </div>
 
-                            {/* Description */}
-                            <div>
-                                <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
-                                    {t('categoryDescription')}
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formDescription}
-                                    onChange={(e) => setFormDescription(e.target.value)}
-                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                    placeholder={language === 'tr' ? 'Kısa açıklama' : 'Short description'}
-                                />
+                                {/* Turkish Description */}
+                                <div>
+                                    <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                                        🇹🇷 {language === 'tr' ? 'Türkçe Açıklama' : 'Turkish Description'}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formDescTr}
+                                        onChange={(e) => setFormDescTr(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                                        placeholder="Restoranlar, market"
+                                    />
+                                </div>
                             </div>
 
                             {/* Type */}
@@ -251,7 +302,7 @@ export default function Categories() {
                                 <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">
                                     {t('categoryIcon')}
                                 </label>
-                                <div className="grid grid-cols-8 gap-2 max-h-40 overflow-y-auto p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                                <div className="grid grid-cols-10 gap-1.5 max-h-48 overflow-y-auto p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
                                     {AVAILABLE_ICONS.map(iconName => {
                                         const IconComp = getIconComponent(iconName);
                                         return (
@@ -263,35 +314,43 @@ export default function Categories() {
                                                     ? 'bg-primary text-white'
                                                     : 'hover:bg-slate-200 dark:hover:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark'
                                                     }`}
+                                                title={iconName}
                                             >
-                                                <IconComp className="w-5 h-5" />
+                                                <IconComp className="w-4 h-4" />
                                             </button>
                                         );
                                     })}
                                 </div>
                             </div>
 
-                            {/* Selected Icon Preview */}
-                            <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                    {(() => {
-                                        const IconComp = getIconComponent(formIcon);
-                                        return <IconComp className="w-5 h-5 text-primary" />;
-                                    })()}
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex gap-2 text-sm">
-                                        <span className="text-text-light dark:text-text-dark font-medium">
-                                            🇬🇧 {formNameEn || 'English'}
-                                        </span>
-                                        <span className="text-text-secondary-light dark:text-text-secondary-dark">|</span>
-                                        <span className="text-text-light dark:text-text-dark font-medium">
-                                            🇹🇷 {formNameTr || 'Türkçe'}
-                                        </span>
+                            {/* Preview Section */}
+                            <div>
+                                <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">
+                                    {language === 'tr' ? 'Önizleme' : 'Preview'}
+                                </label>
+                                <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${formType === 'expense' ? 'bg-danger/10' : formType === 'income' ? 'bg-success/10' : 'bg-primary/10'
+                                        }`}>
+                                        {(() => {
+                                            const IconComp = getIconComponent(formIcon);
+                                            return <IconComp className={`w-5 h-5 ${formType === 'expense' ? 'text-danger' : formType === 'income' ? 'text-success' : 'text-primary'
+                                                }`} />;
+                                        })()}
                                     </div>
-                                    <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
-                                        {formDescription || (language === 'tr' ? 'Açıklama' : 'Description')}
-                                    </p>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 text-sm flex-wrap">
+                                            <span className="font-medium text-text-light dark:text-text-dark">
+                                                🇬🇧 {formNameEn || 'English'}
+                                            </span>
+                                            <span className="text-text-secondary-light dark:text-text-secondary-dark">|</span>
+                                            <span className="font-medium text-text-light dark:text-text-dark">
+                                                🇹🇷 {formNameTr || 'Türkçe'}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark truncate mt-0.5">
+                                            {(language === 'tr' ? formDescTr : formDescEn) || (language === 'tr' ? 'Açıklama' : 'Description')}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -351,13 +410,14 @@ export default function Categories() {
 interface CategoryCardProps {
     category: Category;
     displayName: string;
+    description?: string;
     onEdit: () => void;
     onDelete: () => void;
     typeLabels: Record<string, string>;
     t: (key: any) => string;
 }
 
-function CategoryCard({ category, displayName, onEdit, onDelete, typeLabels, t }: CategoryCardProps) {
+function CategoryCard({ category, displayName, description, onEdit, onDelete, typeLabels, t }: CategoryCardProps) {
     const IconComp = getIconComponent(category.icon);
 
     return (
@@ -377,9 +437,9 @@ function CategoryCard({ category, displayName, onEdit, onDelete, typeLabels, t }
                         </span>
                     )}
                 </div>
-                {category.description && (
+                {description && (
                     <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark truncate mt-0.5">
-                        {category.description}
+                        {description}
                     </p>
                 )}
                 <p className="text-[10px] text-text-secondary-light dark:text-text-secondary-dark mt-1">
