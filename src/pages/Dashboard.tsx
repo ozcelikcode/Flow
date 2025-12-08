@@ -72,19 +72,19 @@ export default function Dashboard() {
     return (
         <>
             {/* PageHeading */}
-            <div className="flex flex-wrap justify-between gap-3 p-4 mb-4">
-                <div className="flex min-w-72 flex-col gap-3">
-                    <p className="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-[-0.033em]">
+            <div className="flex flex-wrap justify-between gap-3 mb-4">
+                <div className="flex min-w-0 flex-col gap-2">
+                    <p className="text-text-light dark:text-text-dark text-2xl sm:text-3xl lg:text-4xl font-black leading-tight tracking-[-0.033em]">
                         {t('welcomeBack')}
                     </p>
-                    <p className="text-text-secondary-light dark:text-text-secondary-dark text-base font-normal leading-normal">
+                    <p className="text-text-secondary-light dark:text-text-secondary-dark text-sm sm:text-base font-normal leading-normal">
                         {t('financialSummary')}
                     </p>
                 </div>
             </div>
 
             {/* Main Stats */}
-            <div className="flex flex-wrap gap-6 p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                 <StatsCard
                     title={t('totalBalance')}
                     amount={formatAmount(currentBalance)}
@@ -108,100 +108,101 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Stats & Category Distribution */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 {/* Quick Stats */}
-                <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
-                    <h3 className="text-lg font-bold text-text-light dark:text-text-dark mb-4 flex items-center gap-2">
+                <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6">
+                    <h3 className="text-base sm:text-lg font-bold text-text-light dark:text-text-dark mb-4 flex items-center gap-2">
                         <BarChart3 className="w-5 h-5 text-primary" />
                         {t('quickStats')}
                     </h3>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
                         {/* Avg Expense */}
-                        <div className="flex flex-col p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                        <div className="flex flex-col p-2 sm:p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                    <TrendingDown className="w-4 h-4 text-primary" />
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
                                 </div>
-                                <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{t('avgMonthlyExpense')}</span>
+                                <span className="text-[10px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark line-clamp-2">{t('avgMonthlyExpense')}</span>
                             </div>
-                            <span className="font-bold text-text-light dark:text-text-dark">{formatAmount(avgExpense)}</span>
+                            <span className="font-bold text-sm sm:text-base text-text-light dark:text-text-dark">{formatAmount(avgExpense)}</span>
                         </div>
 
                         {/* Top Category */}
-                        <div className="flex flex-col p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                        <div className="flex flex-col p-2 sm:p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center">
-                                    <FolderOpen className="w-4 h-4 text-warning" />
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-warning/10 flex items-center justify-center">
+                                    <FolderOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warning" />
                                 </div>
-                                <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{t('topCategory')}</span>
+                                <span className="text-[10px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark line-clamp-2">{t('topCategory')}</span>
                             </div>
-                            <span className="font-bold text-text-light dark:text-text-dark truncate">
+                            <span className="font-bold text-sm sm:text-base text-text-light dark:text-text-dark truncate">
                                 {topCategory ? translateCategory(topCategory[0]) : t('noData')}
                             </span>
                         </div>
 
                         {/* Active Subscriptions */}
-                        <div className="flex flex-col p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                        <div className="flex flex-col p-2 sm:p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center">
-                                    <RefreshCw className="w-4 h-4 text-purple-500" />
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-purple-500/10 flex items-center justify-center">
+                                    <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-500" />
                                 </div>
-                                <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{t('activeSubscriptions')}</span>
+                                <span className="text-[10px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark line-clamp-2">{t('activeSubscriptions')}</span>
                             </div>
-                            <span className="font-bold text-text-light dark:text-text-dark">{subscriptionCount}</span>
+                            <span className="font-bold text-sm sm:text-base text-text-light dark:text-text-dark">{subscriptionCount}</span>
                         </div>
 
                         {/* Monthly Subscription Cost */}
-                        <div className="flex flex-col p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                        <div className="flex flex-col p-2 sm:p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-8 rounded-full bg-danger/10 flex items-center justify-center">
-                                    <CreditCard className="w-4 h-4 text-danger" />
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-danger/10 flex items-center justify-center">
+                                    <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-danger" />
                                 </div>
-                                <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{t('totalSubscriptionCost')}</span>
+                                <span className="text-[10px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark line-clamp-2">{t('totalSubscriptionCost')}</span>
                             </div>
-                            <span className="font-bold text-danger">{formatAmount(monthlySubscriptionCost)}</span>
+                            <span className="font-bold text-sm sm:text-base text-danger">{formatAmount(monthlySubscriptionCost)}</span>
                         </div>
 
                         {/* Transaction Count - Full Width */}
-                        <div className="col-span-2 flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
-                                    <FileText className="w-4 h-4 text-success" />
+                        <div className="col-span-2 flex items-center justify-between p-2 sm:p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-success/10 flex items-center justify-center">
+                                    <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-success" />
                                 </div>
-                                <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('transactionCount')}</span>
+                                <span className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('transactionCount')}</span>
                             </div>
-                            <span className="font-bold text-text-light dark:text-text-dark">{transactions.length}</span>
+                            <span className="font-bold text-sm sm:text-base text-text-light dark:text-text-dark">{transactions.length}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Category Distribution Mini Chart */}
-                <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-text-light dark:text-text-dark flex items-center gap-2">
+                        <h3 className="text-base sm:text-lg font-bold text-text-light dark:text-text-dark flex items-center gap-2">
                             <ChartPie className="w-5 h-5 text-primary" />
-                            {t('categoryDistribution')}
+                            <span className="hidden sm:inline">{t('categoryDistribution')}</span>
+                            <span className="sm:hidden">Categories</span>
                         </h3>
                         <Link
                             to="/reports"
-                            className="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
+                            className="text-xs sm:text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
                         >
-                            {t('viewReports')}
+                            <span className="hidden sm:inline">{t('viewReports')}</span>
                             <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
 
                     {categoryData.length > 0 ? (
-                        <div className="flex items-center gap-4">
-                            <div className="w-32 h-32">
+                        <div className="flex flex-col sm:flex-row items-center gap-4">
+                            <div className="w-28 h-28 sm:w-32 sm:h-32">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie
                                             data={categoryData}
                                             cx="50%"
                                             cy="50%"
-                                            innerRadius={30}
-                                            outerRadius={50}
+                                            innerRadius={25}
+                                            outerRadius={45}
                                             paddingAngle={3}
                                             dataKey="value"
                                             stroke="none"
@@ -217,19 +218,19 @@ export default function Dashboard() {
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
-                            <div className="flex-1 space-y-2">
+                            <div className="flex-1 w-full space-y-2">
                                 {categoryData.slice(0, 4).map((cat, index) => (
-                                    <div key={cat.name} className="flex items-center justify-between text-sm">
-                                        <div className="flex items-center gap-2">
+                                    <div key={cat.name} className="flex items-center justify-between text-xs sm:text-sm">
+                                        <div className="flex items-center gap-2 min-w-0">
                                             <div
-                                                className="w-3 h-3 rounded-full"
+                                                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0"
                                                 style={{ backgroundColor: COLORS[index % COLORS.length] }}
                                             />
-                                            <span className="text-text-secondary-light dark:text-text-secondary-dark truncate max-w-[120px]">
+                                            <span className="text-text-secondary-light dark:text-text-secondary-dark truncate">
                                                 {cat.name}
                                             </span>
                                         </div>
-                                        <span className="font-medium text-text-light dark:text-text-dark">
+                                        <span className="font-medium text-text-light dark:text-text-dark ml-2 shrink-0">
                                             {formatAmount(cat.value)}
                                         </span>
                                     </div>
@@ -245,7 +246,7 @@ export default function Dashboard() {
             </div>
 
             {/* Recent Transactions */}
-            <h2 className="text-text-light dark:text-text-dark text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-4">
+            <h2 className="text-text-light dark:text-text-dark text-lg sm:text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">
                 {t('recentTransactions')}
             </h2>
             <TransactionTable transactions={transactions.slice(0, 5)} />

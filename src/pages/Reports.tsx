@@ -83,39 +83,44 @@ export default function Reports() {
     const isProfit = netBalance >= 0;
 
     return (
-        <div className="p-4">
-            <h2 className="text-text-light dark:text-text-dark text-[22px] font-bold leading-tight tracking-[-0.015em] pb-6">
+        <div>
+            <h2 className="text-text-light dark:text-text-dark text-xl sm:text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4 sm:pb-6">
                 {t('financialReports')}
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                 {/* Income vs Expense Chart */}
-                <div className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm" style={{ outline: 'none' }}>
-                    <h3 className="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">{t('incomeVsExpense')}</h3>
+                <div className="bg-white dark:bg-surface-dark p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm" style={{ outline: 'none' }}>
+                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-text-light dark:text-text-dark">{t('incomeVsExpense')}</h3>
 
                     {/* Legend */}
-                    <div className="flex gap-6 mb-4">
+                    <div className="flex flex-wrap gap-3 sm:gap-6 mb-4">
                         <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-success"></div>
-                            <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('incomeType')}</span>
-                            <span className="text-sm font-bold text-success">{formatAmount(income / rate)}</span>
+                            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-success"></div>
+                            <span className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('incomeType')}</span>
+                            <span className="text-xs sm:text-sm font-bold text-success">{formatAmount(income / rate)}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-danger"></div>
-                            <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('expenseType')}</span>
-                            <span className="text-sm font-bold text-danger">{formatAmount(expense / rate)}</span>
+                            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-danger"></div>
+                            <span className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('expenseType')}</span>
+                            <span className="text-xs sm:text-sm font-bold text-danger">{formatAmount(expense / rate)}</span>
                         </div>
                     </div>
 
-                    <div className="h-56" style={{ outline: 'none' }}>
+                    <div className="h-48 sm:h-56" style={{ outline: 'none' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={data} style={{ outline: 'none' }}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} stroke={axisColor} />
-                                <XAxis dataKey="name" stroke={axisColor} tick={{ fill: axisColor }} />
+                                <XAxis
+                                    dataKey="name"
+                                    stroke={axisColor}
+                                    tick={{ fill: axisColor, fontSize: 12 }}
+                                />
                                 <YAxis
                                     stroke={axisColor}
-                                    tick={{ fill: axisColor }}
+                                    tick={{ fill: axisColor, fontSize: 12 }}
                                     tickFormatter={formatYAxis}
+                                    width={50}
                                 />
                                 <Tooltip
                                     contentStyle={{
@@ -123,7 +128,8 @@ export default function Reports() {
                                         borderColor: tooltipBorder,
                                         color: tooltipText,
                                         borderRadius: '8px',
-                                        outline: 'none'
+                                        outline: 'none',
+                                        fontSize: '12px'
                                     }}
                                     itemStyle={{ color: tooltipText }}
                                     cursor={{ fill: 'transparent' }}
@@ -139,19 +145,19 @@ export default function Reports() {
                     </div>
 
                     {/* Balance Summary */}
-                    <div className={`mt-4 p-3 rounded-lg ${isProfit ? 'bg-success/10' : 'bg-danger/10'}`}>
+                    <div className={`mt-4 p-2.5 sm:p-3 rounded-lg ${isProfit ? 'bg-success/10' : 'bg-danger/10'}`}>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 {isProfit ? (
-                                    <TrendingUp className="w-5 h-5 text-success" />
+                                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-success" />
                                 ) : (
-                                    <TrendingDown className="w-5 h-5 text-danger" />
+                                    <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-danger" />
                                 )}
-                                <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                                <span className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark">
                                     {isProfit ? (t('incomeType') + ' > ' + t('expenseType')) : (t('expenseType') + ' > ' + t('incomeType'))}
                                 </span>
                             </div>
-                            <span className={`font-bold ${isProfit ? 'text-success' : 'text-danger'}`}>
+                            <span className={`font-bold text-sm sm:text-base ${isProfit ? 'text-success' : 'text-danger'}`}>
                                 {isProfit ? '+' : '-'}{formatAmount(Math.abs(netBalance) / rate)}
                             </span>
                         </div>
@@ -159,20 +165,20 @@ export default function Reports() {
                 </div>
 
                 {/* Expense by Category Chart */}
-                <div className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm" style={{ outline: 'none' }}>
-                    <h3 className="text-lg font-semibold mb-4 text-text-light dark:text-text-dark">{t('expenseByCategory')}</h3>
+                <div className="bg-white dark:bg-surface-dark p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm" style={{ outline: 'none' }}>
+                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-text-light dark:text-text-dark">{t('expenseByCategory')}</h3>
 
                     {categoryData.length > 0 ? (
                         <>
-                            <div className="h-56" style={{ outline: 'none' }}>
+                            <div className="h-48 sm:h-56" style={{ outline: 'none' }}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart style={{ outline: 'none' }}>
                                         <Pie
                                             data={categoryData}
                                             cx="50%"
                                             cy="50%"
-                                            innerRadius={50}
-                                            outerRadius={75}
+                                            innerRadius={40}
+                                            outerRadius={65}
                                             paddingAngle={3}
                                             dataKey="value"
                                             stroke="none"
@@ -193,7 +199,8 @@ export default function Reports() {
                                                 borderColor: tooltipBorder,
                                                 color: tooltipText,
                                                 borderRadius: '8px',
-                                                outline: 'none'
+                                                outline: 'none',
+                                                fontSize: '12px'
                                             }}
                                             itemStyle={{ color: tooltipText }}
                                             formatter={(value: number) => [formatTooltipValue(value), '']}
@@ -203,17 +210,17 @@ export default function Reports() {
                             </div>
 
                             {/* Category Legend */}
-                            <div className="grid grid-cols-2 gap-2 mt-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
                                 {categoryData.map((cat, index) => (
                                     <div key={cat.name} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-900">
                                         <div
-                                            className="w-3 h-3 rounded-full shrink-0"
+                                            className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0"
                                             style={{ backgroundColor: COLORS[index % COLORS.length] }}
                                         />
-                                        <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark truncate flex-1">
+                                        <span className="text-[10px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark truncate flex-1">
                                             {cat.name}
                                         </span>
-                                        <span className="text-xs font-bold text-text-light dark:text-text-dark">
+                                        <span className="text-[10px] sm:text-xs font-bold text-text-light dark:text-text-dark shrink-0">
                                             {formatAmount(cat.value / rate)}
                                         </span>
                                     </div>
@@ -221,7 +228,7 @@ export default function Reports() {
                             </div>
                         </>
                     ) : (
-                        <div className="h-56 flex items-center justify-center text-text-secondary-light dark:text-text-secondary-dark">
+                        <div className="h-48 sm:h-56 flex items-center justify-center text-text-secondary-light dark:text-text-secondary-dark">
                             {t('noData')}
                         </div>
                     )}
