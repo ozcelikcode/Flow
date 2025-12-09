@@ -91,15 +91,13 @@ export default function YearlyActivityMap({
     const months = language === 'tr' ? MONTHS_TR : MONTHS_EN;
     const days = language === 'tr' ? DAYS_TR : DAYS_EN;
 
-    // Generate yearly data (last 365 days)
+    // Generate data for the current year (January 1 to December 31)
     const { stats, weekColumns } = useMemo(() => {
-        const today = new Date();
-        today.setHours(23, 59, 59, 999); // End of today
-
-        const yearAgo = new Date(today);
-        yearAgo.setFullYear(yearAgo.getFullYear() - 1);
-        yearAgo.setDate(yearAgo.getDate() + 1);
-        yearAgo.setHours(0, 0, 0, 0); // Start of day
+        const currentYear = new Date().getFullYear();
+        const yearStart = new Date(currentYear, 0, 1); // January 1st
+        const yearEnd = new Date(currentYear, 11, 31); // December 31st
+        yearStart.setHours(0, 0, 0, 0);
+        yearEnd.setHours(23, 59, 59, 999);
 
         // Create a map for quick transaction lookup by date
         const transactionsByDate = new Map<string, { income: number; expense: number }>();
@@ -118,21 +116,25 @@ export default function YearlyActivityMap({
             }
         });
 
-        // Generate all days
+        // Generate all days for the year
         const allDays: DayData[] = [];
         let positiveDays = 0;
         let negativeDays = 0;
 
-        const currentDate = new Date(yearAgo);
-        while (currentDate <= today) {
+        const currentDate = new Date(yearStart);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        while (currentDate <= yearEnd) {
             const dateKey = toLocalDateKey(currentDate);
             const dayTransactions = transactionsByDate.get(dateKey);
+            const isFuture = currentDate > today;
 
-            let status: DayData['status'] = 'empty';
+            let status: DayData['status'] = isFuture ? 'empty' : 'empty';
             let income = 0;
             let expense = 0;
 
-            if (dayTransactions) {
+            if (dayTransactions && !isFuture) {
                 income = dayTransactions.income;
                 expense = dayTransactions.expense;
                 const net = income - expense;
@@ -159,21 +161,18 @@ export default function YearlyActivityMap({
             currentDate.setDate(currentDate.getDate() + 1);
         }
 
-        // Organize into weeks (columns)
+        // Organize into weeks (columns) - weeks start on Monday
         const weeks: DayData[][] = [];
         let currentWeek: DayData[] = [];
 
-        // Pad the first week with empty days
-        const firstDayOfWeek = new Date(yearAgo).getDay();
-        const paddingDays = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1; // Monday = 0
-        for (let i = 0; i < paddingDays; i++) {
-            currentWeek.push({
-                date: '',
-                income: 0,
-                expense: 0,
-                net: 0,
-                status: 'empty'
-            });
+        // Get the day of week for January 1st (0 = Sunday, 1 = Monday, etc.)
+        const firstDayOfWeek = yearStart.getDay();
+        // Convert to Monday-based index (Monday = 0, Sunday = 6)
+        const startDayIndex = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+
+        // First week: fill with null for days before Jan 1
+        for (let i = 0; i < startDayIndex; i++) {
+            currentWeek.push(null as any); // Will be filtered out in render
         }
 
         allDays.forEach(day => {
@@ -184,7 +183,7 @@ export default function YearlyActivityMap({
             }
         });
 
-        // Push remaining days
+        // Push remaining days (last week, no padding needed)
         if (currentWeek.length > 0) {
             weeks.push(currentWeek);
         }
@@ -230,7 +229,7 @@ export default function YearlyActivityMap({
 
         weekColumns.forEach((week, weekIndex) => {
             week.forEach(day => {
-                if (day.date) {
+                if (day && day.date) {
                     const month = new Date(day.date).getMonth();
                     if (month !== currentMonth) {
                         currentMonth = month;
@@ -313,12 +312,19 @@ export default function YearlyActivityMap({
                             {weekColumns.map((week, weekIdx) => (
                                 <div key={weekIdx} className="flex flex-col gap-[2px] sm:gap-[3px]">
                                     {week.map((day, dayIdx) => (
-                                        <div
-                                            key={`${weekIdx}-${dayIdx}`}
-                                            className={`aspect-square w-full min-h-3 sm:min-h-4 rounded-sm cursor-pointer transition-colors ${getCellColor(day.status)}`}
-                                            onMouseEnter={(e) => handleMouseEnter(day, e)}
-                                            onMouseLeave={handleMouseLeave}
-                                        />
+                                        day ? (
+                                            <div
+                                                key={`${weekIdx}-${dayIdx}`}
+                                                className={`aspect-square w-full min-h-3 sm:min-h-4 rounded-sm cursor-pointer transition-colors ${getCellColor(day.status)}`}
+                                                onMouseEnter={(e) => handleMouseEnter(day, e)}
+                                                onMouseLeave={handleMouseLeave}
+                                            />
+                                        ) : (
+                                            <div
+                                                key={`${weekIdx}-${dayIdx}`}
+                                                className="aspect-square w-full min-h-3 sm:min-h-4"
+                                            />
+                                        )
                                     ))}
                                 </div>
                             ))}
