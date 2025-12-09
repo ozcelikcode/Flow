@@ -83,11 +83,21 @@ export default function TransactionModal({
         }
     };
 
+    // Format number with thousand separators (Turkish format)
+    const formatWithThousands = (num: number): string => {
+        const fixed = num.toFixed(2);
+        const parts = fixed.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return parts.join(',');
+    };
+
     // Pre-fill form when editing
     useEffect(() => {
         if (editTransaction) {
             setName(editTransaction.name);
-            setAmount(Number(editTransaction.amount.toFixed(2)).toString());
+            // Convert from USD to display currency
+            const displayAmount = convertFromUsd(editTransaction.amount, currency);
+            setAmount(formatWithThousands(displayAmount));
             setCategory(editTransaction.category);
             setType(editTransaction.type);
             const parsedDate = new Date(editTransaction.date);
@@ -202,7 +212,7 @@ export default function TransactionModal({
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={modalTitle}>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto px-1 py-1">
                 {/* Type Selection */}
                 <div>
                     <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
