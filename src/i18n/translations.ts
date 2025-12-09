@@ -39,10 +39,12 @@ export const translations = {
         // Dashboard - Quick Stats
         quickStats: 'Quick Stats',
         avgMonthlyExpense: 'Avg. Monthly Expense',
-        topCategory: 'Top Category',
+        topCategory: 'Top Spending Category',
         transactionCount: 'Transaction Count',
         activeSubscriptions: 'Active Subscriptions',
         totalSubscriptionCost: 'Monthly Sub. Cost',
+        thisMonthExpense: 'This Month Expense',
+        totalSavings: 'Total Savings',
         thisMonth: 'This Month',
         noData: 'No data',
 
@@ -187,10 +189,12 @@ export const translations = {
         // Dashboard - Quick Stats
         quickStats: 'Hızlı İstatistikler',
         avgMonthlyExpense: 'Ort. Aylık Gider',
-        topCategory: 'En Çok Harcama',
+        topCategory: 'En Çok Harcama Yapılan Kategori',
         transactionCount: 'İşlem Sayısı',
         activeSubscriptions: 'Aktif Abonelikler',
         totalSubscriptionCost: 'Aylık Ab. Maliyeti',
+        thisMonthExpense: 'Bu Ay Toplam Harcama',
+        totalSavings: 'Toplam Birikim',
         thisMonth: 'Bu Ay',
         noData: 'Veri yok',
 

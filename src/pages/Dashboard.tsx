@@ -12,7 +12,8 @@ import {
     FileText,
     ChartPie,
     ArrowRight,
-    BarChart3
+    BarChart3,
+    Calendar
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -84,6 +85,27 @@ export default function Dashboard() {
             return total + monthlyCost;
         }, 0);
 
+    // This month's expense (from 1st of current month to end of month)
+    const now = new Date();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Last day of month
+
+    const thisMonthExpense = expenseTransactions.reduce((total, t) => {
+        const date = new Date(t.date);
+        if (!isNaN(date.getTime()) && date >= currentMonthStart && date <= currentMonthEnd) {
+            return total + t.amount;
+        }
+        return total;
+    }, 0);
+
+    // Total savings (investment category only)
+    const totalSavings = transactions
+        .filter(t => t.category.toLowerCase() === 'investment' || t.category.toLowerCase() === 'yatırım')
+        .reduce((total, t) => {
+            // Income in investment = savings, expense in investment = withdrawal
+            return total + (t.type === 'income' ? t.amount : -t.amount);
+        }, 0);
+
     const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
     return (
@@ -101,7 +123,7 @@ export default function Dashboard() {
             </div>
 
             {/* Main Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <StatsCard
                     title={t('totalBalance')}
                     amount={formatAmount(currentBalance)}
@@ -121,6 +143,13 @@ export default function Dashboard() {
                     change={t('basedOnTransactions')}
                     trend="down"
                     trendColor="danger"
+                />
+                <StatsCard
+                    title={t('totalSavings')}
+                    amount={formatAmount(totalSavings)}
+                    change={t('basedOnTransactions')}
+                    trend={totalSavings >= 0 ? 'up' : 'down'}
+                    trendColor={totalSavings >= 0 ? 'success' : 'danger'}
                 />
             </div>
 
@@ -179,13 +208,24 @@ export default function Dashboard() {
                             <span className="font-bold text-sm sm:text-base text-danger">{formatAmount(monthlySubscriptionCost)}</span>
                         </div>
 
-                        {/* Transaction Count - Full Width */}
-                        <div className="col-span-2 flex items-center justify-between p-2 sm:p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                            <div className="flex items-center gap-2 sm:gap-3">
+                        {/* This Month Expense */}
+                        <div className="flex flex-col p-2 sm:p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-orange-500/10 flex items-center justify-center">
+                                    <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500" />
+                                </div>
+                                <span className="text-[10px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark line-clamp-2">{t('thisMonthExpense')}</span>
+                            </div>
+                            <span className="font-bold text-sm sm:text-base text-orange-500">{formatAmount(thisMonthExpense)}</span>
+                        </div>
+
+                        {/* Transaction Count */}
+                        <div className="flex flex-col p-2 sm:p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
                                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-success/10 flex items-center justify-center">
                                     <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-success" />
                                 </div>
-                                <span className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark">{t('transactionCount')}</span>
+                                <span className="text-[10px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark line-clamp-2">{t('transactionCount')}</span>
                             </div>
                             <span className="font-bold text-sm sm:text-base text-text-light dark:text-text-dark">{transactions.length}</span>
                         </div>
