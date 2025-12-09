@@ -10,6 +10,7 @@ import TransactionsPage from './pages/Transactions';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Categories from './pages/Categories';
+import History from './pages/History';
 
 function AppContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,6 +23,7 @@ function AppContent() {
         <Route path="/transactions" element={<TransactionsPage />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/categories" element={<Categories />} />
+        <Route path="/history" element={<History />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
 

@@ -36,6 +36,8 @@
 ### UI/UX İyileştirmeleri (9 Aralık 2025)
 - Kategori dağılımı kartına "Harcama Özeti" (Spending Insight) bölümü eklendi.
 - En çok harcanan kategorinin toplam içindeki oranı görsel progress bar ile gösteriliyor.
+- **Yeni Sayfa (History)**: Tüm finansal geçmişi (Toplam Varlık, Gelir, Gider, Birikim) gösteren ve aylık bazda işlemleri gruplayan yeni sayfa eklendi.
+- Sidebar menüsüne "Geçmiş" (History) bağlantısı eklendi.
 
 ## Sonraki Adımlar
 - Kategori ikonlarını işlem listelerinde gösterme.

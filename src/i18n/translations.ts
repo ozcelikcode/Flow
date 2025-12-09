@@ -20,6 +20,7 @@ export const translations = {
         dashboard: 'Dashboard',
         transactions: 'Transactions',
         reports: 'Reports',
+        history: 'History',
         settings: 'Settings',
         categories: 'Categories',
         myWallet: 'My Wallet',
@@ -166,12 +167,20 @@ export const translations = {
         dateColumn: 'Date',
         amountColumn: 'Amount',
         noTransactionsFound: 'No transactions found.',
+        historyTitle: 'Transaction History',
+        netWorth: 'Net Worth',
+        totalIncome: 'Total Income',
+        totalExpense: 'Total Expense',
+        monthlyHistory: 'Monthly Summary',
+        topTransactions: 'Top Transactions',
+        moreTransactions: 'more transactions',
     },
     tr: {
         // Navigation
         dashboard: 'Ana Sayfa',
         transactions: 'İşlemler',
         reports: 'Raporlar',
+        history: 'Geçmiş',
         settings: 'Ayarlar',
         categories: 'Kategoriler',
         myWallet: 'Cüzdanım',
@@ -318,6 +327,13 @@ export const translations = {
         dateColumn: 'Tarih',
         amountColumn: 'Tutar',
         noTransactionsFound: 'İşlem bulunamadı.',
+        historyTitle: 'İşlem Geçmişi',
+        netWorth: 'Toplam Varlık',
+        totalIncome: 'Toplam Gelir',
+        totalExpense: 'Toplam Gider',
+        monthlyHistory: 'Aylık Özet',
+        topTransactions: 'Öne Çıkan İşlemler',
+        moreTransactions: 'daha fazla işlem',
     }
 } as const;
 

@@ -301,27 +301,34 @@ export default function Dashboard() {
 
                             {/* Spending Insight - Filling the bottom space */}
                             {categoryData.length > 0 && totalExpense > 0 && (
-                                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <TrendingDown className="w-4 h-4 text-text-secondary-light dark:text-text-secondary-dark" />
-                                        <span className="text-xs sm:text-sm font-semibold text-text-light dark:text-text-dark">
-                                            {t('spendingInsight')}
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-3 leading-relaxed">
-                                        <span className="font-bold" style={{ color: COLORS[0] }}>
-                                            {categoryData[0].name}
-                                        </span>{' '}
-                                        {t('spendingInsightDescription', { percentage: ((categoryData[0].value / totalExpense) * 100).toFixed(0) })}
-                                    </p>
-                                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
-                                        <div
-                                            className="h-full rounded-full transition-all duration-500"
-                                            style={{
-                                                width: `${(categoryData[0].value / totalExpense) * 100}%`,
-                                                backgroundColor: COLORS[0]
-                                            }}
-                                        />
+                                <div className="mt-8">
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-1.5 rounded-full bg-slate-100 dark:bg-slate-800">
+                                                <TrendingDown className="w-4 h-4 text-text-secondary-light dark:text-text-secondary-dark" />
+                                            </div>
+                                            <span className="text-sm font-semibold text-text-light dark:text-text-dark">
+                                                {t('spendingInsight')}
+                                            </span>
+                                        </div>
+
+                                        <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                                            <p className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark mb-3 leading-relaxed">
+                                                <span className="font-bold" style={{ color: COLORS[0] }}>
+                                                    {categoryData[0].name}
+                                                </span>{' '}
+                                                {t('spendingInsightDescription', { percentage: ((categoryData[0].value / totalExpense) * 100).toFixed(0) })}
+                                            </p>
+                                            <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                                <div
+                                                    className="h-full rounded-full transition-all duration-500"
+                                                    style={{
+                                                        width: `${(categoryData[0].value / totalExpense) * 100}%`,
+                                                        backgroundColor: COLORS[0]
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}
