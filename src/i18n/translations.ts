@@ -51,6 +51,8 @@ export const translations = {
         // Dashboard - Category Distribution
         categoryDistribution: 'Category Distribution',
         viewReports: 'View Reports',
+        spendingInsight: 'Spending Insight',
+        spendingInsightDescription: 'constitutes {percentage}% of your total expenses.',
 
         // Transactions Page
         allTransactions: 'All Transactions',
@@ -201,6 +203,8 @@ export const translations = {
         // Dashboard - Category Distribution
         categoryDistribution: 'Kategori Dağılımı',
         viewReports: 'Raporları Gör',
+        spendingInsight: 'Harcama Özeti',
+        spendingInsightDescription: 'kategorisi toplam giderin %{percentage} kadarını oluşturuyor.',
 
         // Transactions Page
         allTransactions: 'Tüm İşlemler',

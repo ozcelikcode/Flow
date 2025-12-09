@@ -33,6 +33,10 @@
 - **Bug Fix**: Reports sayfasındaki günlük trend grafiği tam ayı kapsayacak şekilde güncellendi.
 - `dateUtils.ts` oluşturuldu, merkezi tarih yönetimi sağlandı.
 
+### UI/UX İyileştirmeleri (9 Aralık 2025)
+- Kategori dağılımı kartına "Harcama Özeti" (Spending Insight) bölümü eklendi.
+- En çok harcanan kategorinin toplam içindeki oranı görsel progress bar ile gösteriliyor.
+
 ## Sonraki Adımlar
 - Kategori ikonlarını işlem listelerinde gösterme.
 - Kategoriye göre filtreleme özelliği.

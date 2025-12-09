@@ -253,49 +253,78 @@ export default function Dashboard() {
                     </div>
 
                     {categoryData.length > 0 ? (
-                        <div className="flex flex-col sm:flex-row items-center gap-4">
-                            <div className="w-28 h-28 sm:w-32 sm:h-32">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={categoryData}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={25}
-                                            outerRadius={45}
-                                            paddingAngle={3}
-                                            dataKey="value"
-                                            stroke="none"
-                                        >
-                                            {categoryData.map((_, index) => (
-                                                <Cell
-                                                    key={`cell-${index}`}
-                                                    fill={COLORS[index % COLORS.length]}
-                                                    stroke="none"
+                        <div className="flex flex-col h-full justify-between">
+                            <div className="flex flex-col sm:flex-row items-center gap-4">
+                                <div className="w-28 h-28 sm:w-32 sm:h-32 mb-2 sm:mb-0">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={categoryData}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={25}
+                                                outerRadius={45}
+                                                paddingAngle={3}
+                                                dataKey="value"
+                                                stroke="none"
+                                            >
+                                                {categoryData.map((_, index) => (
+                                                    <Cell
+                                                        key={`cell-${index}`}
+                                                        fill={COLORS[index % COLORS.length]}
+                                                        stroke="none"
+                                                    />
+                                                ))}
+                                            </Pie>
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div className="flex-1 w-full space-y-2">
+                                    {categoryData.slice(0, 4).map((cat, index) => (
+                                        <div key={cat.name} className="flex items-center justify-between text-xs sm:text-sm">
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <div
+                                                    className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0"
+                                                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
                                                 />
-                                            ))}
-                                        </Pie>
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
-                            <div className="flex-1 w-full space-y-2">
-                                {categoryData.slice(0, 4).map((cat, index) => (
-                                    <div key={cat.name} className="flex items-center justify-between text-xs sm:text-sm">
-                                        <div className="flex items-center gap-2 min-w-0">
-                                            <div
-                                                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0"
-                                                style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                                            />
-                                            <span className="text-text-secondary-light dark:text-text-secondary-dark truncate">
-                                                {cat.name}
+                                                <span className="text-text-secondary-light dark:text-text-secondary-dark truncate">
+                                                    {cat.name}
+                                                </span>
+                                            </div>
+                                            <span className="font-medium text-text-light dark:text-text-dark ml-2 shrink-0">
+                                                {formatAmount(cat.value)}
                                             </span>
                                         </div>
-                                        <span className="font-medium text-text-light dark:text-text-dark ml-2 shrink-0">
-                                            {formatAmount(cat.value)}
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Spending Insight - Filling the bottom space */}
+                            {categoryData.length > 0 && totalExpense > 0 && (
+                                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <TrendingDown className="w-4 h-4 text-text-secondary-light dark:text-text-secondary-dark" />
+                                        <span className="text-xs sm:text-sm font-semibold text-text-light dark:text-text-dark">
+                                            {t('spendingInsight')}
                                         </span>
                                     </div>
-                                ))}
-                            </div>
+                                    <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-3 leading-relaxed">
+                                        <span className="font-bold" style={{ color: COLORS[0] }}>
+                                            {categoryData[0].name}
+                                        </span>{' '}
+                                        {t('spendingInsightDescription', { percentage: ((categoryData[0].value / totalExpense) * 100).toFixed(0) })}
+                                    </p>
+                                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                                        <div
+                                            className="h-full rounded-full transition-all duration-500"
+                                            style={{
+                                                width: `${(categoryData[0].value / totalExpense) * 100}%`,
+                                                backgroundColor: COLORS[0]
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="text-center py-8 text-text-secondary-light dark:text-text-secondary-dark">

@@ -22,7 +22,7 @@ interface SettingsContextType {
     isUpdatingRates: boolean;
     language: Language;
     setLanguage: (language: Language) => void;
-    t: (key: TranslationKey) => string;
+    t: (key: TranslationKey, params?: Record<string, string>) => string;
     translateCategory: (category: string) => string;
 }
 
@@ -101,8 +101,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         setLanguageState(newLanguage);
     };
 
-    const t = (key: TranslationKey): string => {
-        return translations[language][key] || translations.en[key] || key;
+    const t = (key: TranslationKey, params?: Record<string, string>): string => {
+        let text: string = translations[language][key] || translations.en[key] || key;
+
+        if (params) {
+            Object.entries(params).forEach(([paramKey, value]) => {
+                text = text.replace(`{${paramKey}}`, value);
+            });
+        }
+
+        return text;
     };
 
     // Translate category names based on current language
