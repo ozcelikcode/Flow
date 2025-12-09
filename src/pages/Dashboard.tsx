@@ -15,6 +15,7 @@ import {
     BarChart3,
     Calendar
 } from 'lucide-react';
+import { parseDate } from '../utils/dateUtils';
 
 export default function Dashboard() {
     const { transactions } = useTransactions();
@@ -37,11 +38,13 @@ export default function Dashboard() {
     // Calculate average monthly expense (group by month, then average)
     const expenseByMonth = expenseTransactions.reduce((acc, t) => {
         // Extract month-year from date string
-        const dateStr = t.date;
-        const date = new Date(dateStr);
-        const monthKey = isNaN(date.getTime())
-            ? dateStr.substring(0, 7) // fallback to first 7 chars
-            : `${date.getFullYear()}-${date.getMonth()}`;
+        const date = parseDate(t.date);
+        let monthKey = t.date.substring(0, 7); // Default fallback
+
+        if (date) {
+            monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+        }
+
         acc[monthKey] = (acc[monthKey] || 0) + t.amount;
         return acc;
     }, {} as Record<string, number>);
@@ -91,8 +94,8 @@ export default function Dashboard() {
     const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Last day of month
 
     const thisMonthExpense = expenseTransactions.reduce((total, t) => {
-        const date = new Date(t.date);
-        if (!isNaN(date.getTime()) && date >= currentMonthStart && date <= currentMonthEnd) {
+        const date = parseDate(t.date);
+        if (date && date >= currentMonthStart && date <= currentMonthEnd) {
             return total + t.amount;
         }
         return total;

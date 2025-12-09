@@ -28,6 +28,10 @@
 - Yıl geçişi sorunları kontrol edildi ve düzeltildi.
 - Tüm bileşenler responsive tasarıma sahip.
 - Material Symbols yerine Lucide ikonları kullanılıyor.
+- **Bug Fix**: Tarih formatlama sorunu giderildi (Türkçe/İngilizce tarih formatları).
+- **Bug Fix**: Dashboard "Bu Ay Toplam Harcama" hesaplaması düzeltildi.
+- **Bug Fix**: Reports sayfasındaki günlük trend grafiği tam ayı kapsayacak şekilde güncellendi.
+- `dateUtils.ts` oluşturuldu, merkezi tarih yönetimi sağlandı.
 
 ## Sonraki Adımlar
 - Kategori ikonlarını işlem listelerinde gösterme.

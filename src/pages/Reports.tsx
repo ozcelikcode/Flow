@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import { TrendingUp, TrendingDown, Calendar, Grid3X3 } from 'lucide-react';
 import YearlyActivityMap from '../components/reports/YearlyActivityMap';
+import { parseDate, toLocalDateKey } from '../utils/dateUtils';
 
 export default function Reports() {
     const { transactions } = useTransactions();
@@ -37,66 +38,21 @@ export default function Reports() {
             return acc;
         }, [] as { name: string; value: number }[]);
 
-    // Parse localized date string to Date object
-    const parseLocalizedDate = (dateStr: string): Date | null => {
-        let date = new Date(dateStr);
-        if (!isNaN(date.getTime())) {
-            return date;
-        }
 
-        const trMonths: Record<string, number> = {
-            'Oca': 0, 'Şub': 1, 'Mar': 2, 'Nis': 3, 'May': 4, 'Haz': 5,
-            'Tem': 6, 'Ağu': 7, 'Eyl': 8, 'Eki': 9, 'Kas': 10, 'Ara': 11
-        };
 
-        const trMatch = dateStr.match(/(\d{1,2})\s+(\w+)\s+(\d{4})/);
-        if (trMatch) {
-            const day = parseInt(trMatch[1]);
-            const monthStr = trMatch[2];
-            const year = parseInt(trMatch[3]);
-            const month = trMonths[monthStr];
-            if (month !== undefined) {
-                return new Date(year, month, day);
-            }
-        }
-
-        const enMonths: Record<string, number> = {
-            'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
-            'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
-        };
-
-        const enMatch = dateStr.match(/(\w+)\s+(\d{1,2}),?\s+(\d{4})/);
-        if (enMatch) {
-            const monthStr = enMatch[1];
-            const day = parseInt(enMatch[2]);
-            const year = parseInt(enMatch[3]);
-            const month = enMonths[monthStr];
-            if (month !== undefined) {
-                return new Date(year, month, day);
-            }
-        }
-
-        return null;
-    };
-
-    const toLocalDateKey = (date: Date): string => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
-    // Generate current month's daily spending data (1st to today)
+    // Generate current month's daily spending data (1st to end of month)
     const generateDailySpendingData = () => {
         const today = new Date();
         const currentYear = today.getFullYear();
         const currentMonth = today.getMonth();
-        const todayDate = today.getDate();
+
+        // Use days in month to support showing all transactions even if future (or if local time is behind)
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
         const monthDays: { date: string; amount: number; displayDate: string }[] = [];
 
-        // From 1st of current month to today
-        for (let day = 1; day <= todayDate; day++) {
+        // From 1st of current month to end of month
+        for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(currentYear, currentMonth, day);
             const dateStr = toLocalDateKey(date);
             const displayDate = day.toString(); // Just show day number
@@ -112,7 +68,7 @@ export default function Reports() {
         transactions
             .filter(tx => tx.type === 'expense')
             .forEach(tx => {
-                const txDate = parseLocalizedDate(tx.date);
+                const txDate = parseDate(tx.date);
                 if (txDate) {
                     const txDateStr = toLocalDateKey(txDate);
                     const dayData = monthDays.find(d => d.date === txDateStr);
