@@ -20,7 +20,7 @@ export default function TransactionModal({
     onDelete,
     editTransaction
 }: TransactionModalProps) {
-    const { currency, t, language } = useSettings();
+    const { currency, t, language, rates } = useSettings();
     const { addCategory, getExpenseCategories, getIncomeCategories, getCategoryDisplayName } = useCategories();
 
     const [name, setName] = useState('');
@@ -46,11 +46,14 @@ export default function TransactionModal({
         TRY: '₺'
     };
 
-    // Conversion rates (to USD base)
-    const toUsdRates: Record<string, number> = {
-        USD: 1,
-        EUR: 1.087,
-        TRY: 0.029,
+    // Convert from input currency to USD (divide by rate since rates are USD -> X)
+    const convertToUsd = (value: number, fromCurrency: 'USD' | 'EUR' | 'TRY'): number => {
+        return value / rates[fromCurrency];
+    };
+
+    // Convert from USD to display currency
+    const convertFromUsd = (value: number, toCurrency: 'USD' | 'EUR' | 'TRY'): number => {
+        return value * rates[toCurrency];
     };
 
     // Get available categories based on transaction type
@@ -119,7 +122,7 @@ export default function TransactionModal({
 
     const updatePriceTier = (index: number, amount: number) => {
         const updated = [...priceTiers];
-        updated[index].amount = amount * toUsdRates[inputCurrency]; // Store in USD
+        updated[index].amount = convertToUsd(amount, inputCurrency); // Store in USD
         setPriceTiers(updated);
     };
 
@@ -145,7 +148,7 @@ export default function TransactionModal({
         e.preventDefault();
         if (!name || !amount) return;
 
-        const amountInUsd = parseFloat(amount) * toUsdRates[inputCurrency];
+        const amountInUsd = convertToUsd(parseFloat(amount.replace(/\./g, '').replace(',', '.')), inputCurrency);
 
         const dateFormat = language === 'tr' ? 'tr-TR' : 'en-US';
         const formattedDate = new Date(date).toLocaleDateString(dateFormat, {
@@ -277,12 +280,38 @@ export default function TransactionModal({
                                 {currencySymbols[inputCurrency]}
                             </span>
                             <input
-                                type="number"
-                                step="0.01"
+                                type="text"
+                                inputMode="decimal"
                                 value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
+                                onChange={(e) => {
+                                    let value = e.target.value;
+                                    // Remove everything except digits, dots and commas
+                                    value = value.replace(/[^\d.,]/g, '');
+
+                                    // Count commas (decimal separator in Turkish)
+                                    const commaCount = (value.match(/,/g) || []).length;
+
+                                    // If there's more than one comma, keep only the first
+                                    if (commaCount > 1) {
+                                        const firstCommaIndex = value.indexOf(',');
+                                        value = value.substring(0, firstCommaIndex + 1) + value.substring(firstCommaIndex + 1).replace(/,/g, '');
+                                    }
+
+                                    // Remove all dots (they're thousand separators, will be re-added)
+                                    value = value.replace(/\./g, '');
+
+                                    // Split by comma (decimal separator)
+                                    const parts = value.split(',');
+
+                                    // Add thousand separators to integer part
+                                    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+                                    // Join back with comma
+                                    setAmount(parts.join(','));
+                                }}
+                                onWheel={(e) => e.currentTarget.blur()}
                                 className="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                placeholder="0.00"
+                                placeholder="0,00"
                                 required
                             />
                         </div>
@@ -335,7 +364,7 @@ export default function TransactionModal({
                                             <input
                                                 type="number"
                                                 step="0.01"
-                                                value={Number((tier.amount / toUsdRates[inputCurrency]).toFixed(2)) || ''}
+                                                value={Number(convertFromUsd(tier.amount, inputCurrency).toFixed(2)) || ''}
                                                 onChange={(e) => updatePriceTier(index, parseFloat(e.target.value) || 0)}
                                                 className="w-full pl-6 pr-2 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-text-light dark:text-text-dark focus:outline-none focus:ring-1 focus:ring-primary/50"
                                                 placeholder="0.00"

@@ -32,8 +32,22 @@ export default function Dashboard() {
 
     // Quick stats calculations
     const expenseTransactions = transactions.filter(t => t.type === 'expense');
-    const avgExpense = expenseTransactions.length > 0
-        ? expenseTransactions.reduce((acc, t) => acc + t.amount, 0) / expenseTransactions.length
+
+    // Calculate average monthly expense (group by month, then average)
+    const expenseByMonth = expenseTransactions.reduce((acc, t) => {
+        // Extract month-year from date string
+        const dateStr = t.date;
+        const date = new Date(dateStr);
+        const monthKey = isNaN(date.getTime())
+            ? dateStr.substring(0, 7) // fallback to first 7 chars
+            : `${date.getFullYear()}-${date.getMonth()}`;
+        acc[monthKey] = (acc[monthKey] || 0) + t.amount;
+        return acc;
+    }, {} as Record<string, number>);
+
+    const monthlyTotals = Object.values(expenseByMonth);
+    const avgExpense = monthlyTotals.length > 0
+        ? monthlyTotals.reduce((a, b) => a + b, 0) / monthlyTotals.length
         : 0;
 
     // Top spending category
@@ -50,22 +64,25 @@ export default function Dashboard() {
         value
     }));
 
-    // Subscription stats
+    // Subscription stats - only expense subscriptions
     const activeSubscriptions = transactions.filter(t =>
-        t.recurrence && t.recurrence !== 'once' && t.isActive !== false
+        t.type === 'expense' &&
+        t.recurrence &&
+        t.recurrence !== 'once' &&
+        t.isActive !== false
     );
     const subscriptionCount = activeSubscriptions.length;
 
-    // Calculate total monthly subscription cost
-    const monthlySubscriptionCost = activeSubscriptions.reduce((total, sub) => {
-        let monthlyCost = sub.amount;
-        if (sub.recurrence === 'yearly') {
-            monthlyCost = sub.amount / 12;
-        } else if (sub.recurrence === 'daily') {
-            monthlyCost = sub.amount * 30;
-        }
-        return total + monthlyCost;
-    }, 0);
+    // Calculate total monthly subscription cost (only daily and monthly - exclude yearly)
+    const monthlySubscriptionCost = activeSubscriptions
+        .filter(sub => sub.recurrence === 'daily' || sub.recurrence === 'monthly')
+        .reduce((total, sub) => {
+            let monthlyCost = sub.amount;
+            if (sub.recurrence === 'daily') {
+                monthlyCost = sub.amount * 30;
+            }
+            return total + monthlyCost;
+        }, 0);
 
     const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 

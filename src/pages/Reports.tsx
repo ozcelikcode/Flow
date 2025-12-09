@@ -341,7 +341,7 @@ export default function Reports() {
                                     tickFormatter={formatYAxis}
                                     width={50}
                                 />
-                                <Tooltip content={<CustomTooltip />} wrapperStyle={{ outline: 'none' }} />
+                                <Tooltip content={<CustomTooltip />} wrapperStyle={{ outline: 'none' }} cursor={false} />
                                 <Bar
                                     dataKey="value"
                                     shape={<CustomBar />}
