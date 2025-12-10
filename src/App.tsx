@@ -10,6 +10,7 @@ import TransactionsPage from './pages/Transactions';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Categories from './pages/Categories';
+import Upcoming from './pages/Upcoming';
 import History from './pages/History';
 
 function AppContent() {
@@ -23,6 +24,7 @@ function AppContent() {
         <Route path="/transactions" element={<TransactionsPage />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/categories" element={<Categories />} />
+        <Route path="/upcoming" element={<Upcoming />} />
         <Route path="/history" element={<History />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>

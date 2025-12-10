@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { TrendingUp, TrendingDown, Calendar, Grid3X3 } from 'lucide-react';
 import YearlyActivityMap from '../components/reports/YearlyActivityMap';
-import { parseDate, toLocalDateKey } from '../utils/dateUtils';
+import { parseLocalizedDate as parseDate, toLocalDateKey } from '../utils/dateUtils';
 
 export default function Reports() {
     const { transactions } = useTransactions();

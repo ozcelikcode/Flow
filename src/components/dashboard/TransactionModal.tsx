@@ -4,6 +4,7 @@ import { useSettings } from '../../context/SettingsContext';
 import { useCategories } from '../../context/CategoryContext';
 import Modal from '../ui/Modal';
 import { Plus, X } from 'lucide-react';
+import { parseLocalizedDate } from '../../utils/dateUtils';
 
 interface TransactionModalProps {
     isOpen: boolean;
@@ -34,6 +35,7 @@ export default function TransactionModal({
     const [recurrence, setRecurrence] = useState<RecurrenceType>('once');
     const [priceTiers, setPriceTiers] = useState<PriceTier[]>([]);
     const [isActive, setIsActive] = useState(true);
+    const [endDate, setEndDate] = useState('');
 
     // Quick add category
     const [showQuickAdd, setShowQuickAdd] = useState(false);
@@ -100,14 +102,21 @@ export default function TransactionModal({
             setAmount(formatWithThousands(displayAmount));
             setCategory(editTransaction.category);
             setType(editTransaction.type);
-            const parsedDate = new Date(editTransaction.date);
-            if (!isNaN(parsedDate.getTime())) {
-                setDate(parsedDate.toISOString().split('T')[0]);
+
+            // Fix Date Parsing
+            const parsedDate = parseLocalizedDate(editTransaction.date);
+            if (parsedDate && !isNaN(parsedDate.getTime())) {
+                const year = parsedDate.getFullYear();
+                const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+                const day = String(parsedDate.getDate()).padStart(2, '0');
+                setDate(`${year}-${month}-${day}`);
             }
+
             setInputCurrency(currency);
             setRecurrence(editTransaction.recurrence || 'once');
             setPriceTiers(editTransaction.priceTiers || []);
             setIsActive(editTransaction.isActive !== false);
+            setEndDate(editTransaction.endDate || '');
         } else {
             setName('');
             setAmount('');
@@ -118,6 +127,7 @@ export default function TransactionModal({
             setRecurrence('once');
             setPriceTiers([]);
             setIsActive(true);
+            setEndDate('');
         }
     }, [editTransaction, currency, isOpen]);
 
@@ -180,8 +190,17 @@ export default function TransactionModal({
         if (recurrence !== 'once') {
             transaction.priceTiers = priceTiers.length > 0 ? priceTiers : undefined;
             transaction.currentPeriod = editTransaction?.currentPeriod || 1;
-            transaction.nextBillingDate = calculateNextBillingDate(date, recurrence);
+
+            // Only recalculate next billing date if it's a new transaction or date changed
+            // Otherwise keep existing flow unless logic requires reset
+            if (!editTransaction) {
+                transaction.nextBillingDate = calculateNextBillingDate(date, recurrence);
+            } else {
+                transaction.nextBillingDate = editTransaction.nextBillingDate || calculateNextBillingDate(date, recurrence);
+            }
+
             transaction.isActive = isActive;
+            transaction.endDate = endDate || undefined;
         }
 
         onSave(transaction);
@@ -210,8 +229,21 @@ export default function TransactionModal({
         }
     };
 
+    // CSS to hide spinners
+    const noSpinnerStyle = `
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    `;
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={modalTitle}>
+            <style>{noSpinnerStyle}</style>
             <form onSubmit={handleSubmit} className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto px-6 py-1">
                 {/* Type Selection */}
                 <div>
@@ -488,6 +520,22 @@ export default function TransactionModal({
                         />
                     </div>
                 </div>
+
+                {/* End Date (Only for Subscriptions) */}
+                {isSubscription && (
+                    <div>
+                        <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                            {t('endDate')} <span className="text-xs font-normal text-slate-400">({t('optional')})</span>
+                        </label>
+                        <input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
+                            min={date}
+                        />
+                    </div>
+                )}
 
                 {/* Actions */}
                 <div className="flex gap-2 mt-2">

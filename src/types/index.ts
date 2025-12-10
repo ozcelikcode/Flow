@@ -31,4 +31,5 @@ export interface Transaction {
     currentPeriod?: number; // Şu anki dönem (1, 2, 3...)
     nextBillingDate?: string; // Sonraki ödeme tarihi
     isActive?: boolean; // Abonelik aktif mi?
+    endDate?: string; // Abonelik bitiş tarihi (Opsiyonel)
 }

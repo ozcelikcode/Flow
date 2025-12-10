@@ -1,7 +1,7 @@
 import { useTransactions } from '../context/TransactionContext';
 import { useSettings } from '../context/SettingsContext';
 import { ArrowUpCircle, ArrowDownCircle, Wallet, History as HistoryIcon, TrendingUp } from 'lucide-react';
-import { parseDate } from '../utils/dateUtils';
+import { parseLocalizedDate as parseDate } from '../utils/dateUtils';
 
 export default function History() {
     const { transactions } = useTransactions();

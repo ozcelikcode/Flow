@@ -11,7 +11,7 @@ import {
     BarChart3,
     Calendar
 } from 'lucide-react';
-import { parseDate } from '../utils/dateUtils';
+import { parseLocalizedDate as parseDate } from '../utils/dateUtils';
 
 export default function Dashboard() {
     const { transactions } = useTransactions();

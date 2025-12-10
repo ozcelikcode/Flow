@@ -5,6 +5,7 @@ import type { Transaction } from '../types';
  * and updates the period and amount if necessary
  */
 export function checkAndUpdateSubscription(transaction: Transaction): Transaction {
+    // If not a recurring transaction, return checks
     if (!transaction.recurrence || transaction.recurrence === 'once') {
         return transaction;
     }
@@ -15,6 +16,17 @@ export function checkAndUpdateSubscription(transaction: Transaction): Transactio
 
     const now = new Date();
     const nextBilling = new Date(transaction.nextBillingDate);
+
+    // Check if end date is passed
+    if (transaction.endDate) {
+        const endDate = new Date(transaction.endDate);
+        if (now > endDate) {
+            return {
+                ...transaction,
+                isActive: false
+            };
+        }
+    }
 
     // Check if we've passed the billing date
     if (now >= nextBilling) {
@@ -83,6 +95,7 @@ export function getSubscriptionInfo(transaction: Transaction, language: 'en' | '
     nextBillingDate: string | null;
     nextPeriodPrice: number | null;
     isActive: boolean;
+    endDate?: string;
 } {
     const isSubscription = transaction.recurrence && transaction.recurrence !== 'once';
 
@@ -109,6 +122,50 @@ export function getSubscriptionInfo(transaction: Transaction, language: 'en' | '
         currentPeriod,
         nextBillingDate: transaction.nextBillingDate || null,
         nextPeriodPrice,
-        isActive: transaction.isActive !== false
+        isActive: transaction.isActive !== false,
+        endDate: transaction.endDate
     };
+}
+
+/**
+ * Get upcoming transactions for the current month
+ */
+export function getUpcomingTransactions(transactions: Transaction[]): Transaction[] {
+    const upcoming: Transaction[] = [];
+    const now = new Date();
+    // Start from today
+    const startOfPeriod = now;
+    // Go until end of current month
+    const endOfPeriod = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+    transactions.forEach(transaction => {
+        // Skip non-recurring/inactive/ended transactions
+        if (!transaction.recurrence || transaction.recurrence === 'once' || transaction.isActive === false) return;
+        if (!transaction.nextBillingDate) return;
+
+        // Check against end date
+        if (transaction.endDate) {
+            const endDate = new Date(transaction.endDate);
+            if (now > endDate) return;
+        }
+
+        const nextDate = new Date(transaction.nextBillingDate);
+
+        // If next billing date is within this month (and in future/today)
+        if (nextDate >= startOfPeriod && nextDate <= endOfPeriod) {
+            // Check if end date permits this instance
+            if (transaction.endDate) {
+                const endDate = new Date(transaction.endDate);
+                if (nextDate > endDate) return;
+            }
+
+            // Clone and set the date to the next billing date for display
+            upcoming.push({
+                ...transaction,
+                date: nextDate.toISOString().split('T')[0] // Use YYYY-MM-DD for upcoming display
+            });
+        }
+    });
+
+    return upcoming.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }

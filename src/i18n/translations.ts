@@ -23,6 +23,7 @@ export const translations = {
         history: 'History',
         settings: 'Settings',
         categories: 'Categories',
+        upcoming: 'Upcoming',
         myWallet: 'My Wallet',
         personalFinance: 'Personal Finance',
         addTransaction: 'Add Transaction',
@@ -177,9 +178,17 @@ export const translations = {
         // Selection
         selectAll: 'Select All',
         selected: 'selected',
-        deleteSelected: 'Delete',
+        deleteSelected: 'Delete Selected',
         deleteTitle: 'Delete Transactions',
         deleteConfirm: 'Are you sure you want to delete {count} selected transactions?',
+        endDate: 'End Date',
+        optional: 'Optional',
+        upcomingTransactions: 'Upcoming Transactions',
+        expectedIncome: 'Expected Income',
+        expectedExpense: 'Expected Expense',
+        forThisMonth: 'For this month',
+        thisMonthsTransactions: 'This Month\'s Transactions',
+        noUpcomingTransactions: 'No upcoming transactions',
     },
     tr: {
         // Navigation
@@ -189,6 +198,7 @@ export const translations = {
         history: 'Geçmiş',
         settings: 'Ayarlar',
         categories: 'Kategoriler',
+        upcoming: 'Yaklaşanlar',
         myWallet: 'Cüzdanım',
         personalFinance: 'Kişisel Finans',
         addTransaction: 'İşlem Ekle',
@@ -343,9 +353,17 @@ export const translations = {
         // Selection
         selectAll: 'Tümünü Seç',
         selected: 'seçildi',
-        deleteSelected: 'Sil',
+        deleteSelected: 'Seçilenleri Sil',
         deleteTitle: 'İşlemleri Sil',
         deleteConfirm: 'Seçili {count} işlemi silmek istediğinize emin misiniz?',
+        endDate: 'Bitiş Tarihi',
+        optional: 'Opsiyonel',
+        upcomingTransactions: 'Yaklaşan İşlemler',
+        expectedIncome: 'Beklenen Gelir',
+        expectedExpense: 'Beklenen Gider',
+        forThisMonth: 'Bu ay için',
+        thisMonthsTransactions: 'Bu Ayın İşlemleri',
+        noUpcomingTransactions: 'Yaklaşan işlem bulunmuyor',
     }
 } as const;
 

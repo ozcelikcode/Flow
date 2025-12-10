@@ -12,7 +12,8 @@ import {
     Menu,
     X,
     Tag,
-    History as HistoryIcon
+    History as HistoryIcon,
+    Calendar
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -76,6 +77,7 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                         <NavItem icon={PieChart} label={t('reports')} to="/reports" onClick={handleNavClick} />
                         <NavItem icon={HistoryIcon} label={t('history')} to="/history" onClick={handleNavClick} />
                         <NavItem icon={Tag} label={t('categories')} to="/categories" onClick={handleNavClick} />
+                        <NavItem icon={Calendar} label={t('upcoming')} to="/upcoming" onClick={handleNavClick} />
                         <NavItem icon={Settings} label={t('settings')} to="/settings" onClick={handleNavClick} />
                     </div>
                 </div>
@@ -102,6 +104,7 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                             <NavItem icon={PieChart} label={t('reports')} to="/reports" />
                             <NavItem icon={HistoryIcon} label={t('history')} to="/history" />
                             <NavItem icon={Tag} label={t('categories')} to="/categories" />
+                            <NavItem icon={Calendar} label={t('upcoming')} to="/upcoming" />
                             <NavItem icon={Settings} label={t('settings')} to="/settings" />
                         </div>
                     </div>
