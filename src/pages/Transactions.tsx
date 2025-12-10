@@ -23,8 +23,9 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import type { Transaction } from '../types';
 import TransactionModal from '../components/dashboard/TransactionModal';
+import ConfirmModal from '../components/ui/ConfirmModal';
 import { getSubscriptionInfo } from '../services/subscriptionService';
-import { GripVertical, Pencil, List, LayoutGrid, X, CheckSquare, Square } from 'lucide-react';
+import { GripVertical, Pencil, List, LayoutGrid, X, CheckSquare, Square, Trash2 } from 'lucide-react';
 
 export default function TransactionsPage() {
     const { transactions, reorderTransactions, deleteTransaction, updateTransaction } = useTransactions();
@@ -32,6 +33,7 @@ export default function TransactionsPage() {
     const { categories, getCategoryDisplayName } = useCategories();
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
         return (localStorage.getItem('transactionViewMode') as 'list' | 'grid') || 'list';
     });
@@ -205,6 +207,17 @@ export default function TransactionsPage() {
         setIsModalOpen(false);
     };
 
+    const handleBulkDelete = () => {
+        setIsConfirmModalOpen(true);
+    };
+
+    const confirmBulkDelete = () => {
+        selectedIds.forEach(id => deleteTransaction(id));
+        setSelectedIds([]);
+        setLastSelectedId(null);
+        setIsConfirmModalOpen(false);
+    };
+
     const handleCloseModal = () => {
         setEditingTransaction(null);
         setIsModalOpen(false);
@@ -244,6 +257,16 @@ export default function TransactionsPage() {
                             {selectedIds.length > 0 && (
                                 <span className="ml-1 text-primary font-bold">({selectedIds.length})</span>
                             )}
+                        </button>
+                    )}
+
+                    {selectedIds.length > 0 && (
+                        <button
+                            onClick={handleBulkDelete}
+                            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs sm:text-sm font-medium text-danger hover:bg-danger/10 transition-colors"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            <span className="hidden sm:inline">{t('deleteSelected') || 'Delete'}</span>
                         </button>
                     )}
                 </div>
@@ -379,6 +402,17 @@ export default function TransactionsPage() {
                 onSave={handleSave}
                 onDelete={handleDelete}
                 editTransaction={editingTransaction}
+            />
+
+            <ConfirmModal
+                isOpen={isConfirmModalOpen}
+                onClose={() => setIsConfirmModalOpen(false)}
+                onConfirm={confirmBulkDelete}
+                title={t('deleteTitle')}
+                message={t('deleteConfirm', { count: selectedIds.length.toString() })}
+                confirmText={t('deleteSelected')}
+                cancelText={t('cancel')}
+                variant="danger"
             />
         </div>
     );

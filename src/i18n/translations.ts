@@ -177,6 +177,9 @@ export const translations = {
         // Selection
         selectAll: 'Select All',
         selected: 'selected',
+        deleteSelected: 'Delete',
+        deleteTitle: 'Delete Transactions',
+        deleteConfirm: 'Are you sure you want to delete {count} selected transactions?',
     },
     tr: {
         // Navigation
@@ -340,6 +343,9 @@ export const translations = {
         // Selection
         selectAll: 'Tümünü Seç',
         selected: 'seçildi',
+        deleteSelected: 'Sil',
+        deleteTitle: 'İşlemleri Sil',
+        deleteConfirm: 'Seçili {count} işlemi silmek istediğinize emin misiniz?',
     }
 } as const;
 

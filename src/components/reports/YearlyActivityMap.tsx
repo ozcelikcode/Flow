@@ -219,21 +219,21 @@ export default function YearlyActivityMap({
         const isPositive = day.net > 0;
 
         if (isPositive) {
-            if (amount < 50) return 'bg-green-100 hover:bg-green-200';
-            if (amount < 100) return 'bg-green-200 hover:bg-green-300';
-            if (amount < 250) return 'bg-green-300 hover:bg-green-400';
-            if (amount < 500) return 'bg-green-400 hover:bg-green-500';
-            if (amount < 1000) return 'bg-green-500 hover:bg-green-600';
-            if (amount < 2000) return 'bg-green-600 hover:bg-green-700';
-            return 'bg-green-700 hover:bg-green-800';
+            if (amount < 50) return 'bg-green-300 dark:bg-green-900/30 hover:bg-green-400 dark:hover:bg-green-900';
+            if (amount < 100) return 'bg-green-400 dark:bg-green-900/70 hover:bg-green-500 dark:hover:bg-green-900';
+            if (amount < 250) return 'bg-green-500 dark:bg-green-800 hover:bg-green-600 dark:hover:bg-green-700';
+            if (amount < 500) return 'bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600';
+            if (amount < 1000) return 'bg-green-700 dark:bg-green-600 hover:bg-green-800 dark:hover:bg-green-500';
+            if (amount < 2000) return 'bg-green-800 dark:bg-green-500 hover:bg-green-900 dark:hover:bg-green-400';
+            return 'bg-green-900 dark:bg-green-500 hover:bg-green-950 dark:hover:bg-green-400';
         } else {
-            if (amount < 50) return 'bg-red-100 hover:bg-red-200';
-            if (amount < 100) return 'bg-red-200 hover:bg-red-300';
-            if (amount < 250) return 'bg-red-300 hover:bg-red-400';
-            if (amount < 500) return 'bg-red-400 hover:bg-red-500';
-            if (amount < 1000) return 'bg-red-500 hover:bg-red-600';
-            if (amount < 2000) return 'bg-red-600 hover:bg-red-700';
-            return 'bg-red-700 hover:bg-red-800';
+            if (amount < 50) return 'bg-red-300 dark:bg-red-900/30 hover:bg-red-400 dark:hover:bg-red-900';
+            if (amount < 100) return 'bg-red-400 dark:bg-red-900/70 hover:bg-red-500 dark:hover:bg-red-900';
+            if (amount < 250) return 'bg-red-500 dark:bg-red-800 hover:bg-red-600 dark:hover:bg-red-700';
+            if (amount < 500) return 'bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-600';
+            if (amount < 1000) return 'bg-red-700 dark:bg-red-600 hover:bg-red-800 dark:hover:bg-red-500';
+            if (amount < 2000) return 'bg-red-800 dark:bg-red-500 hover:bg-red-900 dark:hover:bg-red-400';
+            return 'bg-red-900 dark:bg-red-500 hover:bg-red-950 dark:hover:bg-red-400';
         }
     };
 
@@ -352,20 +352,20 @@ export default function YearlyActivityMap({
             <div className="flex items-center justify-end gap-2 mt-3 text-[11px] text-text-secondary-light dark:text-text-secondary-dark">
                 <span className="mr-1">{language === 'tr' ? 'Harcama (Az → Çok)' : 'Expense (Less → More)'}</span>
                 <div className="flex gap-0.5">
-                    <div className="w-[10px] h-[10px] rounded-sm bg-red-100"></div>
-                    <div className="w-[10px] h-[10px] rounded-sm bg-red-300"></div>
-                    <div className="w-[10px] h-[10px] rounded-sm bg-red-500"></div>
-                    <div className="w-[10px] h-[10px] rounded-sm bg-red-700"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-red-300 dark:bg-red-900/30"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-red-500 dark:bg-red-800"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-red-700 dark:bg-red-600"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-red-900 dark:bg-red-500"></div>
                 </div>
 
                 <span className="mx-2">|</span>
 
                 <span className="mr-1">{language === 'tr' ? 'Gelir (Az → Çok)' : 'Income (Less → More)'}</span>
                 <div className="flex gap-0.5">
-                    <div className="w-[10px] h-[10px] rounded-sm bg-green-100"></div>
-                    <div className="w-[10px] h-[10px] rounded-sm bg-green-300"></div>
-                    <div className="w-[10px] h-[10px] rounded-sm bg-green-500"></div>
-                    <div className="w-[10px] h-[10px] rounded-sm bg-green-700"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-green-300 dark:bg-green-900/30"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-green-500 dark:bg-green-800"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-green-700 dark:bg-green-600"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-green-900 dark:bg-green-500"></div>
                 </div>
             </div>
 
