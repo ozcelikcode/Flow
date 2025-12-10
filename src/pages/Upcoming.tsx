@@ -3,6 +3,7 @@ import { useSettings } from '../context/SettingsContext';
 import { useTransactions } from '../context/TransactionContext';
 import { useCategories } from '../context/CategoryContext';
 import { getUpcomingTransactions } from '../services/subscriptionService';
+import { parseLocalizedDate } from '../utils/dateUtils';
 import * as LucideIcons from 'lucide-react';
 import { Wallet, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
 
@@ -46,7 +47,10 @@ export default function Upcoming() {
     };
 
     const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
+        const date = parseLocalizedDate(dateStr);
+        if (!date) return dateStr;
+
+        return date.toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
             month: 'long',
             day: 'numeric',
             weekday: 'long'
@@ -129,8 +133,8 @@ export default function Upcoming() {
                                 <div key={index} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                     <div className="flex items-center gap-4">
                                         <div className={`p-2.5 rounded-xl ${tx.type === 'income'
-                                                ? 'bg-success/10 text-success'
-                                                : 'bg-danger/10 text-danger'
+                                            ? 'bg-success/10 text-success'
+                                            : 'bg-danger/10 text-danger'
                                             }`}>
                                             <Icon className="w-5 h-5" />
                                         </div>

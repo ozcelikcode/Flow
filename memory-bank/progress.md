@@ -23,6 +23,7 @@
 - [x] Abonelik desteği (günlük, aylık, yıllık)
 - [x] Dönem bazlı fiyatlandırma (price tiers)
 - [x] Otomatik dönem ve fiyat güncellemesi
+- [x] Abonelik bitiş tarihi (End Date) desteği
 
 ### Kategori Yönetimi
 - [x] Kategori ekleme/düzenleme/silme
@@ -37,7 +38,13 @@
 - [x] Kategoriye göre harcama pasta grafiği
 - [x] Günlük harcama trend grafiği (bu ay)
 - [x] Yıllık aktivite haritası (GitHub tarzı)
+- [x] Yıllık aktivite haritası (GitHub tarzı)
 - [x] Özel tooltip tasarımları
+
+### Yaklaşan İşlemler (Upcoming)
+- [x] Gelecek tahmini (gelir/gider) özetleri
+- [x] Yaklaşan ve bugün vadesi gelen işlemler listesi
+- [x] Tekrarlayan ve gelecekteki tek seferlik işlemleri görüntüleme
 
 ### Ayarlar
 - [x] Tema değiştirme (açık/koyu)

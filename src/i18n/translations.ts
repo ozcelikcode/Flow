@@ -184,11 +184,11 @@ export const translations = {
         endDate: 'End Date',
         optional: 'Optional',
         upcomingTransactions: 'Upcoming Transactions',
-        expectedIncome: 'Expected Income',
-        expectedExpense: 'Expected Expense',
-        forThisMonth: 'For this month',
-        thisMonthsTransactions: 'This Month\'s Transactions',
-        noUpcomingTransactions: 'No upcoming transactions',
+        expectedIncome: 'Total Expected Income',
+        expectedExpense: 'Total Expected Expense',
+        forThisMonth: 'Future projection',
+        thisMonthsTransactions: 'All Upcoming Transactions',
+        noUpcomingTransactions: 'No upcoming transactions found',
     },
     tr: {
         // Navigation
@@ -359,11 +359,11 @@ export const translations = {
         endDate: 'Bitiş Tarihi',
         optional: 'Opsiyonel',
         upcomingTransactions: 'Yaklaşan İşlemler',
-        expectedIncome: 'Beklenen Gelir',
-        expectedExpense: 'Beklenen Gider',
-        forThisMonth: 'Bu ay için',
-        thisMonthsTransactions: 'Bu Ayın İşlemleri',
-        noUpcomingTransactions: 'Yaklaşan işlem bulunmuyor',
+        expectedIncome: 'Toplam Beklenen Gelir',
+        expectedExpense: 'Toplam Beklenen Gider',
+        forThisMonth: 'Gelecek tahmini',
+        thisMonthsTransactions: 'Tüm Yaklaşan İşlemler',
+        noUpcomingTransactions: 'Yaklaşan işlem bulunamadı',
     }
 } as const;
 

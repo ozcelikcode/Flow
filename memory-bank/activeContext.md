@@ -33,7 +33,26 @@
 - **Bug Fix**: Reports sayfasındaki günlük trend grafiği tam ayı kapsayacak şekilde güncellendi.
 - `dateUtils.ts` oluşturuldu, merkezi tarih yönetimi sağlandı.
 
-### UI/UX İyileştirmeleri (10 Aralık 2025)
+## Son Değişiklikler (10 Aralık 2025)
+
+### Yaklaşan İşlemler (Upcoming) Sayfası
+- `Upcoming.tsx` sayfası oluşturuldu: Gelecek finansal durumu (tahmini gelir/gider) ve yaklaşan işlemleri gösterir.
+- `subscriptionService.ts` güncellendi:
+    - `getUpcomingTransactions` fonksiyonu yenilendi: Tekrarlayan ve gelecekteki tek seferlik işlemleri kapsıyor.
+    - Abonelik güncelleme mantığı değiştirildi: Abonelikler artık sadece fatura tarihi *geçtikten* sonra (ertesi gün) güncelleniyor, böylece "Bugün" vadesi gelenler "Upcoming" listesinde görünüyor.
+    - `endDate` (Bitiş Tarihi) desteği eklendi.
+- Navigasyon menüsüne "Upcoming" eklendi.
+
+### Tarih Yönetimi
+- `parseLocalizedDate` yardımcı fonksiyonu eklendi: Farklı formatlardaki tarih dizelerini (örn. Türkçe "8 Ara 2025") güvenilir şekilde Date objesine çeviriyor.
+- Tüm abonelik ve gelecek işlem hesaplamaları bu güvenli tarih ayrıştırma yapısını kullanacak şekilde güncellendi.
+
+### Diğer İyileştirmeler
+- **Transaction Modal**: Period Prices için sayı girişi okları (spinners) gizlendi.
+- **Transaction Modal**: Abonelikler için opsiyonel "Bitiş Tarihi" alanı eklendi.
+- **Bug Fix**: Tarih düzenleme ve kaydetme sırasında oluşan format sorunları giderildi.
+
+### Önceki Değişiklikler
 - **Dashboard**: Kategori Dağılımı bölümü kaldırıldı, Quick Stats tek sütuna dönüştürüldü.
 - **Dashboard**: Son işlemler listesi 5 yerine 10 işlem gösterecek şekilde güncellendi.
 - **History**: İşlem listesinin boş görünmesine neden olan tarih formatlama hatası `parseDate` kullanılarak düzeltildi.

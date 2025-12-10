@@ -1,4 +1,5 @@
 import type { Transaction } from '../types';
+import { parseLocalizedDate } from '../utils/dateUtils';
 
 /**
  * Checks if a subscription needs to be updated based on current date
@@ -15,11 +16,24 @@ export function checkAndUpdateSubscription(transaction: Transaction): Transactio
     }
 
     const now = new Date();
+    // Use parseLocalizedDate to handle stored localized formats
+    // nextBillingDate is usually ISO (YYYY-MM-DD) from system calculation, 
+    // but safer to handle consistently if it ever changes.
+    // Actually nextBillingDate is set via toISOString().split('T')[0] in this file, so it IS standard YYYY-MM-DD.
+    // But transaction.date is localized.
+
+    // For nextBillingDate, standard new Date is fine as it's ISO.
     const nextBilling = new Date(transaction.nextBillingDate);
+
+    // Reset time components for accurate date comparison
+    now.setHours(0, 0, 0, 0);
+    nextBilling.setHours(0, 0, 0, 0);
 
     // Check if end date is passed
     if (transaction.endDate) {
+        // endDate is from input type="date", so it is YYYY-MM-DD
         const endDate = new Date(transaction.endDate);
+        endDate.setHours(0, 0, 0, 0);
         if (now > endDate) {
             return {
                 ...transaction,
@@ -29,7 +43,9 @@ export function checkAndUpdateSubscription(transaction: Transaction): Transactio
     }
 
     // Check if we've passed the billing date
-    if (now >= nextBilling) {
+    // We only update if 'now' is strictly AFTER the billing date (i.e., billing date was yesterday or earlier)
+    // This allows transactions due 'Today' to remain visible as 'Upcoming' until the day is over.
+    if (now > nextBilling) {
         const updatedTransaction = { ...transaction };
         const currentPeriod = transaction.currentPeriod || 1;
         const newPeriod = currentPeriod + 1;
@@ -46,7 +62,9 @@ export function checkAndUpdateSubscription(transaction: Transaction): Transactio
         }
 
         // Calculate next billing date
-        const newNextBilling = new Date(nextBilling);
+        const nextBillingDateObj = new Date(transaction.nextBillingDate);
+        const newNextBilling = new Date(nextBillingDateObj);
+
         switch (transaction.recurrence) {
             case 'daily':
                 newNextBilling.setDate(newNextBilling.getDate() + 1);
@@ -128,44 +146,85 @@ export function getSubscriptionInfo(transaction: Transaction, language: 'en' | '
 }
 
 /**
- * Get upcoming transactions for the current month
+ * Get upcoming transactions (both recurring and future one-time)
+ * Uses accurate string comparison for dates to avoid timezone issues.
  */
 export function getUpcomingTransactions(transactions: Transaction[]): Transaction[] {
     const upcoming: Transaction[] = [];
+
+    // Get Local Date String for Today: YYYY-MM-DD
     const now = new Date();
-    // Start from today
-    const startOfPeriod = now;
-    // Go until end of current month
-    const endOfPeriod = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
 
     transactions.forEach(transaction => {
-        // Skip non-recurring/inactive/ended transactions
-        if (!transaction.recurrence || transaction.recurrence === 'once' || transaction.isActive === false) return;
-        if (!transaction.nextBillingDate) return;
+        // Skip explicitly inactive transactions
+        if (transaction.isActive === false) return;
 
-        // Check against end date
-        if (transaction.endDate) {
-            const endDate = new Date(transaction.endDate);
-            if (now > endDate) return;
+        // 1. Check strict future/present date of the original transaction (One-time or first occurrence)
+        // transaction.date is localized, must parse
+        const parsedDate = parseLocalizedDate(transaction.date);
+        let parsedTxDateIso = '';
+
+        if (parsedDate) {
+            // Convert parsed date to ISO YYYY-MM-DD for comparison
+            const pYear = parsedDate.getFullYear();
+            const pMonth = String(parsedDate.getMonth() + 1).padStart(2, '0');
+            const pDay = String(parsedDate.getDate()).padStart(2, '0');
+            parsedTxDateIso = `${pYear}-${pMonth}-${pDay}`;
+
+            // Check if strictly greater than today (strictly future)
+            if (parsedTxDateIso > todayStr) {
+                upcoming.push(transaction);
+            }
         }
 
-        const nextDate = new Date(transaction.nextBillingDate);
+        // 2. Check Recurring Next Billing
+        if (transaction.recurrence && transaction.recurrence !== 'once') {
+            const nextBilling = transaction.nextBillingDate;
 
-        // If next billing date is within this month (and in future/today)
-        if (nextDate >= startOfPeriod && nextDate <= endOfPeriod) {
-            // Check if end date permits this instance
-            if (transaction.endDate) {
-                const endDate = new Date(transaction.endDate);
-                if (nextDate > endDate) return;
+            if (nextBilling) {
+                // Check End Date Constraints
+                if (transaction.endDate) {
+                    // end date is YYYY-MM-DD
+                    // If end date is in the past, subscription is effectively over
+                    if (transaction.endDate < todayStr) return;
+                    // If next billing is after end date, don't show it
+                    if (nextBilling > transaction.endDate) return;
+                }
+
+                // If next billing is strictly in future (tomorrow or later)
+                if (nextBilling > todayStr) {
+                    // Avoid duplicates: 
+                    // If nextBilling is the SAME as the transaction.date (start date), 
+                    // and we already added it above (because it's > todayStr), don't add again.
+                    // We compare nextBilling (ISO) with parsedTxDateIso (ISO)
+                    if (nextBilling !== parsedTxDateIso) {
+                        upcoming.push({
+                            ...transaction,
+                            date: nextBilling // nextBilling is already ISO YYYY-MM-DD
+                        });
+                    }
+                }
             }
-
-            // Clone and set the date to the next billing date for display
-            upcoming.push({
-                ...transaction,
-                date: nextDate.toISOString().split('T')[0] // Use YYYY-MM-DD for upcoming display
-            });
         }
     });
 
-    return upcoming.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Sort by date ascending
+    return upcoming.sort((a, b) => {
+        // Normalize for sorting
+        const getDateIso = (dateStr: string) => {
+            if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
+            const p = parseLocalizedDate(dateStr);
+            if (p) {
+                return `${p.getFullYear()}-${String(p.getMonth() + 1).padStart(2, '0')}-${String(p.getDate()).padStart(2, '0')}`;
+            }
+            return dateStr;
+        };
+        const dateA = getDateIso(a.date);
+        const dateB = getDateIso(b.date);
+        return dateA.localeCompare(dateB);
+    });
 }
