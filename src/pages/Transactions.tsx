@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTransactions } from '../context/TransactionContext';
 import { useSettings } from '../context/SettingsContext';
 import { useCategories } from '../context/CategoryContext';
@@ -69,12 +69,56 @@ export default function TransactionsPage() {
 
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
+    const [previewIds, setPreviewIds] = useState<string[]>([]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setSelectedIds([]);
+                setLastSelectedId(null);
+                setPreviewIds([]);
+            }
+        };
+
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === 'Shift') {
+                setPreviewIds([]);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+        };
+    }, []);
 
     // ... existing sensors ...
 
     // ... existing transactionCategories ...
 
     // ... existing filteredTransactions ...
+
+    const handleItemHover = (id: string, e: React.MouseEvent) => {
+        if (e.shiftKey && lastSelectedId) {
+            const lastIndex = filteredTransactions.findIndex(t => t.id === lastSelectedId);
+            const currentIndex = filteredTransactions.findIndex(t => t.id === id);
+
+            if (lastIndex !== -1 && currentIndex !== -1) {
+                const start = Math.min(lastIndex, currentIndex);
+                const end = Math.max(lastIndex, currentIndex);
+                const rangeIds = filteredTransactions.slice(start, end + 1).map(t => t.id);
+                // Exclude already selected ones if you want "add to selection" preview,
+                // but usually preview shows the whole range including what's already selected.
+                // However, standard Windows explorer usually just highlights the range.
+                // We will just show the rangeIds.
+                setPreviewIds(rangeIds);
+            }
+        } else {
+            if (previewIds.length > 0) setPreviewIds([]);
+        }
+    };
 
     const handleTransactionClick = (e: React.MouseEvent, id: string) => {
         // Prevent selection when clicking on buttons/inputs if any
@@ -118,6 +162,7 @@ export default function TransactionsPage() {
         }
 
         setSelectedIds(newSelectedIds);
+        setPreviewIds([]); // Clear preview on click
     };
 
     const toggleSelectAll = () => {
@@ -293,7 +338,9 @@ export default function TransactionsPage() {
                                         t={t}
                                         isDraggable={!selectedCategory}
                                         isSelected={selectedIds.includes(transaction.id)}
+                                        isPreviewSelected={previewIds.includes(transaction.id)}
                                         onSelect={(e) => handleTransactionClick(e, transaction.id)}
+                                        onHover={(e) => handleItemHover(transaction.id, e)}
                                     />
                                 ))
                             )}
@@ -315,7 +362,9 @@ export default function TransactionsPage() {
                                         language={language}
                                         isDraggable={!selectedCategory}
                                         isSelected={selectedIds.includes(transaction.id)}
+                                        isPreviewSelected={previewIds.includes(transaction.id)}
                                         onSelect={(e) => handleTransactionClick(e, transaction.id)}
+                                        onHover={(e) => handleItemHover(transaction.id, e)}
                                     />
                                 ))
                             )}
@@ -344,10 +393,12 @@ interface ListItemProps {
     t: (key: any) => string;
     isDraggable: boolean;
     isSelected: boolean;
+    isPreviewSelected?: boolean;
     onSelect: (e: React.MouseEvent) => void;
+    onHover?: (e: React.MouseEvent) => void;
 }
 
-function SortableListItem({ transaction, onEdit, formatAmount, translateCategory, language, t, isDraggable, isSelected, onSelect }: ListItemProps) {
+function SortableListItem({ transaction, onEdit, formatAmount, translateCategory, language, t, isDraggable, isSelected, isPreviewSelected, onSelect, onHover }: ListItemProps) {
     const {
         attributes,
         listeners,
@@ -371,9 +422,12 @@ function SortableListItem({ transaction, onEdit, formatAmount, translateCategory
             ref={setNodeRef}
             style={style}
             onClick={onSelect}
+            onMouseEnter={onHover}
             className={`flex items-start sm:items-center justify-between p-3 sm:p-4 bg-white dark:bg-surface-dark rounded-xl border shadow-sm gap-2 sm:gap-4 cursor-pointer transition-colors ${isSelected
                 ? 'border-primary bg-primary/5 dark:bg-primary/10'
-                : 'border-slate-200 dark:border-slate-800 hover:border-primary/50'
+                : isPreviewSelected
+                    ? 'border-primary/50 bg-primary/5 dark:bg-primary/5'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-primary/50'
                 }`}
         >
             <div className="flex items-start sm:items-center gap-2 sm:gap-4 flex-1 min-w-0">
@@ -451,10 +505,12 @@ interface GridItemProps {
     language: 'en' | 'tr';
     isDraggable: boolean;
     isSelected: boolean;
+    isPreviewSelected?: boolean;
     onSelect: (e: React.MouseEvent) => void;
+    onHover?: (e: React.MouseEvent) => void;
 }
 
-function SortableGridItem({ transaction, onEdit, formatAmount, translateCategory, language, isDraggable, isSelected, onSelect }: GridItemProps) {
+function SortableGridItem({ transaction, onEdit, formatAmount, translateCategory, language, isDraggable, isSelected, isPreviewSelected, onSelect, onHover }: GridItemProps) {
     const {
         attributes,
         listeners,
@@ -480,11 +536,14 @@ function SortableGridItem({ transaction, onEdit, formatAmount, translateCategory
             ref={setNodeRef}
             style={style}
             onClick={onSelect}
+            onMouseEnter={onHover}
             className={`rounded-xl border p-4 group relative select-none cursor-pointer ${isDragging
                 ? 'border-primary shadow-xl bg-white dark:bg-surface-dark'
                 : isSelected
                     ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-sm'
-                    : 'bg-white dark:bg-surface-dark border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-primary/30'
+                    : isPreviewSelected
+                        ? 'border-primary/50 bg-primary/5 dark:bg-primary/5 shadow-sm'
+                        : 'bg-white dark:bg-surface-dark border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-primary/30'
                 }`}
         >
             {/* Drag Handle Overlay */}
