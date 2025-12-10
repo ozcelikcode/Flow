@@ -221,8 +221,8 @@ export default function Reports() {
                     </div>
                 </div>
 
-                <div className="h-48 sm:h-64">
-                    <ResponsiveContainer width="100%" height="100%">
+                <div className="h-48 sm:h-64 min-w-0" style={{ minHeight: '192px' }}>
+                    <ResponsiveContainer width="100%" height="100%" debounce={50}>
                         <AreaChart data={dailySpendingData}>
                             <defs>
                                 <linearGradient id="colorSpending" x1="0" y1="0" x2="0" y2="1">
@@ -263,7 +263,7 @@ export default function Reports() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 overflow-hidden">
                 {/* Income vs Expense Chart */}
                 <div className="bg-white dark:bg-surface-dark p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-text-light dark:text-text-dark">{t('incomeVsExpense')}</h3>
@@ -282,8 +282,8 @@ export default function Reports() {
                         </div>
                     </div>
 
-                    <div className="h-48 sm:h-56">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-48 sm:h-56 min-w-0" style={{ minHeight: '192px' }}>
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <BarChart data={data}>
                                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} stroke={axisColor} />
                                 <XAxis
@@ -332,15 +332,15 @@ export default function Reports() {
 
                     {categoryData.length > 0 ? (
                         <>
-                            <div className="h-48 sm:h-56">
-                                <ResponsiveContainer width="100%" height="100%">
+                            <div className="h-48 sm:h-56 min-w-0" style={{ minHeight: '192px' }}>
+                                <ResponsiveContainer width="100%" height="100%" debounce={50}>
                                     <PieChart>
                                         <Pie
                                             data={categoryData}
                                             cx="50%"
                                             cy="50%"
-                                            innerRadius={40}
-                                            outerRadius={65}
+                                            innerRadius={30}
+                                            outerRadius={55}
                                             paddingAngle={3}
                                             dataKey="value"
                                             stroke="none"

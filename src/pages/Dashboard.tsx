@@ -12,7 +12,7 @@ import {
     BarChart3,
     Calendar,
     Wallet,
-    PiggyBank
+    CircleDollarSign
 } from 'lucide-react';
 import { parseLocalizedDate as parseDate } from '../utils/dateUtils';
 
@@ -147,7 +147,7 @@ export default function Dashboard() {
                     change={t('basedOnTransactions')}
                     trend={totalSavings >= 0 ? 'up' : 'down'}
                     trendColor={totalSavings >= 0 ? 'success' : 'danger'}
-                    icon={<PiggyBank className="w-4 h-4 sm:w-5 sm:h-5" />}
+                    icon={<CircleDollarSign className="w-4 h-4 sm:w-5 sm:h-5" />}
                 />
             </div>
 

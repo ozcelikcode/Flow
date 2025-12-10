@@ -144,8 +144,8 @@ export async function loadAndDecrypt<T>(key: string, password: string): Promise<
 
         const decrypted = await decrypt(parsed, password);
         return JSON.parse(decrypted) as T;
-    } catch (error) {
-        console.error('Decryption failed:', error);
+    } catch {
+        // Silently fail - decryption errors are expected for wrong passwords
         return null;
     }
 }

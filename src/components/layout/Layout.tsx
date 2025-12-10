@@ -80,7 +80,19 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
             {/* Mobile Sidebar */}
             <div className={`lg:hidden fixed top-0 right-0 h-full w-64 bg-white dark:bg-surface-dark z-50 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
                 }`}>
-                <div className="p-4 pt-16 flex flex-col h-full">
+                {/* Mobile Sidebar Header with Close Button */}
+                <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+                    <span className="text-base font-semibold text-text-light dark:text-text-dark">
+                        {language === 'tr' ? 'Menü' : 'Menu'}
+                    </span>
+                    <button
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    >
+                        <X className="w-5 h-5 text-text-light dark:text-text-dark" />
+                    </button>
+                </div>
+                <div className="p-4 flex flex-col h-[calc(100%-73px)]">
                     <div className="flex flex-col gap-2 flex-1">
                         <NavItem icon={LayoutDashboard} label={t('dashboard')} to="/" onClick={handleNavClick} />
                         <NavItem icon={Receipt} label={t('transactions')} to="/transactions" onClick={handleNavClick} />

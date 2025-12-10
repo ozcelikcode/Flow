@@ -70,37 +70,37 @@ export default function History() {
             </h2>
 
             {/* Lifetime Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center gap-2">
-                    <div className="p-3 bg-primary/10 rounded-full text-primary mb-1">
-                        <Wallet className="w-6 h-6" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                <div className="bg-white dark:bg-surface-dark p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center gap-1">
+                    <div className="p-2 sm:p-3 bg-primary/10 rounded-full text-primary">
+                        <Wallet className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark font-medium">{t('netWorth')}</span>
-                    <span className="text-2xl font-bold text-text-light dark:text-text-dark">{formatAmount(netWorth)}</span>
+                    <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark font-medium">{t('netWorth')}</span>
+                    <span className="text-base sm:text-xl font-bold text-text-light dark:text-text-dark">{formatAmount(netWorth)}</span>
                 </div>
 
-                <div className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center gap-2">
-                    <div className="p-3 bg-success/10 rounded-full text-success mb-1">
-                        <ArrowUpCircle className="w-6 h-6" />
+                <div className="bg-white dark:bg-surface-dark p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center gap-1">
+                    <div className="p-2 sm:p-3 bg-success/10 rounded-full text-success">
+                        <ArrowUpCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark font-medium">{t('totalIncome')}</span>
-                    <span className="text-2xl font-bold text-success">{formatAmount(totalIncome)}</span>
+                    <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark font-medium">{t('totalIncome')}</span>
+                    <span className="text-base sm:text-xl font-bold text-success">{formatAmount(totalIncome)}</span>
                 </div>
 
-                <div className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center gap-2">
-                    <div className="p-3 bg-danger/10 rounded-full text-danger mb-1">
-                        <ArrowDownCircle className="w-6 h-6" />
+                <div className="bg-white dark:bg-surface-dark p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center gap-1">
+                    <div className="p-2 sm:p-3 bg-danger/10 rounded-full text-danger">
+                        <ArrowDownCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark font-medium">{t('totalExpense')}</span>
-                    <span className="text-2xl font-bold text-danger">{formatAmount(totalExpense)}</span>
+                    <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark font-medium">{t('totalExpense')}</span>
+                    <span className="text-base sm:text-xl font-bold text-danger">{formatAmount(totalExpense)}</span>
                 </div>
 
-                <div className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center gap-2">
-                    <div className="p-3 bg-warning/10 rounded-full text-warning mb-1">
-                        <TrendingUp className="w-6 h-6" />
+                <div className="bg-white dark:bg-surface-dark p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center gap-1">
+                    <div className="p-2 sm:p-3 bg-warning/10 rounded-full text-warning">
+                        <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark font-medium">{t('totalSavings')}</span>
-                    <span className="text-2xl font-bold text-text-light dark:text-text-dark">{formatAmount(totalSavings)}</span>
+                    <span className="text-xs text-text-secondary-light dark:text-text-secondary-dark font-medium">{t('totalSavings')}</span>
+                    <span className="text-base sm:text-xl font-bold text-text-light dark:text-text-dark">{formatAmount(totalSavings)}</span>
                 </div>
             </div>
 
@@ -112,41 +112,41 @@ export default function History() {
                 </h3>
 
                 {sortedGroups.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                         {sortedGroups.map((group, index) => (
                             <div key={index} className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                                <div className="bg-slate-50 dark:bg-slate-900 px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                                    <h4 className="font-bold text-text-light dark:text-text-dark">{group.monthYear}</h4>
-                                    <span className={`text-sm font-bold ${group.income - group.expense >= 0 ? 'text-success' : 'text-danger'}`}>
+                                <div className="bg-slate-50 dark:bg-slate-900 px-3 sm:px-4 py-2 sm:py-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                                    <h4 className="font-bold text-sm sm:text-base text-text-light dark:text-text-dark">{group.monthYear}</h4>
+                                    <span className={`text-xs sm:text-sm font-bold ${group.income - group.expense >= 0 ? 'text-success' : 'text-danger'}`}>
                                         {group.income - group.expense >= 0 ? '+' : ''}{formatAmount(group.income - group.expense)}
                                     </span>
                                 </div>
-                                <div className="p-4 space-y-3">
-                                    <div className="flex justify-between items-center text-sm">
+                                <div className="p-3 sm:p-4 space-y-2">
+                                    <div className="flex justify-between items-center text-xs sm:text-sm">
                                         <span className="text-text-secondary-light dark:text-text-secondary-dark">{t('incomeType')}</span>
                                         <span className="font-medium text-success">{formatAmount(group.income)}</span>
                                     </div>
-                                    <div className="flex justify-between items-center text-sm">
+                                    <div className="flex justify-between items-center text-xs sm:text-sm">
                                         <span className="text-text-secondary-light dark:text-text-secondary-dark">{t('expenseType')}</span>
                                         <span className="font-medium text-danger">{formatAmount(group.expense)}</span>
                                     </div>
                                     <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                                        <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-2">{t('topTransactions')}</p>
-                                        <div className="space-y-2">
+                                        <p className="text-[10px] sm:text-xs text-text-secondary-light dark:text-text-secondary-dark mb-1.5">{t('topTransactions')}</p>
+                                        <div className="space-y-1">
                                             {group.transactions
                                                 .sort((a, b) => b.amount - a.amount)
-                                                .slice(0, 10)
+                                                .slice(0, 5)
                                                 .map(tx => (
-                                                    <div key={tx.id} className="flex justify-between text-xs">
-                                                        <span className="truncate max-w-[150px] text-text-light dark:text-text-dark">{tx.name}</span>
+                                                    <div key={tx.id} className="flex justify-between text-[10px] sm:text-xs">
+                                                        <span className="truncate max-w-[120px] sm:max-w-[150px] text-text-light dark:text-text-dark">{tx.name}</span>
                                                         <span className={tx.type === 'income' ? 'text-success' : 'text-danger'}>
                                                             {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}
                                                         </span>
                                                     </div>
                                                 ))}
-                                            {group.transactions.length > 10 && (
-                                                <p className="text-[10px] text-center text-text-secondary-light dark:text-text-secondary-dark italic">
-                                                    +{group.transactions.length - 10} {t('moreTransactions')}
+                                            {group.transactions.length > 5 && (
+                                                <p className="text-[9px] sm:text-[10px] text-center text-text-secondary-light dark:text-text-secondary-dark italic">
+                                                    +{group.transactions.length - 5} {t('moreTransactions')}
                                                 </p>
                                             )}
                                         </div>

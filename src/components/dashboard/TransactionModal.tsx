@@ -244,17 +244,17 @@ export default function TransactionModal({
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={modalTitle}>
             <style>{noSpinnerStyle}</style>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto px-6 py-1">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 sm:gap-3 max-h-[55vh] sm:max-h-[60vh] overflow-y-auto px-0 py-1">
                 {/* Type Selection */}
                 <div>
-                    <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
                         {t('type')}
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5 sm:gap-2">
                         <button
                             type="button"
                             onClick={() => setType('expense')}
-                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${type === 'expense'
+                            className={`flex-1 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${type === 'expense'
                                 ? 'bg-danger/10 text-danger border border-danger/20'
                                 : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark border border-transparent'
                                 }`}
@@ -264,7 +264,7 @@ export default function TransactionModal({
                         <button
                             type="button"
                             onClick={() => setType('income')}
-                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${type === 'income'
+                            className={`flex-1 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${type === 'income'
                                 ? 'bg-success/10 text-success border border-success/20'
                                 : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark border border-transparent'
                                 }`}
@@ -276,14 +276,14 @@ export default function TransactionModal({
 
                 {/* Name */}
                 <div>
-                    <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
                         {t('name')}
                     </label>
                     <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="w-full px-3 py-1.5 sm:py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-text-light dark:text-text-dark placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
                         placeholder={t('namePlaceholder')}
                         required
                     />
@@ -291,16 +291,16 @@ export default function TransactionModal({
 
                 {/* Payment Type (Recurrence) */}
                 <div>
-                    <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
                         {t('paymentType')}
                     </label>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
                         {(['once', 'daily', 'monthly', 'yearly'] as RecurrenceType[]).map((rec) => (
                             <button
                                 key={rec}
                                 type="button"
                                 onClick={() => setRecurrence(rec)}
-                                className={`py-2 px-1 rounded-lg text-xs font-medium transition-colors ${recurrence === rec
+                                className={`py-1.5 sm:py-2 px-1 rounded-lg text-[10px] sm:text-xs font-medium transition-colors ${recurrence === rec
                                     ? 'bg-primary/10 text-primary border border-primary/20'
                                     : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark border border-transparent'
                                     }`}
@@ -313,12 +313,12 @@ export default function TransactionModal({
 
                 {/* Amount */}
                 <div>
-                    <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
                         {t('amount')} {isSubscription && `(${t('firstPeriod')})`}
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5 sm:gap-2">
                         <div className="relative flex-1">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark">
+                            <span className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-sm text-text-secondary-light dark:text-text-secondary-dark">
                                 {currencySymbols[inputCurrency]}
                             </span>
                             <input
@@ -327,32 +327,19 @@ export default function TransactionModal({
                                 value={amount}
                                 onChange={(e) => {
                                     let value = e.target.value;
-                                    // Remove everything except digits, dots and commas
                                     value = value.replace(/[^\d.,]/g, '');
-
-                                    // Count commas (decimal separator in Turkish)
                                     const commaCount = (value.match(/,/g) || []).length;
-
-                                    // If there's more than one comma, keep only the first
                                     if (commaCount > 1) {
                                         const firstCommaIndex = value.indexOf(',');
                                         value = value.substring(0, firstCommaIndex + 1) + value.substring(firstCommaIndex + 1).replace(/,/g, '');
                                     }
-
-                                    // Remove all dots (they're thousand separators, will be re-added)
                                     value = value.replace(/\./g, '');
-
-                                    // Split by comma (decimal separator)
                                     const parts = value.split(',');
-
-                                    // Add thousand separators to integer part
                                     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-
-                                    // Join back with comma
                                     setAmount(parts.join(','));
                                 }}
                                 onWheel={(e) => e.currentTarget.blur()}
-                                className="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                className="w-full pl-7 sm:pl-8 pr-2 sm:pr-3 py-1.5 sm:py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-text-light dark:text-text-dark placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
                                 placeholder="0,00"
                                 required
                             />
@@ -360,7 +347,7 @@ export default function TransactionModal({
                         <select
                             value={inputCurrency}
                             onChange={(e) => setInputCurrency(e.target.value as 'USD' | 'EUR' | 'TRY')}
-                            className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
+                            className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
                         >
                             <option value="USD">USD</option>
                             <option value="EUR">EUR</option>
@@ -441,12 +428,13 @@ export default function TransactionModal({
                             </button>
                         </div>
                     </div>
-                )}
+                )
+                }
 
                 {/* Category & Date */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                        <label className="block text-xs sm:text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
                             {t('category')}
                         </label>
                         {showQuickAdd ? (
@@ -522,20 +510,22 @@ export default function TransactionModal({
                 </div>
 
                 {/* End Date (Only for Subscriptions) */}
-                {isSubscription && (
-                    <div>
-                        <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
-                            {t('endDate')} <span className="text-xs font-normal text-slate-400">({t('optional')})</span>
-                        </label>
-                        <input
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
-                            min={date}
-                        />
-                    </div>
-                )}
+                {
+                    isSubscription && (
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                                {t('endDate')} <span className="text-xs font-normal text-slate-400">({t('optional')})</span>
+                            </label>
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                min={date}
+                            />
+                        </div>
+                    )
+                }
 
                 {/* Actions */}
                 <div className="flex gap-2 mt-2">
@@ -555,7 +545,7 @@ export default function TransactionModal({
                         {isEditing ? t('save') : t('addTransaction')}
                     </button>
                 </div>
-            </form>
-        </Modal>
+            </form >
+        </Modal >
     );
 }
