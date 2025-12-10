@@ -5,7 +5,7 @@ import { parseDate } from '../utils/dateUtils';
 
 export default function History() {
     const { transactions } = useTransactions();
-    const { formatAmount, t } = useSettings();
+    const { formatAmount, t, language } = useSettings();
 
     // Calculate aggregated stats
     const totalIncome = transactions
@@ -29,13 +29,11 @@ export default function History() {
         const date = parseDate(transaction.date);
         // Handle invalid dates
         if (!date) {
-            // Try to parse if it's in a localized format or just fallback to "Unknown"
-            // For simplify, we group by the string if date parsing fails, but ideally we use dateUtils
-            // We can just use the string prefix if it follows YYYY-MM
             return groups;
         }
 
-        const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+        const locale = language === 'tr' ? 'tr-TR' : 'en-US';
+        const monthYear = date.toLocaleString(locale, { month: 'long', year: 'numeric' });
 
         if (!groups[monthYear]) {
             groups[monthYear] = {
@@ -135,17 +133,20 @@ export default function History() {
                                     <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                                         <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-2">{t('topTransactions')}</p>
                                         <div className="space-y-2">
-                                            {group.transactions.slice(0, 3).map(tx => (
-                                                <div key={tx.id} className="flex justify-between text-xs">
-                                                    <span className="truncate max-w-[150px] text-text-light dark:text-text-dark">{tx.name}</span>
-                                                    <span className={tx.type === 'income' ? 'text-success' : 'text-danger'}>
-                                                        {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                            {group.transactions.length > 3 && (
+                                            {group.transactions
+                                                .sort((a, b) => b.amount - a.amount)
+                                                .slice(0, 10)
+                                                .map(tx => (
+                                                    <div key={tx.id} className="flex justify-between text-xs">
+                                                        <span className="truncate max-w-[150px] text-text-light dark:text-text-dark">{tx.name}</span>
+                                                        <span className={tx.type === 'income' ? 'text-success' : 'text-danger'}>
+                                                            {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            {group.transactions.length > 10 && (
                                                 <p className="text-[10px] text-center text-text-secondary-light dark:text-text-secondary-dark italic">
-                                                    +{group.transactions.length - 3} {t('moreTransactions')}
+                                                    +{group.transactions.length - 10} {t('moreTransactions')}
                                                 </p>
                                             )}
                                         </div>

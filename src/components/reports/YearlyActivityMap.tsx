@@ -209,16 +209,31 @@ export default function YearlyActivityMap({
         setHoveredDay(null);
     };
 
-    const getCellColor = (status: DayData['status']) => {
-        switch (status) {
-            case 'positive':
-                return 'bg-success hover:bg-success/80';
-            case 'negative':
-                return 'bg-danger hover:bg-danger/80';
-            case 'neutral':
-                return 'bg-slate-400 dark:bg-slate-500 hover:bg-slate-500 dark:hover:bg-slate-400';
-            default:
-                return 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700';
+    const getCellColor = (day: DayData) => {
+        if (day.status === 'empty' || day.status === 'neutral') {
+            if (day.status === 'neutral') return 'bg-slate-400 dark:bg-slate-500 hover:bg-slate-500 dark:hover:bg-slate-400';
+            return 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700';
+        }
+
+        const amount = Math.abs(day.net / rate);
+        const isPositive = day.net > 0;
+
+        if (isPositive) {
+            if (amount < 50) return 'bg-green-100 hover:bg-green-200';
+            if (amount < 100) return 'bg-green-200 hover:bg-green-300';
+            if (amount < 250) return 'bg-green-300 hover:bg-green-400';
+            if (amount < 500) return 'bg-green-400 hover:bg-green-500';
+            if (amount < 1000) return 'bg-green-500 hover:bg-green-600';
+            if (amount < 2000) return 'bg-green-600 hover:bg-green-700';
+            return 'bg-green-700 hover:bg-green-800';
+        } else {
+            if (amount < 50) return 'bg-red-100 hover:bg-red-200';
+            if (amount < 100) return 'bg-red-200 hover:bg-red-300';
+            if (amount < 250) return 'bg-red-300 hover:bg-red-400';
+            if (amount < 500) return 'bg-red-400 hover:bg-red-500';
+            if (amount < 1000) return 'bg-red-500 hover:bg-red-600';
+            if (amount < 2000) return 'bg-red-600 hover:bg-red-700';
+            return 'bg-red-700 hover:bg-red-800';
         }
     };
 
@@ -315,7 +330,7 @@ export default function YearlyActivityMap({
                                         day ? (
                                             <div
                                                 key={`${weekIdx}-${dayIdx}`}
-                                                className={`aspect-square w-full min-h-3 sm:min-h-4 rounded-sm cursor-pointer transition-colors ${getCellColor(day.status)}`}
+                                                className={`aspect-square w-full min-h-3 sm:min-h-4 rounded-sm cursor-pointer transition-colors ${getCellColor(day)}`}
                                                 onMouseEnter={(e) => handleMouseEnter(day, e)}
                                                 onMouseLeave={handleMouseLeave}
                                             />
@@ -334,13 +349,24 @@ export default function YearlyActivityMap({
             </div>
 
             {/* Legend */}
-            <div className="flex items-center justify-end gap-1 mt-3 text-[11px] text-text-secondary-light dark:text-text-secondary-dark">
-                <span>{language === 'tr' ? 'Az' : 'Less'}</span>
-                <div className="w-[13px] h-[13px] rounded-sm bg-slate-200 dark:bg-slate-800"></div>
-                <div className="w-[13px] h-[13px] rounded-sm bg-slate-400 dark:bg-slate-500"></div>
-                <div className="w-[13px] h-[13px] rounded-sm bg-success/50"></div>
-                <div className="w-[13px] h-[13px] rounded-sm bg-success"></div>
-                <span>{language === 'tr' ? 'Çok' : 'More'}</span>
+            <div className="flex items-center justify-end gap-2 mt-3 text-[11px] text-text-secondary-light dark:text-text-secondary-dark">
+                <span className="mr-1">{language === 'tr' ? 'Harcama (Az → Çok)' : 'Expense (Less → More)'}</span>
+                <div className="flex gap-0.5">
+                    <div className="w-[10px] h-[10px] rounded-sm bg-red-100"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-red-300"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-red-500"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-red-700"></div>
+                </div>
+
+                <span className="mx-2">|</span>
+
+                <span className="mr-1">{language === 'tr' ? 'Gelir (Az → Çok)' : 'Income (Less → More)'}</span>
+                <div className="flex gap-0.5">
+                    <div className="w-[10px] h-[10px] rounded-sm bg-green-100"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-green-300"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-green-500"></div>
+                    <div className="w-[10px] h-[10px] rounded-sm bg-green-700"></div>
+                </div>
             </div>
 
             {/* Tooltip */}

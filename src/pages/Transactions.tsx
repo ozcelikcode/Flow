@@ -24,7 +24,7 @@ import { CSS } from '@dnd-kit/utilities';
 import type { Transaction } from '../types';
 import TransactionModal from '../components/dashboard/TransactionModal';
 import { getSubscriptionInfo } from '../services/subscriptionService';
-import { GripVertical, Pencil, List, LayoutGrid, X } from 'lucide-react';
+import { GripVertical, Pencil, List, LayoutGrid, X, CheckSquare, Square } from 'lucide-react';
 
 export default function TransactionsPage() {
     const { transactions, reorderTransactions, deleteTransaction, updateTransaction } = useTransactions();
@@ -67,7 +67,69 @@ export default function TransactionsPage() {
         return transactions.filter(t => t.category === selectedCategory);
     }, [transactions, selectedCategory]);
 
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
+
+    // ... existing sensors ...
+
+    // ... existing transactionCategories ...
+
+    // ... existing filteredTransactions ...
+
+    const handleTransactionClick = (e: React.MouseEvent, id: string) => {
+        // Prevent selection when clicking on buttons/inputs if any
+        // e.stopPropagation() should be called by the child if needed, but here we assume the click is valid
+
+        let newSelectedIds = [...selectedIds];
+
+        if (e.ctrlKey || e.metaKey) {
+            // Toggle selection
+            if (newSelectedIds.includes(id)) {
+                newSelectedIds = newSelectedIds.filter(selectedId => selectedId !== id);
+            } else {
+                newSelectedIds.push(id);
+                setLastSelectedId(id);
+            }
+        } else if (e.shiftKey && lastSelectedId) {
+            // Range selection
+            // We need to find indices in the CURRENT filtered list
+            const lastIndex = filteredTransactions.findIndex(t => t.id === lastSelectedId);
+            const currentIndex = filteredTransactions.findIndex(t => t.id === id);
+
+            if (lastIndex !== -1 && currentIndex !== -1) {
+                const start = Math.min(lastIndex, currentIndex);
+                const end = Math.max(lastIndex, currentIndex);
+                const rangeIds = filteredTransactions.slice(start, end + 1).map(t => t.id);
+
+                // Add unique ids from range
+                const uniqueIds = new Set([...newSelectedIds, ...rangeIds]);
+                newSelectedIds = Array.from(uniqueIds);
+            }
+        } else {
+            // Single selection without modifier keys
+            if (newSelectedIds.includes(id) && newSelectedIds.length === 1) {
+                // Already selected sole item, keep it.
+                // Optional: Deselect? No, standard is keep.
+                newSelectedIds = [id]; // Ensure only this one
+            } else {
+                newSelectedIds = [id];
+            }
+            setLastSelectedId(id);
+        }
+
+        setSelectedIds(newSelectedIds);
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedIds.length === filteredTransactions.length && filteredTransactions.length > 0) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(filteredTransactions.map(t => t.id));
+        }
+    };
+
     const handleDragEnd = (event: DragEndEvent) => {
+        // ... existing handleDragEnd ...
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
@@ -119,9 +181,27 @@ export default function TransactionsPage() {
     return (
         <div>
             <div className="flex items-center justify-between pb-4 sm:pb-6">
-                <h2 className="text-text-light dark:text-text-dark text-xl sm:text-[22px] font-bold leading-tight tracking-[-0.015em]">
-                    {t('allTransactions')}
-                </h2>
+                <div className="flex items-center gap-3 sm:gap-4">
+                    <h2 className="text-text-light dark:text-text-dark text-xl sm:text-[22px] font-bold leading-tight tracking-[-0.015em]">
+                        {t('allTransactions')}
+                    </h2>
+                    {filteredTransactions.length > 0 && (
+                        <button
+                            onClick={toggleSelectAll}
+                            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs sm:text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                            {selectedIds.length === filteredTransactions.length && filteredTransactions.length > 0 ? (
+                                <CheckSquare className="w-4 h-4 text-primary" />
+                            ) : (
+                                <Square className="w-4 h-4" />
+                            )}
+                            <span className="hidden sm:inline">{t('selectAll') || 'Select All'}</span>
+                            {selectedIds.length > 0 && (
+                                <span className="ml-1 text-primary font-bold">({selectedIds.length})</span>
+                            )}
+                        </button>
+                    )}
+                </div>
 
                 {/* View Toggle */}
                 <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
@@ -212,6 +292,8 @@ export default function TransactionsPage() {
                                         language={language}
                                         t={t}
                                         isDraggable={!selectedCategory}
+                                        isSelected={selectedIds.includes(transaction.id)}
+                                        onSelect={(e) => handleTransactionClick(e, transaction.id)}
                                     />
                                 ))
                             )}
@@ -232,6 +314,8 @@ export default function TransactionsPage() {
                                         translateCategory={translateCategory}
                                         language={language}
                                         isDraggable={!selectedCategory}
+                                        isSelected={selectedIds.includes(transaction.id)}
+                                        onSelect={(e) => handleTransactionClick(e, transaction.id)}
                                     />
                                 ))
                             )}
@@ -259,9 +343,11 @@ interface ListItemProps {
     language: 'en' | 'tr';
     t: (key: any) => string;
     isDraggable: boolean;
+    isSelected: boolean;
+    onSelect: (e: React.MouseEvent) => void;
 }
 
-function SortableListItem({ transaction, onEdit, formatAmount, translateCategory, language, t, isDraggable }: ListItemProps) {
+function SortableListItem({ transaction, onEdit, formatAmount, translateCategory, language, t, isDraggable, isSelected, onSelect }: ListItemProps) {
     const {
         attributes,
         listeners,
@@ -284,13 +370,22 @@ function SortableListItem({ transaction, onEdit, formatAmount, translateCategory
         <div
             ref={setNodeRef}
             style={style}
-            className="flex items-start sm:items-center justify-between p-3 sm:p-4 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm gap-2 sm:gap-4"
+            onClick={onSelect}
+            className={`flex items-start sm:items-center justify-between p-3 sm:p-4 bg-white dark:bg-surface-dark rounded-xl border shadow-sm gap-2 sm:gap-4 cursor-pointer transition-colors ${isSelected
+                ? 'border-primary bg-primary/5 dark:bg-primary/10'
+                : 'border-slate-200 dark:border-slate-800 hover:border-primary/50'
+                }`}
         >
             <div className="flex items-start sm:items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                <div className="mt-1 sm:mt-0 text-text-secondary-light dark:text-text-secondary-dark shrink-0">
+                    {isSelected ? <CheckSquare className="w-5 h-5 text-primary" /> : <Square className="w-5 h-5" />}
+                </div>
+
                 {isDraggable && (
                     <button
                         {...attributes}
                         {...listeners}
+                        onClick={(e) => e.stopPropagation()}
                         className="cursor-grab touch-none p-1 sm:p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 shrink-0 mt-1 sm:mt-0"
                     >
                         <GripVertical className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -335,7 +430,10 @@ function SortableListItem({ transaction, onEdit, formatAmount, translateCategory
                 </div>
 
                 <button
-                    onClick={onEdit}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit();
+                    }}
                     className="text-primary hover:bg-primary/10 p-1.5 sm:p-2 rounded-lg transition-colors"
                 >
                     <Pencil className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -352,9 +450,11 @@ interface GridItemProps {
     translateCategory: (category: string) => string;
     language: 'en' | 'tr';
     isDraggable: boolean;
+    isSelected: boolean;
+    onSelect: (e: React.MouseEvent) => void;
 }
 
-function SortableGridItem({ transaction, onEdit, formatAmount, translateCategory, language, isDraggable }: GridItemProps) {
+function SortableGridItem({ transaction, onEdit, formatAmount, translateCategory, language, isDraggable, isSelected, onSelect }: GridItemProps) {
     const {
         attributes,
         listeners,
@@ -379,40 +479,78 @@ function SortableGridItem({ transaction, onEdit, formatAmount, translateCategory
         <div
             ref={setNodeRef}
             style={style}
-            {...(isDraggable ? { ...attributes, ...listeners } : {})}
-            className={`bg-white dark:bg-surface-dark rounded-xl border p-4 group relative ${isDragging
-                ? 'border-primary shadow-xl'
-                : 'border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-primary/30'
+            onClick={onSelect}
+            className={`rounded-xl border p-4 group relative select-none cursor-pointer ${isDragging
+                ? 'border-primary shadow-xl bg-white dark:bg-surface-dark'
+                : isSelected
+                    ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-sm'
+                    : 'bg-white dark:bg-surface-dark border-slate-200 dark:border-slate-800 hover:shadow-lg hover:border-primary/30'
                 }`}
         >
-            {/* Amount Header */}
-            <div className={`text-lg sm:text-xl font-bold mb-2 ${transaction.type === 'income' ? 'text-success' : 'text-danger'}`}>
-                {transaction.type === 'expense' ? '-' : '+'}{formatAmount(transaction.amount)}
+            {/* Drag Handle Overlay */}
+            {isDraggable && (
+                <div
+                    {...attributes}
+                    {...listeners}
+                    className="absolute inset-0 z-0"
+                    onClick={(e) => e.stopPropagation()} // Prevent selection when dragging? No, usually distinct.
+                // Actually, if we use inset-0 for listeners, it covers everything.
+                // To handle click selection, we need to ensure the click passes through or is handled.
+                // If dnd-kit consumes the event, onClick on parent might not fire.
+                // But dnd-kit usually allows clicks.
+                // However, placing listeners on a covering div blocks access to buttons underneath unless z-index managed.
+                // Let's attach listeners to the CARD itself (as before), but separate onClick.
+                // The previous code had listeners on the div directly.
+                // I removed listeners from the main div in this replacement, but added this overlay.
+                // WAIT. If I want the whole card draggable AND clickable...
+                // Standard dnd-kit: attach listeners to the element.
+                // Clicking without dragging triggers onClick.
+                // So I should attach listeners to the main div as before.
+                />
+            )}
+
+            {/* Reverting to attaching listeners to main div for simplicity, but careful with click */}
+
+            {/* Selection Checkbox */}
+            <div className="absolute top-3 right-3 z-10 text-text-secondary-light dark:text-text-secondary-dark">
+                {isSelected ? <CheckSquare className="w-5 h-5 text-primary" /> : <Square className="w-5 h-5 opacity-0 group-hover:opacity-50" />}
             </div>
 
-            {/* Name */}
-            <p className="font-medium text-sm text-text-light dark:text-text-dark truncate mb-1">
-                {transaction.name}
-            </p>
+            {/* Content with z-index to sit above drag listeners if any, or just normal flow */}
+            <div className="relative z-10 pointer-events-none">
+                {/* Pointer events none to let clicks pass to main div? 
+                    But buttons need pointer-events-auto.
+                */}
 
-            {/* Category */}
-            <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark truncate mb-2">
-                {translateCategory(transaction.category)}
-            </p>
+                {/* Amount Header */}
+                <div className={`text-lg sm:text-xl font-bold mb-2 ${transaction.type === 'income' ? 'text-success' : 'text-danger'}`}>
+                    {transaction.type === 'expense' ? '-' : '+'}{formatAmount(transaction.amount)}
+                </div>
 
-            {/* Date & Badge */}
-            <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] text-text-secondary-light dark:text-text-secondary-dark">
-                    {transaction.date.split(',')[0]}
+                {/* Name */}
+                <p className="font-medium text-sm text-text-light dark:text-text-dark truncate mb-1">
+                    {transaction.name}
                 </p>
-                {subInfo.isSubscription && (
-                    <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-medium ${subInfo.isActive
-                        ? 'bg-primary/10 text-primary'
-                        : 'bg-slate-200 dark:bg-slate-700 text-text-secondary-light dark:text-text-secondary-dark'
-                        }`}>
-                        {subInfo.recurrenceLabel}
-                    </span>
-                )}
+
+                {/* Category */}
+                <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark truncate mb-2">
+                    {translateCategory(transaction.category)}
+                </p>
+
+                {/* Date & Badge */}
+                <div className="flex items-center justify-between gap-2">
+                    <p className="text-[10px] text-text-secondary-light dark:text-text-secondary-dark">
+                        {transaction.date.split(',')[0]}
+                    </p>
+                    {subInfo.isSubscription && (
+                        <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-medium ${subInfo.isActive
+                            ? 'bg-primary/10 text-primary'
+                            : 'bg-slate-200 dark:bg-slate-700 text-text-secondary-light dark:text-text-secondary-dark'
+                            }`}>
+                            {subInfo.recurrenceLabel}
+                        </span>
+                    )}
+                </div>
             </div>
 
             {/* Edit Button - stops drag propagation */}
@@ -422,7 +560,7 @@ function SortableGridItem({ transaction, onEdit, formatAmount, translateCategory
                     onEdit();
                 }}
                 onPointerDown={(e) => e.stopPropagation()}
-                className="mt-3 w-full py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-primary text-xs font-medium flex items-center justify-center gap-1 hover:bg-primary/5 active:bg-primary/10 transition-colors cursor-pointer"
+                className="relative z-20 mt-3 w-full py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-primary text-xs font-medium flex items-center justify-center gap-1 hover:bg-primary/5 active:bg-primary/10 transition-colors cursor-pointer"
             >
                 <Pencil className="w-3 h-3" />
                 {language === 'tr' ? 'Düzenle' : 'Edit'}

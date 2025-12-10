@@ -174,6 +174,9 @@ export const translations = {
         monthlyHistory: 'Monthly Summary',
         topTransactions: 'Top Transactions',
         moreTransactions: 'more transactions',
+        // Selection
+        selectAll: 'Select All',
+        selected: 'selected',
     },
     tr: {
         // Navigation
@@ -334,6 +337,9 @@ export const translations = {
         monthlyHistory: 'Aylık Özet',
         topTransactions: 'Öne Çıkan İşlemler',
         moreTransactions: 'daha fazla işlem',
+        // Selection
+        selectAll: 'Tümünü Seç',
+        selected: 'seçildi',
     }
 } as const;
 
