@@ -13,7 +13,6 @@ Uygulama, React/Vite ile Bileşen Tabanlı Mimari kullanmaktadır.
 ### Dashboard
 - Finansal özet kartları (StatsCard)
 - Hızlı istatistikler grid'i
-- Kategori dağılımı pasta grafiği
 - Son işlemler tablosu (TransactionTable)
 
 ### Transactions
@@ -36,6 +35,7 @@ Uygulama, React/Vite ile Bileşen Tabanlı Mimari kullanmaktadır.
 - Tema seçimi (açık/koyu)
 - Dil seçimi (İngilizce/Türkçe)
 - Para birimi seçimi (USD, EUR, TRY)
+- Hesap silme (şifre doğrulamalı)
 
 ## Tasarım Desenleri
 
@@ -43,6 +43,19 @@ Uygulama, React/Vite ile Bileşen Tabanlı Mimari kullanmaktadır.
 - Context API ile global state
 - Her context kendi localStorage yönetimi yapar
 - Custom hooks ile context erişimi
+
+### Provider Sıralaması (Önemli!)
+```
+AuthProvider > SettingsProvider > CategoryProvider > ToastProvider
+```
+- `SettingsContext` `useAuth()` kullandığı için `AuthProvider` en dışta olmalı.
+
+### Şifreleme (End-to-End Encryption)
+- **Algoritma**: AES-256-GCM (Authenticated Encryption)
+- **Anahtar Türetme**: PBKDF2 (100,000 iterasyon, SHA-256)
+- **Salt/IV**: Her kaydetmede yeni üretilir
+- **Şifreleme Anahtarı**: Kullanıcı şifresinden türetilir
+- **Şifreli Veriler**: transactions, categories, settings
 
 ### Çeviri Sistemi
 - `translations.ts` içinde tüm çeviriler

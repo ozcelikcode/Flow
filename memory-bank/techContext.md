@@ -10,33 +10,43 @@
 - **Grafikler**: Recharts
 - **Sürükle-Bırak**: @dnd-kit/core, @dnd-kit/sortable
 
+### Güvenlik
+- **Şifreleme**: Web Crypto API (AES-256-GCM)
+- **Anahtar Türetme**: PBKDF2 (100,000 iterasyon)
+- **Kimlik Doğrulama**: Yerel session (localStorage)
+
 ### State Yönetimi
 - React Context API
-  - `TransactionContext`: İşlem CRUD ve sıralama
-  - `SettingsContext`: Tema, dil, para birimi
-  - `CategoryContext`: Kategori CRUD ve çeviri
+  - `AuthContext`: Kullanıcı kimlik doğrulama ve oturum
+  - `TransactionContext`: İşlem CRUD ve sıralama (şifreli)
+  - `SettingsContext`: Tema, dil, para birimi (şifreli)
+  - `CategoryContext`: Kategori CRUD ve çeviri (şifreli)
+  - `ToastContext`: Bildirim yönetimi
 
-### Veri Kalıcılığı
+### Veri Kalıcılığı (Şifreli)
 - localStorage
-  - `flow_transactions`: İşlem listesi
-  - `flow_categories`: Özel kategoriler
-  - `flow_settings`: Tema, dil, para birimi
-  - `transactionViewMode`: Liste/Grid tercih
+  - `flow_transactions_{userId}`: İşlem listesi (şifreli)
+  - `flow_categories_{userId}`: Özel kategoriler (şifreli)
+  - `flow_settings_{userId}`: Tema, dil, para birimi (şifreli)
+  - `flow_users`: Kullanıcı listesi (hash'li şifreler)
+  - `flow_session`: Oturum bilgisi
 
 ## Proje Yapısı
 ```
 src/
 ├── components/
+│   ├── auth/            # ProtectedRoute
 │   ├── dashboard/       # TransactionModal, StatsCard, TransactionTable
 │   ├── layout/          # Layout (sidebar, navbar)
 │   ├── reports/         # YearlyActivityMap
 │   └── ui/              # Modal
 ├── context/             # React Context providers
 ├── i18n/               # Çeviri dosyaları
-├── pages/              # Dashboard, Transactions, Reports, Settings, Categories
-├── services/           # subscriptionService
+├── pages/              # Dashboard, Transactions, Reports, Settings, Categories, Upcoming, History
+├── services/           # subscriptionService, authService, cryptoService
 ├── styles/             # charts.css
 ├── types/              # TypeScript interfaces
+├── utils/              # dateUtils
 └── App.tsx             # Router ve provider sarmalayıcı
 ```
 
@@ -50,3 +60,4 @@ src/
 - Responsive tasarım zorunlu (mobil-first)
 - Dark/Light tema desteği zorunlu
 - Çift dil desteği (EN/TR) zorunlu
+- Tüm kişisel veriler şifreli saklanmalı

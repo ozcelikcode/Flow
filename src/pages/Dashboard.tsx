@@ -4,12 +4,15 @@ import StatsCard from '../components/dashboard/StatsCard';
 import TransactionTable from '../components/dashboard/TransactionTable';
 import {
     TrendingDown,
+    TrendingUp,
     FolderOpen,
     RefreshCw,
     CreditCard,
     FileText,
     BarChart3,
-    Calendar
+    Calendar,
+    Wallet,
+    PiggyBank
 } from 'lucide-react';
 import { parseLocalizedDate as parseDate } from '../utils/dateUtils';
 
@@ -121,12 +124,14 @@ export default function Dashboard() {
                     change={t('basedOnTransactions')}
                     trend={currentBalance >= 0 ? 'up' : 'down'}
                     trendColor={currentBalance >= 0 ? undefined : 'danger'}
+                    icon={<Wallet className="w-4 h-4 sm:w-5 sm:h-5" />}
                 />
                 <StatsCard
                     title={t('income')}
                     amount={formatAmount(totalIncome)}
                     change={t('basedOnTransactions')}
                     trend="up"
+                    icon={<TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />}
                 />
                 <StatsCard
                     title={t('expense')}
@@ -134,6 +139,7 @@ export default function Dashboard() {
                     change={t('basedOnTransactions')}
                     trend="down"
                     trendColor="danger"
+                    icon={<TrendingDown className="w-4 h-4 sm:w-5 sm:h-5" />}
                 />
                 <StatsCard
                     title={t('totalSavings')}
@@ -141,6 +147,7 @@ export default function Dashboard() {
                     change={t('basedOnTransactions')}
                     trend={totalSavings >= 0 ? 'up' : 'down'}
                     trendColor={totalSavings >= 0 ? 'success' : 'danger'}
+                    icon={<PiggyBank className="w-4 h-4 sm:w-5 sm:h-5" />}
                 />
             </div>
 
@@ -225,7 +232,8 @@ export default function Dashboard() {
             </div>
 
             {/* Recent Transactions */}
-            <h2 className="text-text-light dark:text-text-dark text-lg sm:text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">
+            <h2 className="text-text-light dark:text-text-dark text-lg sm:text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
                 {t('recentTransactions')}
             </h2>
             <TransactionTable transactions={transactions.slice(0, 10)} />

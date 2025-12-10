@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { Category } from '../types';
+import { useAuth } from './AuthContext';
+import { encryptAndSave, loadAndDecrypt } from '../services/cryptoService';
 
 // Default categories with bilingual names and descriptions
 const DEFAULT_CATEGORIES: Category[] = [
@@ -30,47 +32,73 @@ interface CategoryContextType {
     getExpenseCategories: () => Category[];
     getIncomeCategories: () => Category[];
     getCategoryDisplayName: (category: Category, language: 'en' | 'tr') => string;
+    isLoading: boolean;
 }
 
 const CategoryContext = createContext<CategoryContextType | null>(null);
 
 export function CategoryProvider({ children }: { children: ReactNode }) {
-    const [categories, setCategories] = useState<Category[]>(() => {
-        const saved = localStorage.getItem('flow_categories');
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                // Migrate old categories that don't have nameEn/nameTr
-                const migrated = parsed.map((c: any) => ({
-                    ...c,
-                    nameEn: c.nameEn || c.name,
-                    nameTr: c.nameTr || c.name,
-                }));
-                // Merge with defaults to ensure all default categories exist
-                const existingIds = new Set(migrated.map((c: Category) => c.id));
-                const merged = [...migrated];
-                DEFAULT_CATEGORIES.forEach(dc => {
-                    if (!existingIds.has(dc.id)) {
-                        merged.push(dc);
-                    } else {
-                        // Update default category translations if they exist
-                        const idx = merged.findIndex((c: Category) => c.id === dc.id);
-                        if (idx !== -1 && !merged[idx].isCustom) {
-                            merged[idx] = { ...merged[idx], nameEn: dc.nameEn, nameTr: dc.nameTr };
-                        }
-                    }
-                });
-                return merged;
-            } catch {
-                return DEFAULT_CATEGORIES;
-            }
-        }
-        return DEFAULT_CATEGORIES;
-    });
+    const { user } = useAuth();
+    const userId = user?.id;
+    const userPassword = user?.passwordHash?.substring(0, 32) || 'default';
 
+    const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const getStorageKey = useCallback(() => {
+        return userId ? `flow_categories_${userId}` : 'flow_categories';
+    }, [userId]);
+
+    // Load encrypted categories
     useEffect(() => {
-        localStorage.setItem('flow_categories', JSON.stringify(categories));
-    }, [categories]);
+        const loadData = async () => {
+            if (!userId) {
+                setCategories(DEFAULT_CATEGORIES);
+                setIsLoading(false);
+                return;
+            }
+
+            setIsLoading(true);
+            const key = getStorageKey();
+
+            try {
+                const data = await loadAndDecrypt<Category[]>(key, userPassword);
+                if (data && data.length > 0) {
+                    // Merge with defaults
+                    const existingIds = new Set(data.map(c => c.id));
+                    const merged = [...data];
+                    DEFAULT_CATEGORIES.forEach(dc => {
+                        if (!existingIds.has(dc.id)) {
+                            merged.push(dc);
+                        }
+                    });
+                    setCategories(merged);
+                } else {
+                    setCategories(DEFAULT_CATEGORIES);
+                }
+            } catch {
+                setCategories(DEFAULT_CATEGORIES);
+            }
+            setIsLoading(false);
+        };
+
+        loadData();
+    }, [userId, userPassword, getStorageKey]);
+
+    // Save encrypted categories
+    const saveCategories = useCallback(async (cats: Category[]) => {
+        if (!userId) return;
+
+        // Only save custom categories
+        const customCats = cats.filter(c => c.isCustom);
+        const key = getStorageKey();
+
+        try {
+            await encryptAndSave(key, customCats, userPassword);
+        } catch (error) {
+            console.error('Failed to save categories:', error);
+        }
+    }, [userId, userPassword, getStorageKey]);
 
     const addCategory = (category: Omit<Category, 'id' | 'isCustom'>): Category => {
         const newCategory: Category = {
@@ -78,22 +106,28 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
             id: `custom-${Date.now()}`,
             isCustom: true
         };
-        setCategories(prev => [...prev, newCategory]);
+        const newCats = [...categories, newCategory];
+        setCategories(newCats);
+        saveCategories(newCats);
         return newCategory;
     };
 
     const updateCategory = (id: string, updates: Partial<Omit<Category, 'id' | 'isCustom'>>) => {
-        setCategories(prev => prev.map(cat =>
+        const newCats = categories.map(cat =>
             cat.id === id ? { ...cat, ...updates } : cat
-        ));
+        );
+        setCategories(newCats);
+        saveCategories(newCats);
     };
 
     const deleteCategory = (id: string): boolean => {
         const category = categories.find(c => c.id === id);
         if (!category || !category.isCustom) {
-            return false; // Can't delete default categories
+            return false;
         }
-        setCategories(prev => prev.filter(c => c.id !== id));
+        const newCats = categories.filter(c => c.id !== id);
+        setCategories(newCats);
+        saveCategories(newCats);
         return true;
     };
 
@@ -122,7 +156,8 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
             getCategoryByName,
             getExpenseCategories,
             getIncomeCategories,
-            getCategoryDisplayName
+            getCategoryDisplayName,
+            isLoading
         }}>
             {children}
         </CategoryContext.Provider>

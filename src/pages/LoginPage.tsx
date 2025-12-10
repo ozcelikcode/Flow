@@ -7,7 +7,7 @@ import { LogIn, User, Lock, Clock, AlertCircle } from 'lucide-react';
 export default function LoginPage() {
     const navigate = useNavigate();
     const { login } = useAuth();
-    const { t, language } = useSettings();
+    const { language } = useSettings();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');

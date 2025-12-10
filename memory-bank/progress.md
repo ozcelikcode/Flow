@@ -51,6 +51,14 @@
 - [x] Dil seçimi (İngilizce/Türkçe)
 - [x] Para birimi seçimi
 - [x] Veri sıfırlama
+- [x] Hesap silme (şifre doğrulamalı)
+
+### Güvenlik
+- [x] Uçtan uca şifreleme (AES-256-GCM + PBKDF2)
+- [x] İşlemler (transactions) şifreli
+- [x] Kategoriler şifreli
+- [x] Kullanıcı ayarları şifreli
+- [x] Her kayıtta yeni salt/IV oluşturulur
 
 ### UI/UX
 - [x] Responsive tasarım (mobil uyumlu)

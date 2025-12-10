@@ -1,6 +1,8 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { translations, categoryKeys, type Language, type TranslationKey } from '../i18n/translations';
+import { useAuth } from './AuthContext';
+import { encryptAndSave, loadAndDecrypt } from '../services/cryptoService';
 
 type Currency = 'USD' | 'EUR' | 'TRY';
 
@@ -9,6 +11,14 @@ interface CurrencyRates {
     EUR: number;
     TRY: number;
     lastUpdated: string;
+}
+
+// Encrypted user settings interface
+interface UserSettings {
+    theme: 'light' | 'dark';
+    language: Language;
+    currency: Currency;
+    currencyRates: CurrencyRates;
 }
 
 interface SettingsContextType {
@@ -24,6 +34,7 @@ interface SettingsContextType {
     setLanguage: (language: Language) => void;
     t: (key: TranslationKey, params?: Record<string, string>) => string;
     translateCategory: (category: string) => string;
+    isLoading: boolean;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -41,35 +52,91 @@ const CURRENCY_LOCALES: Record<Currency, { locale: string; currency: string }> =
     TRY: { locale: 'tr-TR', currency: 'TRY' },
 };
 
+// Get default theme from system preference
+function getDefaultTheme(): 'light' | 'dark' {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
 export function SettingsProvider({ children }: { children: ReactNode }) {
-    const [theme, setThemeState] = useState<'light' | 'dark'>(() => {
-        const saved = localStorage.getItem('theme');
-        if (!saved) {
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-        return saved as 'light' | 'dark';
-    });
+    const { user } = useAuth();
+    const userId = user?.id;
+    const userPassword = user?.passwordHash?.substring(0, 32) || 'default';
 
-    const [currency, setCurrencyState] = useState<Currency>(() => {
-        const saved = localStorage.getItem('currency');
-        return (saved as Currency) || 'USD';
-    });
-
-    const [language, setLanguageState] = useState<Language>(() => {
-        const saved = localStorage.getItem('language');
-        return (saved as Language) || 'en';
-    });
-
-    const [rates, setRates] = useState<CurrencyRates>(() => {
-        const saved = localStorage.getItem('currencyRates');
-        return saved ? JSON.parse(saved) : DEFAULT_RATES;
-    });
-
+    const [theme, setThemeState] = useState<'light' | 'dark'>(getDefaultTheme);
+    const [currency, setCurrencyState] = useState<Currency>('USD');
+    const [language, setLanguageState] = useState<Language>('en');
+    const [rates, setRates] = useState<CurrencyRates>(DEFAULT_RATES);
     const [isUpdatingRates, setIsUpdatingRates] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Apply theme
+    // Get user-specific storage key
+    const getStorageKey = useCallback(() => {
+        return userId ? `flow_settings_${userId}` : 'flow_settings';
+    }, [userId]);
+
+    // Load encrypted settings when user changes
     useEffect(() => {
-        localStorage.setItem('theme', theme);
+        const loadData = async () => {
+            if (!userId) {
+                // Not logged in - use defaults or system preferences
+                setThemeState(getDefaultTheme());
+                setLanguageState('en');
+                setCurrencyState('USD');
+                setRates(DEFAULT_RATES);
+                setIsLoading(false);
+                return;
+            }
+
+            setIsLoading(true);
+            const key = getStorageKey();
+
+            try {
+                const data = await loadAndDecrypt<UserSettings>(key, userPassword);
+                if (data) {
+                    setThemeState(data.theme);
+                    setLanguageState(data.language);
+                    setCurrencyState(data.currency);
+                    setRates(data.currencyRates);
+                }
+            } catch (error) {
+                console.error('Failed to load settings:', error);
+                // Try loading unencrypted data for migration
+                const stored = localStorage.getItem(key);
+                if (stored) {
+                    try {
+                        const parsed = JSON.parse(stored);
+                        if (parsed && typeof parsed === 'object' && !('iv' in parsed)) {
+                            // Old format - migrate
+                            if (parsed.theme) setThemeState(parsed.theme);
+                            if (parsed.language) setLanguageState(parsed.language);
+                            if (parsed.currency) setCurrencyState(parsed.currency);
+                            if (parsed.currencyRates) setRates(parsed.currencyRates);
+                        }
+                    } catch {
+                        // Ignore parse errors
+                    }
+                }
+            }
+            setIsLoading(false);
+        };
+
+        loadData();
+    }, [userId, userPassword, getStorageKey]);
+
+    // Save encrypted settings
+    const saveSettings = useCallback(async (settings: UserSettings) => {
+        if (!userId) return;
+
+        const key = getStorageKey();
+        try {
+            await encryptAndSave(key, settings, userPassword);
+        } catch (error) {
+            console.error('Failed to save settings:', error);
+        }
+    }, [userId, userPassword, getStorageKey]);
+
+    // Apply theme to DOM
+    useEffect(() => {
         if (theme === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
@@ -77,29 +144,20 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         }
     }, [theme]);
 
-    useEffect(() => {
-        localStorage.setItem('currency', currency);
-    }, [currency]);
-
-    useEffect(() => {
-        localStorage.setItem('language', language);
-    }, [language]);
-
-    useEffect(() => {
-        localStorage.setItem('currencyRates', JSON.stringify(rates));
-    }, [rates]);
-
-    const setTheme = (newTheme: 'light' | 'dark') => {
+    const setTheme = useCallback((newTheme: 'light' | 'dark') => {
         setThemeState(newTheme);
-    };
+        saveSettings({ theme: newTheme, language, currency, currencyRates: rates });
+    }, [language, currency, rates, saveSettings]);
 
-    const setCurrency = (newCurrency: Currency) => {
+    const setCurrency = useCallback((newCurrency: Currency) => {
         setCurrencyState(newCurrency);
-    };
+        saveSettings({ theme, language, currency: newCurrency, currencyRates: rates });
+    }, [theme, language, rates, saveSettings]);
 
-    const setLanguage = (newLanguage: Language) => {
+    const setLanguage = useCallback((newLanguage: Language) => {
         setLanguageState(newLanguage);
-    };
+        saveSettings({ theme, language: newLanguage, currency, currencyRates: rates });
+    }, [theme, currency, rates, saveSettings]);
 
     const t = (key: TranslationKey, params?: Record<string, string>): string => {
         let text: string = translations[language][key] || translations.en[key] || key;
@@ -135,15 +193,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                     lastUpdated: new Date().toLocaleString(language === 'tr' ? 'tr-TR' : 'en-US'),
                 };
                 setRates(newRates);
+                saveSettings({ theme, language, currency, currencyRates: newRates });
             } else {
                 throw new Error('API error');
             }
         } catch (error) {
             console.error('Failed to fetch rates:', error);
-            setRates(prev => ({
-                ...prev,
+            const newRates = {
+                ...rates,
                 lastUpdated: `${new Date().toLocaleString(language === 'tr' ? 'tr-TR' : 'en-US')} (offline)`,
-            }));
+            };
+            setRates(newRates);
+            saveSettings({ theme, language, currency, currencyRates: newRates });
         } finally {
             setIsUpdatingRates(false);
         }
@@ -174,7 +235,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             language,
             setLanguage,
             t,
-            translateCategory
+            translateCategory,
+            isLoading
         }}>
             {children}
         </SettingsContext.Provider>
@@ -188,4 +250,3 @@ export function useSettings() {
     }
     return context;
 }
-

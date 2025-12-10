@@ -391,3 +391,45 @@ function getNextMonthDate(date: Date): string {
 export function getUserStorageKey(key: string, userId: string): string {
     return `flow_${key}_${userId}`;
 }
+
+// Delete user account and all associated data
+export async function deleteAccount(userId: string, password: string): Promise<{ success: boolean; error?: string }> {
+    const users = await getUsers();
+    const user = users.find(u => u.id === userId);
+
+    if (!user) {
+        return { success: false, error: 'userNotFound' };
+    }
+
+    // Can't delete admin account
+    if (user.isAdmin) {
+        return { success: false, error: 'cannotDeleteAdmin' };
+    }
+
+    // Verify password
+    const hash = await hashPassword(password, user.salt);
+    if (hash !== user.passwordHash) {
+        return { success: false, error: 'wrongPassword' };
+    }
+
+    // Delete all user data from localStorage
+    const keysToDelete = [
+        `flow_transactions_${userId}`,
+        `flow_categories_${userId}`,
+        `flow_settings_${userId}`
+    ];
+
+    keysToDelete.forEach(key => {
+        localStorage.removeItem(key);
+    });
+
+    // Remove user from users list
+    const updatedUsers = users.filter(u => u.id !== userId);
+    saveUsers(updatedUsers);
+
+    // Clear session
+    clearSession();
+
+    return { success: true };
+}
+

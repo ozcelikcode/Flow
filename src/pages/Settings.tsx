@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSettings } from '../context/SettingsContext';
 import { useAuth, SESSION_DURATIONS, PROFILE_ICONS, type SessionDuration, type ProfileIcon } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { RefreshCw, LogOut, Shield, Clock, Edit2, Lock, Check, X, Palette, Languages, Coins } from 'lucide-react';
+import { RefreshCw, LogOut, Shield, Clock, Edit2, Lock, Check, X, Palette, Languages, Coins, Trash2, AlertTriangle } from 'lucide-react';
 import * as Icons from 'lucide-react';
 
 // Icon component that renders a dynamic icon by name
@@ -14,7 +14,7 @@ function ProfileIconComponent({ name, className }: { name: string; className?: s
 
 export default function Settings() {
     const { theme, setTheme, currency, setCurrency, rates, updateRates, isUpdatingRates, language, setLanguage, t } = useSettings();
-    const { user, logout, sessionDuration, setSessionDuration, updateUserProfile, updatePassword } = useAuth();
+    const { user, logout, sessionDuration, setSessionDuration, updateUserProfile, updatePassword, deleteUserAccount } = useAuth();
     const { showToast } = useToast();
 
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -26,6 +26,12 @@ export default function Settings() {
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
+
+    // Delete account states
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deletePassword, setDeletePassword] = useState('');
+    const [deleteError, setDeleteError] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const durationLabels: Record<SessionDuration, { en: string; tr: string }> = {
         '1d': { en: '1 Day', tr: '1 Gün' },
@@ -83,6 +89,32 @@ export default function Settings() {
             } else {
                 setPasswordError(language === 'tr' ? 'Şifre değiştirilemedi' : 'Failed to change password');
             }
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (!deletePassword) {
+            setDeleteError(language === 'tr' ? 'Şifrenizi girin' : 'Enter your password');
+            return;
+        }
+
+        setIsDeleting(true);
+        setDeleteError('');
+
+        const result = await deleteUserAccount(deletePassword);
+
+        if (result.success) {
+            showToast(language === 'tr' ? 'Hesabınız silindi' : 'Your account has been deleted', 'success');
+            // User will be redirected to login page automatically
+        } else {
+            if (result.error === 'wrongPassword') {
+                setDeleteError(language === 'tr' ? 'Şifre yanlış' : 'Wrong password');
+            } else if (result.error === 'cannotDeleteAdmin') {
+                setDeleteError(language === 'tr' ? 'Admin hesabı silinemez' : 'Admin account cannot be deleted');
+            } else {
+                setDeleteError(language === 'tr' ? 'Hesap silinemedi' : 'Failed to delete account');
+            }
+            setIsDeleting(false);
         }
     };
 
@@ -144,8 +176,8 @@ export default function Settings() {
                                                 key={iconName}
                                                 onClick={() => setEditProfileIcon(iconName)}
                                                 className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${editProfileIcon === iconName
-                                                        ? 'bg-primary text-white ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
-                                                        : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark hover:bg-slate-200 dark:hover:bg-slate-700'
+                                                    ? 'bg-primary text-white ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-900'
+                                                    : 'bg-slate-100 dark:bg-slate-800 text-text-secondary-light dark:text-text-secondary-dark hover:bg-slate-200 dark:hover:bg-slate-700'
                                                     }`}
                                             >
                                                 <ProfileIconComponent name={iconName} className="w-5 h-5" />
@@ -322,6 +354,78 @@ export default function Settings() {
                             </button>
                         )}
                     </section>
+
+                    {/* Danger Zone - Delete Account */}
+                    {!user?.isAdmin && (
+                        <section className="bg-white dark:bg-surface-dark p-4 sm:p-6 rounded-xl border border-red-200 dark:border-red-900/50 shadow-sm">
+                            <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-danger">
+                                <AlertTriangle className="w-5 h-5" />
+                                {language === 'tr' ? 'Tehlikeli Bölge' : 'Danger Zone'}
+                            </h3>
+
+                            <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg mb-4">
+                                <p className="text-sm text-red-700 dark:text-red-300">
+                                    {language === 'tr'
+                                        ? 'Hesabınızı sildiğinizde tüm verileriniz (işlemler, kategoriler, ayarlar) kalıcı olarak silinecektir. Bu işlem geri alınamaz!'
+                                        : 'When you delete your account, all your data (transactions, categories, settings) will be permanently deleted. This action cannot be undone!'}
+                                </p>
+                            </div>
+
+                            {showDeleteConfirm ? (
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="block text-xs font-medium mb-1 text-danger">
+                                            {language === 'tr' ? 'Onaylamak için şifrenizi girin' : 'Enter your password to confirm'}
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={deletePassword}
+                                            onChange={(e) => setDeletePassword(e.target.value)}
+                                            placeholder={language === 'tr' ? 'Şifreniz' : 'Your password'}
+                                            className="w-full px-3 py-2 rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-slate-800 text-sm focus:border-danger focus:ring-1 focus:ring-danger outline-none"
+                                            disabled={isDeleting}
+                                        />
+                                    </div>
+                                    {deleteError && (
+                                        <p className="text-xs text-danger">{deleteError}</p>
+                                    )}
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={handleDeleteAccount}
+                                            disabled={isDeleting}
+                                            className="flex-1 py-2 px-4 bg-danger hover:bg-danger/90 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                        >
+                                            {isDeleting ? (
+                                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <Trash2 className="w-4 h-4" />
+                                            )}
+                                            {language === 'tr' ? 'Evet, Hesabımı Sil' : 'Yes, Delete My Account'}
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowDeleteConfirm(false);
+                                                setDeletePassword('');
+                                                setDeleteError('');
+                                            }}
+                                            disabled={isDeleting}
+                                            className="flex-1 py-2 px-4 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-text-light dark:text-text-dark text-sm font-medium rounded-lg transition-colors"
+                                        >
+                                            {language === 'tr' ? 'İptal' : 'Cancel'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    className="w-full py-2 px-4 flex items-center justify-center gap-2 bg-danger/10 hover:bg-danger/20 text-danger text-sm font-medium rounded-lg transition-colors border border-danger/30"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    {language === 'tr' ? 'Hesabımı Sil' : 'Delete My Account'}
+                                </button>
+                            )}
+                        </section>
+                    )}
                 </div>
 
                 {/* Right Column */}

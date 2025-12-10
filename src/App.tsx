@@ -58,9 +58,9 @@ function ProtectedApp() {
 
 export default function App() {
   return (
-    <SettingsProvider>
-      <CategoryProvider>
-        <AuthProvider>
+    <AuthProvider>
+      <SettingsProvider>
+        <CategoryProvider>
           <ToastProvider>
             <Router>
               <Routes>
@@ -70,8 +70,8 @@ export default function App() {
               </Routes>
             </Router>
           </ToastProvider>
-        </AuthProvider>
-      </CategoryProvider>
-    </SettingsProvider>
+        </CategoryProvider>
+      </SettingsProvider>
+    </AuthProvider>
   );
 }

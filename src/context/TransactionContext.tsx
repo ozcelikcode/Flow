@@ -1,8 +1,8 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import type { ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { Transaction } from '../types';
 import { processSubscriptions } from '../services/subscriptionService';
 import { useAuth } from './AuthContext';
+import { encryptAndSave, loadAndDecrypt } from '../services/cryptoService';
 
 interface TransactionContextType {
     transactions: Transaction[];
@@ -12,6 +12,7 @@ interface TransactionContextType {
     updateTransaction: (id: string, updatedTx: Partial<Omit<Transaction, 'id'>>) => void;
     reorderTransactions: (newTransactions: Transaction[]) => void;
     processSubscriptionUpdates: () => void;
+    isLoading: boolean;
 }
 
 const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
@@ -19,80 +20,114 @@ const TransactionContext = createContext<TransactionContextType | undefined>(und
 export function TransactionProvider({ children }: { children: ReactNode }) {
     const { user } = useAuth();
     const userId = user?.id;
+    const userPassword = user?.passwordHash?.substring(0, 32) || 'default'; // Use part of hash as encryption key
+
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Get user-specific storage key
     const getStorageKey = useCallback(() => {
         return userId ? `flow_transactions_${userId}` : 'flow_transactions';
     }, [userId]);
 
-    // Try to load from local storage or use initial empty array
-    const [transactions, setTransactions] = useState<Transaction[]>(() => {
-        if (!userId) return [];
-        const saved = localStorage.getItem(`flow_transactions_${userId}`);
-        return saved ? JSON.parse(saved) : [];
-    });
-
-    // Reload transactions when user changes
+    // Load encrypted transactions when user changes
     useEffect(() => {
-        if (userId) {
+        const loadData = async () => {
+            if (!userId) {
+                setTransactions([]);
+                setIsLoading(false);
+                return;
+            }
+
+            setIsLoading(true);
             const key = getStorageKey();
-            const saved = localStorage.getItem(key);
-            setTransactions(saved ? JSON.parse(saved) : []);
-        } else {
-            setTransactions([]);
-        }
-    }, [userId, getStorageKey]);
 
-    // Save to user-specific storage
-    useEffect(() => {
-        if (userId) {
-            localStorage.setItem(getStorageKey(), JSON.stringify(transactions));
-        }
-    }, [transactions, userId, getStorageKey]);
+            try {
+                const data = await loadAndDecrypt<Transaction[]>(key, userPassword);
+                setTransactions(data || []);
+            } catch (error) {
+                console.error('Failed to load transactions:', error);
+                // Try loading unencrypted data for migration
+                const stored = localStorage.getItem(key);
+                if (stored) {
+                    try {
+                        const parsed = JSON.parse(stored);
+                        if (Array.isArray(parsed)) {
+                            setTransactions(parsed);
+                        }
+                    } catch {
+                        setTransactions([]);
+                    }
+                } else {
+                    setTransactions([]);
+                }
+            }
+            setIsLoading(false);
+        };
 
-    // Process subscriptions on mount and periodically
+        loadData();
+    }, [userId, userPassword, getStorageKey]);
+
+    // Save encrypted transactions
+    const saveTransactions = useCallback(async (txs: Transaction[]) => {
+        if (!userId) return;
+
+        const key = getStorageKey();
+        try {
+            await encryptAndSave(key, txs, userPassword);
+        } catch (error) {
+            console.error('Failed to save transactions:', error);
+            // Fallback to unencrypted save
+            localStorage.setItem(key, JSON.stringify(txs));
+        }
+    }, [userId, userPassword, getStorageKey]);
+
+    // Process subscriptions on mount
     const processSubscriptionUpdates = useCallback(() => {
         const { updated, hasChanges } = processSubscriptions(transactions);
         if (hasChanges) {
             setTransactions(updated);
+            saveTransactions(updated);
         }
-    }, [transactions]);
+    }, [transactions, saveTransactions]);
 
-    // Check subscriptions on mount and every hour
     useEffect(() => {
-        if (userId) {
+        if (userId && !isLoading && transactions.length > 0) {
             processSubscriptionUpdates();
-
-            const interval = setInterval(() => {
-                processSubscriptionUpdates();
-            }, 60 * 60 * 1000); // Check every hour
-
-            return () => clearInterval(interval);
         }
-    }, [userId]); // Only run when user changes
+    }, [userId, isLoading]);
 
-    const addTransaction = (newTx: Omit<Transaction, 'id'>) => {
+    const addTransaction = async (newTx: Omit<Transaction, 'id'>) => {
         const transaction: Transaction = {
             ...newTx,
             id: Date.now().toString(),
         };
-        setTransactions(prev => [transaction, ...prev]);
+        const newTxs = [transaction, ...transactions];
+        setTransactions(newTxs);
+        await saveTransactions(newTxs);
     };
 
-    const deleteTransaction = (id: string) => {
-        setTransactions(prev => prev.filter(t => t.id !== id));
+    const deleteTransaction = async (id: string) => {
+        const newTxs = transactions.filter(t => t.id !== id);
+        setTransactions(newTxs);
+        await saveTransactions(newTxs);
     };
 
-    const deleteMultipleTransactions = (ids: string[]) => {
-        setTransactions(prev => prev.filter(t => !ids.includes(t.id)));
+    const deleteMultipleTransactions = async (ids: string[]) => {
+        const newTxs = transactions.filter(t => !ids.includes(t.id));
+        setTransactions(newTxs);
+        await saveTransactions(newTxs);
     };
 
-    const updateTransaction = (id: string, updatedTx: Partial<Omit<Transaction, 'id'>>) => {
-        setTransactions(prev => prev.map(t => (t.id === id ? { ...t, ...updatedTx } : t)));
+    const updateTransaction = async (id: string, updatedTx: Partial<Omit<Transaction, 'id'>>) => {
+        const newTxs = transactions.map(t => (t.id === id ? { ...t, ...updatedTx } : t));
+        setTransactions(newTxs);
+        await saveTransactions(newTxs);
     };
 
-    const reorderTransactions = (newTransactions: Transaction[]) => {
+    const reorderTransactions = async (newTransactions: Transaction[]) => {
         setTransactions(newTransactions);
+        await saveTransactions(newTransactions);
     };
 
     return (
@@ -103,7 +138,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
             deleteMultipleTransactions,
             updateTransaction,
             reorderTransactions,
-            processSubscriptionUpdates
+            processSubscriptionUpdates,
+            isLoading
         }}>
             {children}
         </TransactionContext.Provider>

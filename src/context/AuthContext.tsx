@@ -10,9 +10,9 @@ import {
     changePassword,
     updateProfile,
     createSession,
-    getSession,
     clearSession,
-    getCurrentUser
+    getCurrentUser,
+    deleteAccount
 } from '../services/authService';
 
 interface AuthContextType {
@@ -28,6 +28,7 @@ interface AuthContextType {
     updateUserProfile: (updates: { displayName?: string; profileIcon?: ProfileIcon }) => Promise<{ success: boolean; error?: string }>;
     setSessionDuration: (duration: SessionDuration) => void;
     refreshUser: () => Promise<void>;
+    deleteUserAccount: (password: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -125,6 +126,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSessionDurationState(duration);
     }, []);
 
+    const deleteUserAccount = useCallback(async (password: string): Promise<{ success: boolean; error?: string }> => {
+        if (!user) {
+            return { success: false, error: 'notAuthenticated' };
+        }
+
+        const result = await deleteAccount(user.id, password);
+        if (result.success) {
+            setUser(null);
+        }
+        return result;
+    }, [user]);
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -138,7 +151,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             updatePassword,
             updateUserProfile,
             setSessionDuration,
-            refreshUser
+            refreshUser,
+            deleteUserAccount
         }}>
             {children}
         </AuthContext.Provider>
