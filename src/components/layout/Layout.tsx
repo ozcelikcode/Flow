@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useSettings } from '../../context/SettingsContext';
+import { useAuth } from '../../context/AuthContext';
 import {
     LayoutDashboard,
     Receipt,
@@ -13,7 +14,8 @@ import {
     X,
     Tag,
     History as HistoryIcon,
-    Calendar
+    Calendar,
+    LogOut
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -22,11 +24,19 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, onAddTransactionClick }: LayoutProps) {
-    const { t } = useSettings();
+    const { t, language } = useSettings();
+    const { logout, user } = useAuth();
+    const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     const handleNavClick = () => {
         setIsMobileMenuOpen(false);
+    };
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
     };
 
     return (
@@ -70,8 +80,8 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
             {/* Mobile Sidebar */}
             <div className={`lg:hidden fixed top-0 right-0 h-full w-64 bg-white dark:bg-surface-dark z-50 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
                 }`}>
-                <div className="p-4 pt-16">
-                    <div className="flex flex-col gap-2">
+                <div className="p-4 pt-16 flex flex-col h-full">
+                    <div className="flex flex-col gap-2 flex-1">
                         <NavItem icon={LayoutDashboard} label={t('dashboard')} to="/" onClick={handleNavClick} />
                         <NavItem icon={Receipt} label={t('transactions')} to="/transactions" onClick={handleNavClick} />
                         <NavItem icon={PieChart} label={t('reports')} to="/reports" onClick={handleNavClick} />
@@ -79,6 +89,19 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                         <NavItem icon={Tag} label={t('categories')} to="/categories" onClick={handleNavClick} />
                         <NavItem icon={Calendar} label={t('upcoming')} to="/upcoming" onClick={handleNavClick} />
                         <NavItem icon={Settings} label={t('settings')} to="/settings" onClick={handleNavClick} />
+                    </div>
+
+                    {/* Mobile Logout Button */}
+                    <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+                        <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-danger hover:bg-danger/10 transition-colors"
+                        >
+                            <LogOut className="w-5 h-5" />
+                            <span className="text-sm font-medium">
+                                {language === 'tr' ? 'Çıkış Yap' : 'Logout'}
+                            </span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -94,7 +117,7 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                             <div className="flex flex-col">
                                 <h1 className="text-text-light dark:text-text-dark text-base font-medium leading-normal">{t('myWallet')}</h1>
                                 <p className="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">
-                                    {t('personalFinance')}
+                                    {user?.displayName || user?.username || t('personalFinance')}
                                 </p>
                             </div>
                         </div>
@@ -108,13 +131,44 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                             <NavItem icon={Settings} label={t('settings')} to="/settings" />
                         </div>
                     </div>
-                    <button
-                        onClick={onAddTransactionClick}
-                        className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] gap-2 hover:bg-primary/90 transition-colors"
-                    >
-                        <Plus className="w-5 h-5" />
-                        <span className="truncate">{t('addTransaction')}</span>
-                    </button>
+
+                    <div className="flex flex-col gap-3">
+                        <button
+                            onClick={onAddTransactionClick}
+                            className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] gap-2 hover:bg-primary/90 transition-colors"
+                        >
+                            <Plus className="w-5 h-5" />
+                            <span className="truncate">{t('addTransaction')}</span>
+                        </button>
+
+                        {/* Desktop Logout Button */}
+                        {showLogoutConfirm ? (
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex-1 py-2 px-3 bg-danger hover:bg-danger/90 text-white text-xs font-medium rounded-lg transition-colors"
+                                >
+                                    {language === 'tr' ? 'Evet' : 'Yes'}
+                                </button>
+                                <button
+                                    onClick={() => setShowLogoutConfirm(false)}
+                                    className="flex-1 py-2 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-text-light dark:text-text-dark text-xs font-medium rounded-lg transition-colors"
+                                >
+                                    {language === 'tr' ? 'İptal' : 'Cancel'}
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => setShowLogoutConfirm(true)}
+                                className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-text-secondary-light dark:text-text-secondary-dark hover:text-danger hover:bg-danger/10 transition-colors"
+                            >
+                                <LogOut className="w-4 h-4" />
+                                <span className="text-sm font-medium">
+                                    {language === 'tr' ? 'Çıkış Yap' : 'Logout'}
+                                </span>
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Main Content */}
