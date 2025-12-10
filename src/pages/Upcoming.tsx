@@ -51,6 +51,7 @@ export default function Upcoming() {
         if (!date) return dateStr;
 
         return date.toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
+            year: 'numeric',
             month: 'long',
             day: 'numeric',
             weekday: 'long'

@@ -202,9 +202,23 @@ export function getUpcomingTransactions(transactions: Transaction[]): Transactio
                     // and we already added it above (because it's > todayStr), don't add again.
                     // We compare nextBilling (ISO) with parsedTxDateIso (ISO)
                     if (nextBilling !== parsedTxDateIso) {
+                        // Calculate the next period number for price tier
+                        const currentPeriod = transaction.currentPeriod || 1;
+                        const nextPeriod = currentPeriod + 1;
+
+                        // Check if there's a price tier for the next period
+                        let nextAmount = transaction.amount;
+                        if (transaction.priceTiers && transaction.priceTiers.length > 0) {
+                            const nextTier = transaction.priceTiers.find(t => t.periodNumber === nextPeriod);
+                            if (nextTier) {
+                                nextAmount = nextTier.amount;
+                            }
+                        }
+
                         upcoming.push({
                             ...transaction,
-                            date: nextBilling // nextBilling is already ISO YYYY-MM-DD
+                            date: nextBilling, // nextBilling is already ISO YYYY-MM-DD
+                            amount: nextAmount // Use the next period's price
                         });
                     }
                 }
