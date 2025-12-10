@@ -33,11 +33,12 @@
 - **Bug Fix**: Reports sayfasındaki günlük trend grafiği tam ayı kapsayacak şekilde güncellendi.
 - `dateUtils.ts` oluşturuldu, merkezi tarih yönetimi sağlandı.
 
-### UI/UX İyileştirmeleri (9 Aralık 2025)
-- Kategori dağılımı kartına "Harcama Özeti" (Spending Insight) bölümü eklendi.
-- En çok harcanan kategorinin toplam içindeki oranı görsel progress bar ile gösteriliyor.
-- **Yeni Sayfa (History)**: Tüm finansal geçmişi (Toplam Varlık, Gelir, Gider, Birikim) gösteren ve aylık bazda işlemleri gruplayan yeni sayfa eklendi.
-- Sidebar menüsüne "Geçmiş" (History) bağlantısı eklendi.
+### UI/UX İyileştirmeleri (10 Aralık 2025)
+- **Dashboard**: Kategori Dağılımı bölümü kaldırıldı, Quick Stats tek sütuna dönüştürüldü.
+- **Dashboard**: Son işlemler listesi 5 yerine 10 işlem gösterecek şekilde güncellendi.
+- **History**: İşlem listesinin boş görünmesine neden olan tarih formatlama hatası `parseDate` kullanılarak düzeltildi.
+- **Transaction Modal**: Form alanları görsel olarak daraltılarak (padding artırılarak) daha kompakt bir görünüm sağlandı.
+
 
 ## Sonraki Adımlar
 - Kategori ikonlarını işlem listelerinde gösterme.

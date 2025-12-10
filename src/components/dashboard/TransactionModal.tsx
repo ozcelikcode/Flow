@@ -212,7 +212,7 @@ export default function TransactionModal({
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={modalTitle}>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto px-1 py-1">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto px-6 py-1">
                 {/* Type Selection */}
                 <div>
                     <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">

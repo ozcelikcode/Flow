@@ -1,6 +1,7 @@
 import { useTransactions } from '../context/TransactionContext';
 import { useSettings } from '../context/SettingsContext';
 import { ArrowUpCircle, ArrowDownCircle, Wallet, History as HistoryIcon, TrendingUp } from 'lucide-react';
+import { parseDate } from '../utils/dateUtils';
 
 export default function History() {
     const { transactions } = useTransactions();
@@ -25,9 +26,9 @@ export default function History() {
 
     // Group transactions by month
     const groupedTransactions = transactions.reduce((groups, transaction) => {
-        const date = new Date(transaction.date);
+        const date = parseDate(transaction.date);
         // Handle invalid dates
-        if (isNaN(date.getTime())) {
+        if (!date) {
             // Try to parse if it's in a localized format or just fallback to "Unknown"
             // For simplify, we group by the string if date parsing fails, but ideally we use dateUtils
             // We can just use the string prefix if it follows YYYY-MM
@@ -57,9 +58,10 @@ export default function History() {
 
     const sortedGroups = Object.values(groupedTransactions).sort((a, b) => {
         // Sort by date descending (needs real date object or smart parsing, but for now we rely on insertion order or simple sort)
-        // Better: sort by the date of the first transaction in the group
-        const dateA = new Date(a.transactions[0].date);
-        const dateB = new Date(b.transactions[0].date);
+        // Sort by the date of the first transaction in the group
+        const dateA = parseDate(a.transactions[0].date);
+        const dateB = parseDate(b.transactions[0].date);
+        if (!dateA || !dateB) return 0;
         return dateB.getTime() - dateA.getTime();
     });
 

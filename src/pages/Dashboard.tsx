@@ -1,17 +1,13 @@
 import { useTransactions } from '../context/TransactionContext';
 import { useSettings } from '../context/SettingsContext';
-import { Link } from 'react-router-dom';
 import StatsCard from '../components/dashboard/StatsCard';
 import TransactionTable from '../components/dashboard/TransactionTable';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import {
     TrendingDown,
     FolderOpen,
     RefreshCw,
     CreditCard,
     FileText,
-    ChartPie,
-    ArrowRight,
     BarChart3,
     Calendar
 } from 'lucide-react';
@@ -62,12 +58,6 @@ export default function Dashboard() {
 
     const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
 
-    // Category distribution for mini pie chart
-    const categoryData = Object.entries(categoryTotals).map(([name, value]) => ({
-        name: translateCategory(name),
-        value
-    }));
-
     // Subscription stats - only expense subscriptions
     const activeSubscriptions = transactions.filter(t =>
         t.type === 'expense' &&
@@ -108,8 +98,6 @@ export default function Dashboard() {
             // Income in investment = savings, expense in investment = withdrawal
             return total + (t.type === 'income' ? t.amount : -t.amount);
         }, 0);
-
-    const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
     return (
         <>
@@ -156,8 +144,8 @@ export default function Dashboard() {
                 />
             </div>
 
-            {/* Quick Stats & Category Distribution */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 gap-6 mb-6">
                 {/* Quick Stats */}
                 <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6">
                     <h3 className="text-base sm:text-lg font-bold text-text-light dark:text-text-dark mb-4 flex items-center gap-2">
@@ -234,118 +222,13 @@ export default function Dashboard() {
                         </div>
                     </div>
                 </div>
-
-                {/* Category Distribution Mini Chart */}
-                <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-base sm:text-lg font-bold text-text-light dark:text-text-dark flex items-center gap-2">
-                            <ChartPie className="w-5 h-5 text-primary" />
-                            <span className="hidden sm:inline">{t('categoryDistribution')}</span>
-                            <span className="sm:hidden">Categories</span>
-                        </h3>
-                        <Link
-                            to="/reports"
-                            className="text-xs sm:text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
-                        >
-                            <span className="hidden sm:inline">{t('viewReports')}</span>
-                            <ArrowRight className="w-4 h-4" />
-                        </Link>
-                    </div>
-
-                    {categoryData.length > 0 ? (
-                        <div className="flex flex-col h-full justify-between">
-                            <div className="flex flex-col sm:flex-row items-center gap-4">
-                                <div className="w-28 h-28 sm:w-32 sm:h-32 mb-2 sm:mb-0">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                            <Pie
-                                                data={categoryData}
-                                                cx="50%"
-                                                cy="50%"
-                                                innerRadius={25}
-                                                outerRadius={45}
-                                                paddingAngle={3}
-                                                dataKey="value"
-                                                stroke="none"
-                                            >
-                                                {categoryData.map((_, index) => (
-                                                    <Cell
-                                                        key={`cell-${index}`}
-                                                        fill={COLORS[index % COLORS.length]}
-                                                        stroke="none"
-                                                    />
-                                                ))}
-                                            </Pie>
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                </div>
-                                <div className="flex-1 w-full space-y-2">
-                                    {categoryData.slice(0, 4).map((cat, index) => (
-                                        <div key={cat.name} className="flex items-center justify-between text-xs sm:text-sm">
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                <div
-                                                    className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0"
-                                                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                                                />
-                                                <span className="text-text-secondary-light dark:text-text-secondary-dark truncate">
-                                                    {cat.name}
-                                                </span>
-                                            </div>
-                                            <span className="font-medium text-text-light dark:text-text-dark ml-2 shrink-0">
-                                                {formatAmount(cat.value)}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Spending Insight - Filling the bottom space */}
-                            {categoryData.length > 0 && totalExpense > 0 && (
-                                <div className="mt-8">
-                                    <div className="flex flex-col gap-3">
-                                        <div className="flex items-center gap-2">
-                                            <div className="p-1.5 rounded-full bg-slate-100 dark:bg-slate-800">
-                                                <TrendingDown className="w-4 h-4 text-text-secondary-light dark:text-text-secondary-dark" />
-                                            </div>
-                                            <span className="text-sm font-semibold text-text-light dark:text-text-dark">
-                                                {t('spendingInsight')}
-                                            </span>
-                                        </div>
-
-                                        <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                                            <p className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark mb-3 leading-relaxed">
-                                                <span className="font-bold" style={{ color: COLORS[0] }}>
-                                                    {categoryData[0].name}
-                                                </span>{' '}
-                                                {t('spendingInsightDescription', { percentage: ((categoryData[0].value / totalExpense) * 100).toFixed(0) })}
-                                            </p>
-                                            <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                                <div
-                                                    className="h-full rounded-full transition-all duration-500"
-                                                    style={{
-                                                        width: `${(categoryData[0].value / totalExpense) * 100}%`,
-                                                        backgroundColor: COLORS[0]
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 text-text-secondary-light dark:text-text-secondary-dark">
-                            {t('noData')}
-                        </div>
-                    )}
-                </div>
             </div>
 
             {/* Recent Transactions */}
             <h2 className="text-text-light dark:text-text-dark text-lg sm:text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">
                 {t('recentTransactions')}
             </h2>
-            <TransactionTable transactions={transactions.slice(0, 5)} />
+            <TransactionTable transactions={transactions.slice(0, 10)} />
         </>
     );
 }
