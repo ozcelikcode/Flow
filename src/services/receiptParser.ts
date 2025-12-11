@@ -6,10 +6,12 @@
 export interface ParsedReceiptData {
     amount: number | null;
     date: string | null; // ISO format YYYY-MM-DD
+    companyName: string | null; // Store/company name
     rawText: string;
     confidence: {
         amount: number; // 0-100
         date: number;   // 0-100
+        companyName: number; // 0-100
         overall: number; // 0-100
     };
 }
@@ -206,11 +208,74 @@ function extractDate(text: string): { date: string | null; confidence: number } 
 }
 
 /**
+ * Extract company/store name from receipt text
+ * Usually the first meaningful line of the receipt
+ */
+function extractCompanyName(text: string): { companyName: string | null; confidence: number } {
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+    if (lines.length === 0) {
+        return { companyName: null, confidence: 0 };
+    }
+
+    // Skip patterns that are NOT company names
+    const skipPatterns = [
+        /^(TARIH|DATE|SAAT|TIME|SATIS|KASA|KASIYER|FATURA|RECEIPT|TOPLAM|GENEL|TUTAR)/i,
+        /^\d+[./-]\d+[./-]\d+/, // Date patterns
+        /^[\d\s.,]+$/, // Only numbers
+        /^[*=-]+$/, // Separator lines
+        /^\*+/, // Lines starting with asterisks
+        /^(TL|₺|TRY)/i, // Currency only
+    ];
+
+    // Look for the first valid company name (usually in first 5 lines)
+    for (let i = 0; i < Math.min(lines.length, 5); i++) {
+        const line = lines[i];
+
+        // Skip if too short or too long
+        if (line.length < 3 || line.length > 50) continue;
+
+        // Skip if matches skip patterns
+        let shouldSkip = false;
+        for (const pattern of skipPatterns) {
+            if (pattern.test(line)) {
+                shouldSkip = true;
+                break;
+            }
+        }
+        if (shouldSkip) continue;
+
+        // Skip if mostly numbers
+        const numCount = (line.match(/\d/g) || []).length;
+        if (numCount > line.length * 0.5) continue;
+
+        // This looks like a company name
+        // Clean up the name (remove extra spaces, special chars at start/end)
+        const cleanedName = line
+            .replace(/^[*\-=\s]+/, '')
+            .replace(/[*\-=\s]+$/, '')
+            .trim();
+
+        if (cleanedName.length >= 3) {
+            // Higher confidence for earlier lines
+            const confidence = 85 - (i * 10);
+            return {
+                companyName: cleanedName,
+                confidence: Math.max(50, confidence)
+            };
+        }
+    }
+
+    return { companyName: null, confidence: 0 };
+}
+
+/**
  * Parse receipt text and extract relevant data
  */
 export function parseReceiptText(text: string): ParsedReceiptData {
     const amountResult = extractAmount(text);
     const dateResult = extractDate(text);
+    const companyResult = extractCompanyName(text);
 
     // Calculate overall confidence
     let overall = 0;
@@ -224,15 +289,22 @@ export function parseReceiptText(text: string): ParsedReceiptData {
         overall += dateResult.confidence;
         count++;
     }
+    if (companyResult.companyName !== null) {
+        overall += companyResult.confidence;
+        count++;
+    }
 
     return {
         amount: amountResult.amount,
         date: dateResult.date,
+        companyName: companyResult.companyName,
         rawText: text,
         confidence: {
             amount: amountResult.confidence,
             date: dateResult.confidence,
+            companyName: companyResult.confidence,
             overall: count > 0 ? Math.round(overall / count) : 0
         }
     };
 }
+

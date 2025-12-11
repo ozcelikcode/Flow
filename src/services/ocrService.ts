@@ -54,10 +54,10 @@ export async function processReceiptImage(
 
         onProgress?.({ status: 'OCR başlatılıyor...', progress: 10 });
 
-        // Perform OCR - use 'eng' first as it's more reliable, Turkish characters will still be recognized
+        // Perform OCR with Turkish language for better character recognition
         const result = await Tesseract.recognize(
             dataUrl,
-            'eng', // English is more reliable for numbers and common patterns
+            'tur', // Turkish for proper Ö, İ, Ş, Ü, Ç, Ğ recognition
             {
                 logger: (m) => {
                     if (onProgress && m.status) {

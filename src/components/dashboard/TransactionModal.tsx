@@ -203,6 +203,11 @@ export default function TransactionModal({
                 setScanResult(result.data);
 
                 // Auto-fill form fields with extracted data
+                if (result.data.companyName) {
+                    console.log('Setting name:', result.data.companyName); // Debug log
+                    setName(result.data.companyName);
+                }
+
                 if (result.data.amount !== null && result.data.amount > 0) {
                     // Convert to display currency format
                     const formattedAmount = formatWithThousands(result.data.amount);
@@ -383,6 +388,14 @@ export default function TransactionModal({
                                     </span>
                                 </div>
                                 <div className="flex flex-wrap gap-2 text-xs">
+                                    {scanResult.companyName && (
+                                        <span className={`px-1.5 py-0.5 rounded ${scanResult.confidence.companyName >= 70
+                                            ? 'bg-success/20 text-success'
+                                            : 'bg-warning/20 text-warning'
+                                            }`}>
+                                            {language === 'tr' ? 'İşletme' : 'Store'}: {scanResult.companyName} ({scanResult.confidence.companyName}%)
+                                        </span>
+                                    )}
                                     {scanResult.amount !== null && (
                                         <span className={`px-1.5 py-0.5 rounded ${scanResult.confidence.amount >= 70
                                             ? 'bg-success/20 text-success'
