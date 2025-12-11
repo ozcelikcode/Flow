@@ -9,6 +9,5 @@ export default defineConfig({
       overlay: true,
     },
   },
-  // Suppress HMR logs in console
-  logLevel: 'warn',
 })
+
