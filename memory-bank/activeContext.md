@@ -27,6 +27,14 @@
 - React DevTools mesajı gizlendi (`main.tsx`).
 - `cryptoService.ts`'deki `console.error` kaldırıldı (güvenlik için).
 
+### Fiş/Fatura Tarama (OCR)
+- **Tesseract.js** ile görüntü OCR (İngilizce dil paketi).
+- **PDF.js** ile PDF metin çıkarma.
+- Türk fişi pattern matching (TOPLAM, TUTAR, NAKİT, tarih).
+- Güven yüzdesi gösterimi (tutar ve tarih için ayrı ayrı).
+- Desteklenen formatlar: JPEG, JPG, PNG, BMP, PDF.
+- Tamamen client-side - veriler sunucuya gönderilmiyor.
+
 ## Önceki Değişiklikler (10 Aralık 2025)
 
 ### Güvenlik ve Şifreleme

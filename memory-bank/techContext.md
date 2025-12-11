@@ -9,6 +9,8 @@
 - **Fontlar**: Inter (Google Fonts)
 - **Grafikler**: Recharts
 - **Sürükle-Bırak**: @dnd-kit/core, @dnd-kit/sortable
+- **OCR**: Tesseract.js (fiş/fatura tarama)
+- **PDF İşleme**: pdfjs-dist (PDF metin çıkarma)
 
 ### Güvenlik
 - **Şifreleme**: Web Crypto API (AES-256-GCM)

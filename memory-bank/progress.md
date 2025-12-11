@@ -70,6 +70,7 @@
 - [x] Özel scrollbar stilleri
 - [x] Kompakt History kartları (mobil için)
 - [x] Responsive TransactionModal
+- [x] Fiş/Fatura OCR tarama (Tesseract.js + PDF.js)
 
 ## Bilinen Sorunlar
 - Yok.

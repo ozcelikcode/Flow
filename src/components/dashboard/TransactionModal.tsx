@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Transaction, RecurrenceType, PriceTier } from '../../types';
 import { useSettings } from '../../context/SettingsContext';
 import { useCategories } from '../../context/CategoryContext';
 import Modal from '../ui/Modal';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, ScanLine, Loader2 } from 'lucide-react';
 import { parseLocalizedDate } from '../../utils/dateUtils';
+import { processReceiptImage } from '../../services/ocrService';
+import { processPDFFile } from '../../services/pdfService';
+import type { ParsedReceiptData } from '../../services/receiptParser';
 
 interface TransactionModalProps {
     isOpen: boolean;
@@ -40,6 +43,13 @@ export default function TransactionModal({
     // Quick add category
     const [showQuickAdd, setShowQuickAdd] = useState(false);
     const [quickCategoryName, setQuickCategoryName] = useState('');
+
+    // Receipt scanner state
+    const [isScanning, setIsScanning] = useState(false);
+    const [scanProgress, setScanProgress] = useState<{ status: string; progress: number } | null>(null);
+    const [scanResult, setScanResult] = useState<ParsedReceiptData | null>(null);
+    const [scanError, setScanError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Currency symbols
     const currencySymbols = {
@@ -164,6 +174,66 @@ export default function TransactionModal({
         return start.toISOString().split('T')[0];
     };
 
+    // Handle receipt file upload
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsScanning(true);
+        setScanError(null);
+        setScanResult(null);
+        setScanProgress({ status: language === 'tr' ? 'Başlatılıyor...' : 'Starting...', progress: 0 });
+
+        try {
+            let result;
+
+            if (file.type === 'application/pdf') {
+                result = await processPDFFile(file, (progress) => {
+                    setScanProgress({ status: progress.status, progress: progress.progress });
+                });
+            } else {
+                result = await processReceiptImage(file, (progress) => {
+                    setScanProgress({ status: progress.status, progress: progress.progress });
+                });
+            }
+
+            console.log('Scan Result:', result); // Debug log
+
+            if (result.success && result.data) {
+                setScanResult(result.data);
+
+                // Auto-fill form fields with extracted data
+                if (result.data.amount !== null && result.data.amount > 0) {
+                    // Convert to display currency format
+                    const formattedAmount = formatWithThousands(result.data.amount);
+                    console.log('Setting amount:', formattedAmount); // Debug log
+                    setAmount(formattedAmount);
+                    setInputCurrency('TRY'); // Turkish receipts are in TRY
+                }
+
+                if (result.data.date) {
+                    console.log('Setting date:', result.data.date); // Debug log
+                    setDate(result.data.date);
+                }
+
+                // Set type to expense (most receipts are expenses)
+                setType('expense');
+            } else {
+                setScanError(result.error || (language === 'tr' ? 'Tarama başarısız' : 'Scan failed'));
+            }
+        } catch (error) {
+            console.error('Scan error:', error);
+            setScanError(language === 'tr' ? 'Beklenmeyen hata oluştu' : 'Unexpected error occurred');
+        } finally {
+            setIsScanning(false);
+            setScanProgress(null);
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!name || !amount) return;
@@ -248,6 +318,93 @@ export default function TransactionModal({
         <Modal isOpen={isOpen} onClose={onClose} title={modalTitle}>
             <style>{noSpinnerStyle}</style>
             <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 sm:gap-3 max-h-[55vh] sm:max-h-[60vh] overflow-y-auto px-0 py-1">
+
+                {/* Receipt Scanner Section */}
+                {!editTransaction && (
+                    <div className="mb-2">
+                        <div className="flex items-center gap-2 mb-2">
+                            <ScanLine className="w-4 h-4 text-primary" />
+                            <label className="text-xs sm:text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
+                                {language === 'tr' ? 'Fiş/Fatura Tara' : 'Scan Receipt'}
+                            </label>
+                        </div>
+
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileUpload}
+                            accept=".jpg,.jpeg,.png,.bmp,.pdf"
+                            className="hidden"
+                            id="receipt-upload"
+                        />
+
+                        <label
+                            htmlFor="receipt-upload"
+                            className={`flex items-center justify-center gap-2 w-full p-3 border-2 border-dashed rounded-xl cursor-pointer transition-colors
+                                ${isScanning
+                                    ? 'border-primary bg-primary/5 cursor-wait'
+                                    : 'border-slate-300 dark:border-slate-700 hover:border-primary hover:bg-primary/5'
+                                }`}
+                        >
+                            {isScanning ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                                    <span className="text-sm text-primary">
+                                        {scanProgress?.status || (language === 'tr' ? 'İşleniyor...' : 'Processing...')}
+                                        {scanProgress?.progress ? ` (${scanProgress.progress}%)` : ''}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <ScanLine className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
+                                    <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                                        {language === 'tr' ? 'Resim veya PDF yükle' : 'Upload image or PDF'}
+                                    </span>
+                                </>
+                            )}
+                        </label>
+
+                        {/* Scan Error */}
+                        {scanError && (
+                            <div className="mt-2 p-2 bg-danger/10 border border-danger/20 rounded-lg">
+                                <p className="text-xs text-danger">{scanError}</p>
+                            </div>
+                        )}
+
+                        {/* Scan Result with Confidence */}
+                        {scanResult && (
+                            <div className="mt-2 p-2 bg-success/10 border border-success/20 rounded-lg">
+                                <div className="flex items-center justify-between mb-1">
+                                    <span className="text-xs font-medium text-success">
+                                        {language === 'tr' ? 'Tarama Sonucu' : 'Scan Result'}
+                                    </span>
+                                    <span className="text-xs bg-success/20 text-success px-1.5 py-0.5 rounded">
+                                        {language === 'tr' ? 'Güven' : 'Confidence'}: {scanResult.confidence.overall}%
+                                    </span>
+                                </div>
+                                <div className="flex flex-wrap gap-2 text-xs">
+                                    {scanResult.amount !== null && (
+                                        <span className={`px-1.5 py-0.5 rounded ${scanResult.confidence.amount >= 70
+                                            ? 'bg-success/20 text-success'
+                                            : 'bg-warning/20 text-warning'
+                                            }`}>
+                                            {language === 'tr' ? 'Tutar' : 'Amount'}: ₺{scanResult.amount.toFixed(2)} ({scanResult.confidence.amount}%)
+                                        </span>
+                                    )}
+                                    {scanResult.date && (
+                                        <span className={`px-1.5 py-0.5 rounded ${scanResult.confidence.date >= 70
+                                            ? 'bg-success/20 text-success'
+                                            : 'bg-warning/20 text-warning'
+                                            }`}>
+                                            {language === 'tr' ? 'Tarih' : 'Date'}: {scanResult.date} ({scanResult.confidence.date}%)
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* Type Selection */}
                 <div>
                     <label className="block text-xs sm:text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
