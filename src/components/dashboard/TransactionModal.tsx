@@ -191,13 +191,16 @@ export default function TransactionModal({
             transaction.priceTiers = priceTiers.length > 0 ? priceTiers : undefined;
             transaction.currentPeriod = editTransaction?.currentPeriod || 1;
 
-            // Only recalculate next billing date if it's a new transaction or date changed
-            // Otherwise keep existing flow unless logic requires reset
-            if (!editTransaction) {
-                transaction.nextBillingDate = calculateNextBillingDate(date, recurrence);
-            } else {
-                transaction.nextBillingDate = editTransaction.nextBillingDate || calculateNextBillingDate(date, recurrence);
-            }
+            // Always recalculate next billing date based on current date and recurrence
+            // This ensures correct calculation when recurrence type or date changes
+            const calculatedNextBilling = calculateNextBillingDate(date, recurrence);
+            console.log('DEBUG nextBillingDate:', {
+                inputDate: date,
+                recurrence: recurrence,
+                calculatedNextBilling: calculatedNextBilling,
+                parsedInputDate: new Date(date).toISOString()
+            });
+            transaction.nextBillingDate = calculatedNextBilling;
 
             transaction.isActive = isActive;
             transaction.endDate = endDate || undefined;

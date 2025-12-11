@@ -18,6 +18,11 @@
 - X ekseni gün numaraları düzgün yerleştirildi (`interval={0}`, `tickMargin={5}`).
 - Ay geçişlerinde sorunsuz çalışıyor.
 
+### Yaklaşan İşlemler Gruplandırması
+- İşlemler 3 kategoriye ayrıldı: "Bu Hafta", "Bu Ay", "Daha Sonra".
+- Her grup için ayrı kart ve işlem sayısı badge'i.
+- Tarih geçişlerinde sorunsuz çalışıyor (hafta sonu Pazar, ay sonu).
+
 ### Console Temizliği
 - React DevTools mesajı gizlendi (`main.tsx`).
 - `cryptoService.ts`'deki `console.error` kaldırıldı (güvenlik için).

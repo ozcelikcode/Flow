@@ -45,6 +45,7 @@
 - [x] Gelecek tahmini (gelir/gider) özetleri
 - [x] Yaklaşan ve bugün vadesi gelen işlemler listesi
 - [x] Tekrarlayan ve gelecekteki tek seferlik işlemleri görüntüleme
+- [x] Zaman dilimine göre gruplandırma (Bu Hafta, Bu Ay, Daha Sonra)
 
 ### Ayarlar
 - [x] Tema değiştirme (açık/koyu)
