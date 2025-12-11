@@ -36,10 +36,10 @@
 ### Raporlar
 - [x] Gelir vs Gider bar grafiği
 - [x] Kategoriye göre harcama pasta grafiği
-- [x] Günlük harcama trend grafiği (bu ay)
-- [x] Yıllık aktivite haritası (GitHub tarzı)
+- [x] Günlük harcama trend grafiği (1'den bugüne kadar)
 - [x] Yıllık aktivite haritası (GitHub tarzı)
 - [x] Özel tooltip tasarımları
+- [x] Responsive grafik container'lar (debounce ile)
 
 ### Yaklaşan İşlemler (Upcoming)
 - [x] Gelecek tahmini (gelir/gider) özetleri
@@ -64,8 +64,11 @@
 - [x] Responsive tasarım (mobil uyumlu)
 - [x] Lucide ikonları (Material Symbols değiştirildi)
 - [x] Mobil hamburger menü
+- [x] Mobil sidebar X kapatma butonu
 - [x] Dark mode date picker
 - [x] Özel scrollbar stilleri
+- [x] Kompakt History kartları (mobil için)
+- [x] Responsive TransactionModal
 
 ## Bilinen Sorunlar
 - Yok.

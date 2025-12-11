@@ -40,22 +40,20 @@ export default function Reports() {
 
 
 
-    // Generate current month's daily spending data (1st to end of month)
+    // Generate current month's daily spending data (1st to today)
     const generateDailySpendingData = () => {
         const today = new Date();
         const currentYear = today.getFullYear();
         const currentMonth = today.getMonth();
-
-        // Use days in month to support showing all transactions even if future (or if local time is behind)
-        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const currentDay = today.getDate();
 
         const monthDays: { date: string; amount: number; displayDate: string }[] = [];
 
-        // From 1st of current month to end of month
-        for (let day = 1; day <= daysInMonth; day++) {
+        // From 1st of current month to today (inclusive)
+        for (let day = 1; day <= currentDay; day++) {
             const date = new Date(currentYear, currentMonth, day);
             const dateStr = toLocalDateKey(date);
-            const displayDate = day.toString(); // Just show day number
+            const displayDate = day.toString();
 
             monthDays.push({
                 date: dateStr,
@@ -237,8 +235,8 @@ export default function Reports() {
                                 tick={{ fill: axisColor, fontSize: 10 }}
                                 tickLine={false}
                                 axisLine={false}
-                                interval="preserveStartEnd"
-                                minTickGap={30}
+                                interval={0}
+                                tickMargin={5}
                             />
                             <YAxis
                                 stroke={axisColor}
