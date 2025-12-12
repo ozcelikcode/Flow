@@ -75,10 +75,24 @@ export default function TransactionsPage() {
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            // Don't trigger shortcuts when typing in inputs
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+                return;
+            }
+
             if (e.key === 'Escape') {
                 setSelectedIds([]);
                 setLastSelectedId(null);
                 setPreviewIds([]);
+            }
+
+            // CTRL + A to select all transactions
+            if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+                e.preventDefault(); // Prevent select all text
+                // Select all filtered transactions
+                if (filteredTransactions.length > 0) {
+                    setSelectedIds(filteredTransactions.map(t => t.id));
+                }
             }
         };
 
@@ -94,7 +108,7 @@ export default function TransactionsPage() {
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
         };
-    }, []);
+    }, [filteredTransactions]);
 
     // ... existing sensors ...
 

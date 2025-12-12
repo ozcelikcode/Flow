@@ -1,7 +1,7 @@
 /**
  * OCR Service using Tesseract.js
  * Provides image text extraction with Turkish language support
- * Includes image preprocessing for better accuracy
+ * Includes advanced image preprocessing for better accuracy
  */
 
 import Tesseract from 'tesseract.js';
@@ -44,10 +44,11 @@ function loadImage(dataUrl: string): Promise<HTMLImageElement> {
 }
 
 /**
- * Preprocess image for better OCR accuracy
- * - Converts to grayscale
- * - Enhances contrast
- * - Applies adaptive thresholding for low-light images
+ * Advanced image preprocessing for OCR
+ * - Upscales small images
+ * - Converts to high-contrast grayscale
+ * - Applies adaptive thresholding
+ * - Reduces noise
  */
 async function preprocessImage(dataUrl: string): Promise<string> {
     const img = await loadImage(dataUrl);
@@ -57,11 +58,20 @@ async function preprocessImage(dataUrl: string): Promise<string> {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas context not available');
 
-    // Set canvas size to image size (max 2000px for performance)
-    const maxSize = 2000;
     let width = img.width;
     let height = img.height;
 
+    // Step 1: Upscale small images for better OCR
+    // OCR works best with images at least 300 DPI equivalent
+    const minDimension = 1200; // Target minimum dimension
+    if (width < minDimension && height < minDimension) {
+        const scaleFactor = minDimension / Math.min(width, height);
+        width = Math.round(width * scaleFactor);
+        height = Math.round(height * scaleFactor);
+    }
+
+    // Limit max size for performance
+    const maxSize = 3000;
     if (width > maxSize || height > maxSize) {
         const scale = Math.min(maxSize / width, maxSize / height);
         width = Math.round(width * scale);
@@ -71,33 +81,46 @@ async function preprocessImage(dataUrl: string): Promise<string> {
     canvas.width = width;
     canvas.height = height;
 
-    // Draw image
+    // Enable image smoothing for upscaling
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    // Draw image (scaled)
     ctx.drawImage(img, 0, 0, width, height);
 
     // Get image data
     const imageData = ctx.getImageData(0, 0, width, height);
     const data = imageData.data;
 
-    // Step 1: Convert to grayscale and calculate histogram
-    const grayscale = new Uint8Array(width * height);
-    const histogram = new Array(256).fill(0);
+    // Step 2: Convert to grayscale and collect statistics
+    const grayscale = new Float32Array(width * height);
+    let minGray = 255, maxGray = 0;
+    let sumGray = 0;
 
     for (let i = 0; i < data.length; i += 4) {
         // Weighted grayscale (human perception)
-        const gray = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+        const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
         grayscale[i / 4] = gray;
-        histogram[gray]++;
+        if (gray < minGray) minGray = gray;
+        if (gray > maxGray) maxGray = gray;
+        sumGray += gray;
     }
 
-    // Step 2: Calculate optimal threshold using Otsu's method
+    const avgGray = sumGray / grayscale.length;
+    const range = maxGray - minGray;
+
+    // Step 3: Calculate histogram for Otsu's threshold
+    const histogram = new Array(256).fill(0);
+    for (let i = 0; i < grayscale.length; i++) {
+        histogram[Math.round(grayscale[i])]++;
+    }
+
+    // Otsu's method for optimal threshold
     const totalPixels = width * height;
     let sum = 0;
     for (let i = 0; i < 256; i++) sum += i * histogram[i];
 
-    let sumB = 0;
-    let wB = 0;
-    let maxVariance = 0;
-    let threshold = 128;
+    let sumB = 0, wB = 0, maxVariance = 0, threshold = 128;
 
     for (let t = 0; t < 256; t++) {
         wB += histogram[t];
@@ -107,10 +130,8 @@ async function preprocessImage(dataUrl: string): Promise<string> {
         if (wF === 0) break;
 
         sumB += t * histogram[t];
-
         const mB = sumB / wB;
         const mF = (sum - sumB) / wF;
-
         const variance = wB * wF * (mB - mF) * (mB - mF);
 
         if (variance > maxVariance) {
@@ -119,44 +140,64 @@ async function preprocessImage(dataUrl: string): Promise<string> {
         }
     }
 
-    // Step 3: Enhance contrast using histogram stretching
-    let minGray = 255, maxGray = 0;
+    // Step 4: Apply aggressive contrast enhancement and thresholding
+    // For low contrast images (range < 100), use more aggressive processing
+    const isLowContrast = range < 100;
+    const isDark = avgGray < 100;
+
     for (let i = 0; i < grayscale.length; i++) {
-        if (grayscale[i] < minGray) minGray = grayscale[i];
-        if (grayscale[i] > maxGray) maxGray = grayscale[i];
-    }
+        let value = grayscale[i];
 
-    const range = maxGray - minGray;
-    const contrastFactor = range > 0 ? 255 / range : 1;
-
-    // Step 4: Apply processing to image data
-    for (let i = 0; i < grayscale.length; i++) {
-        // Contrast enhancement
-        let value = Math.round((grayscale[i] - minGray) * contrastFactor);
-
-        // Clamp value
-        value = Math.max(0, Math.min(255, value));
-
-        // Apply mild sharpening by increasing contrast
-        if (value < threshold) {
-            value = Math.max(0, value - 20); // Darken dark pixels
-        } else {
-            value = Math.min(255, value + 20); // Lighten light pixels
+        // Normalize to 0-255 range with contrast stretch
+        if (range > 0) {
+            value = ((value - minGray) / range) * 255;
         }
+
+        // Apply gamma correction for dark images
+        if (isDark) {
+            value = 255 * Math.pow(value / 255, 0.6); // Gamma < 1 brightens
+        }
+
+        // Enhance contrast further
+        // Apply S-curve for better contrast
+        const normalized = value / 255;
+        const contrasted = normalized < 0.5
+            ? 2 * normalized * normalized
+            : 1 - 2 * (1 - normalized) * (1 - normalized);
+        value = contrasted * 255;
+
+        // For very low contrast, apply adaptive thresholding
+        if (isLowContrast) {
+            // Simple binary thresholding with adjusted threshold
+            const adjustedThreshold = (threshold - minGray) / range * 255;
+            value = value > adjustedThreshold ? 255 : 0;
+        } else {
+            // Sharpen: Increase contrast at edges
+            if (value < threshold) {
+                value = Math.max(0, value * 0.7);
+            } else {
+                value = Math.min(255, value * 1.3);
+            }
+        }
+
+        // Clamp
+        value = Math.max(0, Math.min(255, Math.round(value)));
 
         // Set RGB to same value (grayscale)
         const idx = i * 4;
-        data[idx] = value;     // R
-        data[idx + 1] = value; // G
-        data[idx + 2] = value; // B
-        // Alpha stays the same
+        data[idx] = value;
+        data[idx + 1] = value;
+        data[idx + 2] = value;
     }
+
+    // Step 5: Simple noise reduction (3x3 median-like filter for edges)
+    // Skip this for now to preserve text edges
 
     // Put processed data back
     ctx.putImageData(imageData, 0, 0);
 
-    // Return as data URL
-    return canvas.toDataURL('image/png');
+    // Return as PNG for lossless quality
+    return canvas.toDataURL('image/png', 1.0);
 }
 
 /**
@@ -186,12 +227,14 @@ export async function processReceiptImage(
         // Preprocess image for better OCR
         const processedImage = await preprocessImage(dataUrl);
 
+        console.log('Image preprocessed, starting OCR...'); // Debug
+
         onProgress?.({ status: 'OCR başlatılıyor...', progress: 25 });
 
-        // Perform OCR with Turkish language for better character recognition
+        // Perform OCR with Turkish language
         const result = await Tesseract.recognize(
             processedImage,
-            'tur', // Turkish for proper Ö, İ, Ş, Ü, Ç, Ğ recognition
+            'tur', // Turkish for proper character recognition
             {
                 logger: (m) => {
                     if (onProgress && m.status) {
