@@ -23,62 +23,54 @@
 - [x] Abonelik desteği (günlük, aylık, yıllık)
 - [x] Dönem bazlı fiyatlandırma (price tiers)
 - [x] Otomatik dönem ve fiyat güncellemesi
-- [x] Abonelik bitiş tarihi (End Date) desteği
+- [x] CTRL+A ile tüm işlemleri seçme kısayolu
+- [x] Fiş/Fatura OCR tarama (Tesseract.js + PDF.js)
+
+### Gelir ve Gider Analizi (YENİ)
+- [x] Özelleşmiş Gelir Sayfası (/income)
+- [x] Özelleşmiş Gider Sayfası (/expenses)
+- [x] Tam ekran (100vh) dashboard yerleşimi
+- [x] Trend (Alan), Dağılım (Pasta) ve Kategori (Bar) grafikleri
+- [x] Dönem filtreleme (Hafta, Ay, Yıl)
+- [x] Navbar'da "İşlemler" dropdown menüsü
 
 ### Kategori Yönetimi
 - [x] Kategori ekleme/düzenleme/silme
-- [x] Çift dil desteği (İngilizce/Türkçe isim ve açıklama)
+- [x] Çift dil desteği
 - [x] 70+ Lucide ikon seçeneği
 - [x] Varsayılan ve özel kategoriler
-- [x] Kategori tipi (gelir/gider/her ikisi)
-- [x] Hızlı kategori ekleme (TransactionModal içinden)
+- [x] Hızlı kategori ekleme
 
 ### Raporlar
 - [x] Gelir vs Gider bar grafiği
 - [x] Kategoriye göre harcama pasta grafiği
-- [x] Günlük harcama trend grafiği (1'den bugüne kadar)
-- [x] Yıllık aktivite haritası (GitHub tarzı)
-- [x] Özel tooltip tasarımları
-- [x] Responsive grafik container'lar (debounce ile)
+- [x] Günlük harcama trend grafiği
+- [x] Yıllık aktivite haritası
+- [x] Responsive grafik container'lar
 
 ### Yaklaşan İşlemler (Upcoming)
 - [x] Gelecek tahmini (gelir/gider) özetleri
 - [x] Yaklaşan ve bugün vadesi gelen işlemler listesi
-- [x] Tekrarlayan ve gelecekteki tek seferlik işlemleri görüntüleme
-- [x] Zaman dilimine göre gruplandırma (Bu Hafta, Bu Ay, Daha Sonra)
+- [x] Zaman dilimine göre gruplandırma
 
 ### Ayarlar
-- [x] Tema değiştirme (açık/koyu)
-- [x] Dil seçimi (İngilizce/Türkçe)
-- [x] Para birimi seçimi
-- [x] Veri sıfırlama
-- [x] Hesap silme (şifre doğrulamalı)
-
-### Güvenlik
-- [x] Uçtan uca şifreleme (AES-256-GCM + PBKDF2)
-- [x] İşlemler (transactions) şifreli
-- [x] Kategoriler şifreli
-- [x] Kullanıcı ayarları şifreli
-- [x] Her kayıtta yeni salt/IV oluşturulur
+- [x] Tema ve Dil seçimi
+- [x] Veri sıfırlama ve Hesap silme
+- [x] Güvenlik (Uçtan uca şifreleme AES-256)
 
 ### UI/UX
 - [x] Responsive tasarım (mobil uyumlu)
-- [x] Lucide ikonları (Material Symbols değiştirildi)
-- [x] Mobil hamburger menü
-- [x] Mobil sidebar X kapatma butonu
+- [x] Lucide ikonları
+- [x] Mobil sidebar geliştirmeleri
 - [x] Dark mode date picker
 - [x] Özel scrollbar stilleri
-- [x] Kompakt History kartları (mobil için)
-- [x] Responsive TransactionModal
-- [x] Fiş/Fatura OCR tarama (Tesseract.js + PDF.js)
 
 ## Bilinen Sorunlar
 - Yok.
 
 ## Gelecek Özellikler
-- [ ] Kategoriye göre filtreleme
+- [ ] Kategoriye göre filtreleme (Transactions sayfasında)
 - [ ] Arama fonksiyonu
 - [ ] Veri dışa/içe aktarma (JSON)
-- [ ] Bütçe hedefleri
-- [ ] Grafikler için zaman aralığı seçimi
+- [ ] Bütçe hedefleri belirleme
 - [ ] PWA desteği

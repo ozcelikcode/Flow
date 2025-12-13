@@ -15,6 +15,8 @@ import Settings from './pages/Settings';
 import Categories from './pages/Categories';
 import Upcoming from './pages/Upcoming';
 import History from './pages/History';
+import Income from './pages/Income';
+import Expenses from './pages/Expenses';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
@@ -27,6 +29,8 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/transactions" element={<TransactionsPage />} />
+        <Route path="/income" element={<Income />} />
+        <Route path="/expenses" element={<Expenses />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/upcoming" element={<Upcoming />} />

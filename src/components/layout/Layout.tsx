@@ -15,7 +15,10 @@ import {
     Tag,
     History as HistoryIcon,
     Calendar,
-    LogOut
+    LogOut,
+    ChevronDown,
+    TrendingUp,
+    TrendingDown
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -29,6 +32,7 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    const [isTransactionDropdownOpen, setIsTransactionDropdownOpen] = useState(false);
 
     const handleNavClick = () => {
         setIsMobileMenuOpen(false);
@@ -95,7 +99,28 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                 <div className="p-4 flex flex-col h-[calc(100%-73px)]">
                     <div className="flex flex-col gap-2 flex-1">
                         <NavItem icon={LayoutDashboard} label={t('dashboard')} to="/" onClick={handleNavClick} />
-                        <NavItem icon={Receipt} label={t('transactions')} to="/transactions" onClick={handleNavClick} />
+
+                        {/* Transactions Dropdown */}
+                        <div>
+                            <button
+                                onClick={() => setIsTransactionDropdownOpen(!isTransactionDropdownOpen)}
+                                className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Receipt className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
+                                    <span className="text-sm font-medium text-text-light dark:text-text-dark">{t('transactions')}</span>
+                                </div>
+                                <ChevronDown className={`w-4 h-4 text-text-secondary-light dark:text-text-secondary-dark transition-transform ${isTransactionDropdownOpen ? 'rotate-180' : ''}`} />
+                            </button>
+                            {isTransactionDropdownOpen && (
+                                <div className="ml-4 mt-1 flex flex-col gap-1">
+                                    <NavItem icon={Receipt} label={language === 'tr' ? 'Tüm İşlemler' : 'All Transactions'} to="/transactions" onClick={handleNavClick} />
+                                    <NavItem icon={TrendingUp} label={language === 'tr' ? 'Gelirler' : 'Income'} to="/income" onClick={handleNavClick} />
+                                    <NavItem icon={TrendingDown} label={language === 'tr' ? 'Giderler' : 'Expenses'} to="/expenses" onClick={handleNavClick} />
+                                </div>
+                            )}
+                        </div>
+
                         <NavItem icon={PieChart} label={t('reports')} to="/reports" onClick={handleNavClick} />
                         <NavItem icon={HistoryIcon} label={t('history')} to="/history" onClick={handleNavClick} />
                         <NavItem icon={Tag} label={t('categories')} to="/categories" onClick={handleNavClick} />
@@ -135,7 +160,28 @@ export default function Layout({ children, onAddTransactionClick }: LayoutProps)
                         </div>
                         <div className="flex flex-col gap-2">
                             <NavItem icon={LayoutDashboard} label={t('dashboard')} to="/" />
-                            <NavItem icon={Receipt} label={t('transactions')} to="/transactions" />
+
+                            {/* Desktop Transactions Dropdown */}
+                            <div>
+                                <button
+                                    onClick={() => setIsTransactionDropdownOpen(!isTransactionDropdownOpen)}
+                                    className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <Receipt className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
+                                        <span className="text-sm font-medium text-text-light dark:text-text-dark">{t('transactions')}</span>
+                                    </div>
+                                    <ChevronDown className={`w-4 h-4 text-text-secondary-light dark:text-text-secondary-dark transition-transform ${isTransactionDropdownOpen ? 'rotate-180' : ''}`} />
+                                </button>
+                                {isTransactionDropdownOpen && (
+                                    <div className="ml-4 mt-1 flex flex-col gap-1">
+                                        <NavItem icon={Receipt} label={language === 'tr' ? 'Tüm İşlemler' : 'All Transactions'} to="/transactions" />
+                                        <NavItem icon={TrendingUp} label={language === 'tr' ? 'Gelirler' : 'Income'} to="/income" />
+                                        <NavItem icon={TrendingDown} label={language === 'tr' ? 'Giderler' : 'Expenses'} to="/expenses" />
+                                    </div>
+                                )}
+                            </div>
+
                             <NavItem icon={PieChart} label={t('reports')} to="/reports" />
                             <NavItem icon={HistoryIcon} label={t('history')} to="/history" />
                             <NavItem icon={Tag} label={t('categories')} to="/categories" />

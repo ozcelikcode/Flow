@@ -1,58 +1,42 @@
 # Aktif Bağlam (Active Context)
 
 ## Mevcut Odak
-- Mobil ve tablet UI iyileştirmeleri tamamlandı.
-- Raporlar sayfası responsive düzeltmeleri yapıldı.
-- Günlük Harcama Trendi grafiği bugüne kadar gösterecek şekilde güncellendi.
+- Proje genel incelemesi ve dokümantasyon senkronizasyonu tamamlanıyor.
+- Gelir ve Gider sayfalarının tam ekran (100vh) düzeni oturtuldu.
 
-## Son Değişiklikler (11 Aralık 2025)
+## Son Değişiklikler (13 Aralık 2025)
 
-### Mobil ve Tablet UI İyileştirmeleri
+### Yeni Sayfalar: Gelir ve Giderler
+- **/income** ve **/expenses** sayfaları eklendi.
+- **Tam Ekran Layout**: `h-[calc(100vh-6rem)]` ile sayfa scroll gerektirmeden tam ekrana sığdırıldı.
+- **Esnek Düzen**: Flexbox mimarisiyle grafikler (Area, Pie, Bar) ekranı verimli kullanır (Sol %66 Trend, Sağ %33 Dağılım).
+- **Navbar Güncellemesi**: "İşlemler" menüsü dropdown yapıldı -> "Tüm İşlemler", "Gelirler", "Giderler".
+
+### İşlem Sayfası İyileştirmeleri
+- **Klavye Kısayolu**: `CTRL + A` ile artık "Tüm İşlemler" tablosundaki bütün satırlar seçiliyor (önceden modal açıyordu, değiştirildi).
+- Çoklu seçim ve toplu işlemler için altyapı hazır.
+
+### Mobil ve Tablet UI İyileştirmeleri (Önceki)
 - **History.tsx**: Stats kartları 2 sütunlu grid, daha kompakt boyutlar.
 - **TransactionModal.tsx**: Mobil uyumlu form, küçültülmüş butonlar ve inputlar.
-- **Reports.tsx**: Grafik container'larına debounce eklendi, Recharts uyarıları giderildi.
+- **Reports.tsx**: Grafik container'larına debounce eklendi.
 - **Layout.tsx**: Mobil sidebar'a X kapatma butonu eklendi.
 
-### Günlük Harcama Trendi Düzeltmeleri
-- Grafik sadece ayın 1'inden bugüne kadar gösteriyor (gelecek günler hariç).
-- X ekseni gün numaraları düzgün yerleştirildi (`interval={0}`, `tickMargin={5}`).
-- Ay geçişlerinde sorunsuz çalışıyor.
-
-### Yaklaşan İşlemler Gruplandırması
-- İşlemler 3 kategoriye ayrıldı: "Bu Hafta", "Bu Ay", "Daha Sonra".
-- Her grup için ayrı kart ve işlem sayısı badge'i.
-- Tarih geçişlerinde sorunsuz çalışıyor (hafta sonu Pazar, ay sonu).
-
-### Console Temizliği
-- React DevTools mesajı gizlendi (`main.tsx`).
-- `cryptoService.ts`'deki `console.error` kaldırıldı (güvenlik için).
-
 ### Fiş/Fatura Tarama (OCR)
-- **Tesseract.js** ile görüntü OCR (İngilizce dil paketi).
+- **Tesseract.js** ile görüntü OCR.
 - **PDF.js** ile PDF metin çıkarma.
-- Türk fişi pattern matching (TOPLAM, TUTAR, NAKİT, tarih).
-- Güven yüzdesi gösterimi (tutar ve tarih için ayrı ayrı).
-- Desteklenen formatlar: JPEG, JPG, PNG, BMP, PDF.
-- Tamamen client-side - veriler sunucuya gönderilmiyor.
+- Türk fişi pattern matching ve güven yüzdesi gösterimi.
+- Tamamen client-side işleme.
 
 ## Önceki Değişiklikler (10 Aralık 2025)
 
 ### Güvenlik ve Şifreleme
 - **Uçtan Uca Şifreleme**: Tüm kişisel veriler AES-256-GCM ile şifreleniyor.
-- `cryptoService.ts`: PBKDF2 anahtar türetme (100,000 iterasyon).
-- Her kaydetmede yeni salt ve IV oluşturulur.
-- Şifreli veriler: İşlemler, kategoriler, kullanıcı ayarları.
-
-### Hesap Silme
-- Settings → Güvenlik bölümüne "Tehlikeli Bölge" eklendi.
-- Şifre doğrulama zorunlu, Admin hesabı silinemez.
-
-### Provider Sıralaması
-- `App.tsx`'de: `AuthProvider > SettingsProvider > CategoryProvider`.
+- `cryptoService.ts`: PBKDF2 anahtar türetme.
+- Hesap silme özelliği ("Tehlikeli Bölge").
 
 ## Sonraki Adımlar
-- Kategoriye göre filtreleme özelliği.
+- Kategoriye göre filtreleme özelliği (Transactions sayfasında).
 - Arama fonksiyonu.
 - Veri dışa/içe aktarma (JSON).
 - PWA desteği.
-
