@@ -6,8 +6,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import { parseReceiptText, type ParsedReceiptData } from './receiptParser';
 
-// Set worker source for PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Set worker source using unpkg CDN (more reliable than cdnjs)
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@5.4.449/build/pdf.worker.min.mjs';
 
 export interface PDFProgress {
     status: string;
