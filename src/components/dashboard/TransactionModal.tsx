@@ -152,6 +152,9 @@ export default function TransactionModal({
             setPriceTiers([]);
             setIsActive(true);
             setEndDate('');
+            // Clear previous scan results
+            setScanResult(null);
+            setScanError(null);
         }
     }, [editTransaction, currency, isOpen]);
 
