@@ -26,6 +26,8 @@
 - [x] CTRL+A ile tüm işlemleri seçme kısayolu
 - [x] Fiş/Fatura OCR tarama (Tesseract.js + PDF.js)
 - [x] İşlem saat bilgisi desteği (time field)
+- [x] Otomatik kategori tespiti (keyword-based)
+- [x] Kompakt modal UI tasarımı
 
 ### Gelir ve Gider Analizi (YENİ)
 - [x] Özelleşmiş Gelir Sayfası (/income)

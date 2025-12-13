@@ -1,29 +1,36 @@
 # Aktif Bağlam (Active Context)
 
 ## Mevcut Odak
-- İşlem ekleme/düzenleme modeline saat bilgisi eklendi.
-- PDF ve Resim tarama işlemlerinde saat çıkarma özelliği eklendi.
+- Fiş/Fatura taramada otomatik kategori tespiti ve seçimi eklendi.
+- İşlem ekleme/düzenleme modal UI tamamen yeniden tasarlandı (kompakt).
 
 ## Son Değişiklikler (13 Aralık 2025)
 
-### Saat Bilgisi Desteği (YENİ)
-- **Transaction tipine `time` alanı eklendi**: İşlemlerin saat bilgisi artık kaydediliyor (HH:MM formatında).
-- **TransactionModal güncellendi**: Tarih alanının yanına saat input'u eklendi.
-- **receiptParser güncellendi**: Fiş/faturalardan saat bilgisi çıkarılıyor (SAAT:, TIME:, HH:MM:SS pattern'leri destekleniyor).
-- **PDF/Resim tarama güncellendi**: Taranan belgelerden saat otomatik olarak çıkarılıyor ve forma dolduruluyor.
-- **Çeviriler güncellendi**: "time" / "Saat" çevirileri eklendi.
+### Otomatik Kategori Tespiti (YENİ)
+- **receiptParser'a kategori tespiti eklendi**: Fiş içeriğinden akıllı kategori tahmini yapılıyor.
+- **Desteklenen kategoriler**: Food & Drink, Transportation, Health, Shopping, Bills, Entertainment, Subscription, Education.
+- **Anahtar kelime tabanlı tespit**: Türkçe ve İngilizce anahtar kelimeler destekleniyor.
+- **3 senaryo**:
+  1. Kategori tespit edilip mevcutsa → seçilir
+  2. Kategori tespit edilip mevcut değilse → otomatik oluşturulur
+  3. Tespit edilemezse → "Other" seçilir
 
-### Önceki Değişiklikler (Gelir/Gider Sayfaları)
-- **/income** ve **/expenses** sayfaları eklendi.
-- **Tam Ekran Layout**: `h-[calc(100vh-6rem)]` ile sayfa scroll gerektirmeden tam ekrana sığdırıldı.
-- **Esnek Düzen**: Flexbox mimarisiyle grafikler (Area, Pie, Bar) ekranı verimli kullanır.
-- **Navbar Güncellemesi**: "İşlemler" menüsü dropdown yapıldı.
+### Kompakt Modal UI (YENİ)
+- **Form gap'leri azaltıldı**: Scroll gerektirmeyen kompakt tasarım.
+- **Alanlar birleştirildi**: Tür + İsim tek satırda, Kategori + Tarih + Saat tek satırda.
+- **Scanner section küçültüldü**: Daha az yer kaplıyor.
+- **Font boyutları optimize edildi**: text-xs kullanımı artırıldı.
+- **Butonlar yeniden tasarlandı**: Daha düşük padding ve border-top ayracı.
+
+### Saat Bilgisi Desteği
+- **Transaction tipine `time` alanı eklendi**: İşlemlerin saat bilgisi kaydediliyor.
+- **Fiş taramada saat çıkarma**: SAAT:, TIME:, HH:MM:SS pattern'leri destekleniyor.
 
 ### Fiş/Fatura Tarama (OCR)
 - **Tesseract.js** ile görüntü OCR.
 - **PDF.js** ile PDF metin çıkarma.
 - Türk fişi pattern matching ve güven yüzdesi gösterimi.
-- **Saat bilgisi çıkarma** artık destekleniyor.
+- **Saat ve Kategori bilgisi çıkarma** artık destekleniyor.
 - Tamamen client-side işleme.
 
 ## Önceki Değişiklikler (10 Aralık 2025)

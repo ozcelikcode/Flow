@@ -8,12 +8,14 @@ export interface ParsedReceiptData {
     date: string | null; // ISO format YYYY-MM-DD
     time: string | null; // HH:MM format
     companyName: string | null; // Store/company name
+    suggestedCategory: string | null; // Suggested category based on content
     rawText: string;
     confidence: {
         amount: number; // 0-100
         date: number;   // 0-100
         time: number;   // 0-100
         companyName: number; // 0-100
+        category: number; // 0-100
         overall: number; // 0-100
     };
 }
@@ -324,6 +326,145 @@ function extractTime(text: string): { time: string | null; confidence: number } 
     };
 }
 
+// Category keyword patterns for intelligent category detection
+const CATEGORY_KEYWORDS: { category: string; keywords: RegExp[] }[] = [
+    // Food & Drink
+    {
+        category: 'Food & Drink',
+        keywords: [
+            /RESTORAN|RESTAURANT|CAFE|KAFE|KAHVE|COFFEE|LOKANTA|YEMEK|FOOD|BURGER|PIZZA|DÖNER|KEBAB|FAST\s*FOOD/gi,
+            /STARBUCKS|MCDONALD|BURGER\s*KING|KFC|DOMINO|PAPA\s*JOHN|POPEYES|SBARRO/gi,
+            /MARKET|MIGROS|BİM|ŞOK|A101|CARREFOUR|METRO|MAKRO|TEKİRDAĞ|KOMAGENE/gi,
+            /BAKKAL|MANAV|KASAP|FIRIN|BAKERY|PASTANE|PATISSERIE/gi,
+            /KAHVE\s*DÜNYASI|GLORIA\s*JEANS|ESPRESSO|LATTE|CAPPUCCINO/gi,
+        ]
+    },
+    // Transportation
+    {
+        category: 'Transportation',
+        keywords: [
+            /AKARYAKIT|PETROL|BENZIN|OPET|BP|SHELL|TOTAL|LUKOIL|PETLINE|AYTEMIZ/gi,
+            /OTOPARK|PARKING|PARK|VALE|GARAJ|GARAGE/gi,
+            /TAKSİ|TAXI|UBER|BOLT|BITAKSI|İTAKSİ/gi,
+            /OTOBÜS|BUS|METRO|TRAMVAY|İETT|EGO|ESHOT|İZBAN|MARMARAY/gi,
+            /UÇAK|FLIGHT|THY|PEGASUS|ANADOLUJET|SUNEXPRESS|ONUR\s*AIR/gi,
+            /İSTANBULKART|AKBIL|KENTKART|MÜŞTERİ\s*HİZMETLER/gi,
+        ]
+    },
+    // Health
+    {
+        category: 'Health',
+        keywords: [
+            /ECZANE|PHARMACY|İLAÇ|MEDICINE|DRUG/gi,
+            /HASTANe|HOSPITAL|KLİNİK|CLINIC|DOKTOR|DOCTOR|SAĞLIK|HEALTH/gi,
+            /OPTİK|OPTIK|GÖZLÜK|GLASSES|LENS/gi,
+            /DİŞ|DENTAL|DENTIST|DİŞÇİ/gi,
+            /SPOR\s*SALONU|GYM|FİTNESS|FITNESS|PILATES|YOGA/gi,
+        ]
+    },
+    // Shopping
+    {
+        category: 'Shopping',
+        keywords: [
+            /AVM|MALL|SHOPPING\s*CENTER|ALIŞVERİŞ\s*MERKEZİ/gi,
+            /MAĞAZA|STORE|SHOP|BOUTIQUE|BUTİK/gi,
+            /GİYİM|CLOTHING|FASHION|MODA|ZARA|H&M|LC\s*WAIKIKI|KOTON|DEFACTo|MANGO|PULL&BEAR/gi,
+            /ELEKTRONİK|ELECTRONICS|TEKNOLOJİ|TECHNOLOGY|MEDIAMARKT|TEKNOSA|VATAN|D&R|APPLE|SAMSUNG/gi,
+            /AYAKKABI|SHOES|FILA|NIKE|ADIDAS|PUMA|SKECHERS|KINETIX/gi,
+            /MOBILYA|FURNITURE|IKEA|KOÇTAŞ|BAUHAUS|PRAKTIKER/gi,
+            /KOZMETİK|COSMETIC|PARFÜM|PERFUME|GRATIS|WATSONS|SEPHORA|MAC/gi,
+            /TRENDYOL|HEPSIBURADA|N11|AMAZON|GİTTİGİDİYOR/gi,
+        ]
+    },
+    // Bills
+    {
+        category: 'Bills',
+        keywords: [
+            /FATURA|BILL|INVOICE/gi,
+            /ELEKTRİK|ELECTRIC|AYEDAŞ|BAŞKENT|TEDAŞ|ENERJİ/gi,
+            /DOĞALGAZ|GAS|İGDAŞ|BAŞKENTGAZ|EGEGAZ/gi,
+            /SU\s*FATURA|WATER|İSKİ|ASKİ|SU\s*İDARE/gi,
+            /TELEFON|PHONE|TURKCELL|VODAFONE|TÜRK\s*TELEKOM|AVEA/gi,
+            /İNTERNET|INTERNET|TTNET|SUPERONLINE|KABLONET/gi,
+        ]
+    },
+    // Entertainment
+    {
+        category: 'Entertainment',
+        keywords: [
+            /SİNEMA|CINEMA|MOVIE|FİLM|CINEMAXIMUM|CINEMAPINK|MARS\s*CINEMA/gi,
+            /TİYATRO|THEATER|THEATRE|KONSER|CONCERT|ETKİNLİK|EVENT/gi,
+            /OYUN|GAME|PLAYSTATION|XBOX|STEAM|EPIC\s*GAMES|NINTENDO/gi,
+            /LUNAPARK|EĞLENCE|AMUSEMENT|PARK|AQUAPARK/gi,
+            /MÜZE|MUSEUM|SERGİ|EXHIBITION|GALERİ|GALLERY/gi,
+            /NETFLIX|SPOTIFY|YOUTUBE|DISNEY|AMAZON\s*PRIME|EXXEN|BLUTV|GAİN/gi,
+        ]
+    },
+    // Subscription
+    {
+        category: 'Subscription',
+        keywords: [
+            /ABONELİK|SUBSCRIPTION|ÜYELİK|MEMBERSHIP/gi,
+            /AYLIK|MONTHLY|YILLIK|YEARLY|ANNUAL/gi,
+            /NETFLIX|SPOTIFY|YOUTUBE\s*PREMIUM|APPLE\s*MUSIC|DEEZER/gi,
+            /ADOBE|MICROSOFT|OFFICE|GOOGLE\s*ONE|ICLOUD|DROPBOX/gi,
+        ]
+    },
+    // Education
+    {
+        category: 'Education',
+        keywords: [
+            /OKUL|SCHOOL|ÜNİVERSİTE|UNIVERSITY|KURS|COURSE/gi,
+            /KİTAP|BOOK|KIRTASİYE|STATIONERY|D&R|İDEFİX|REMZI|IDEFIX/gi,
+            /UDEMY|COURSERA|LINKEDIN\s*LEARNING|MASTERCLASS|SKILLSHARE/gi,
+            /DERSHANe|EĞİTİM|EDUCATION|SINAV|EXAM|YKS|ALES|KPSS|TOEFL|IELTS/gi,
+        ]
+    },
+];
+
+/**
+ * Extract category from text based on keywords
+ */
+function extractCategory(text: string, companyName: string | null): { category: string | null; confidence: number } {
+    const searchText = `${text} ${companyName || ''}`.toUpperCase();
+
+    let bestMatch: { category: string; matchCount: number; priority: number } | null = null;
+
+    for (let i = 0; i < CATEGORY_KEYWORDS.length; i++) {
+        const { category, keywords } = CATEGORY_KEYWORDS[i];
+        let matchCount = 0;
+
+        for (const pattern of keywords) {
+            pattern.lastIndex = 0;
+            const matches = searchText.match(pattern);
+            if (matches) {
+                matchCount += matches.length;
+            }
+        }
+
+        if (matchCount > 0) {
+            // Priority based on order in array and match count
+            const priority = (CATEGORY_KEYWORDS.length - i) + matchCount;
+            if (!bestMatch || priority > bestMatch.priority) {
+                bestMatch = { category, matchCount, priority };
+            }
+        }
+    }
+
+    if (!bestMatch) {
+        return { category: null, confidence: 0 };
+    }
+
+    // Calculate confidence based on match count
+    let confidence = 50 + (bestMatch.matchCount * 10);
+    confidence = Math.min(95, confidence);
+
+    return {
+        category: bestMatch.category,
+        confidence
+    };
+}
+
 /**
  * Parse receipt text and extract relevant data
  */
@@ -332,6 +473,7 @@ export function parseReceiptText(text: string): ParsedReceiptData {
     const dateResult = extractDate(text);
     const timeResult = extractTime(text);
     const companyResult = extractCompanyName(text);
+    const categoryResult = extractCategory(text, companyResult.companyName);
 
     // Calculate overall confidence
     let overall = 0;
@@ -353,18 +495,24 @@ export function parseReceiptText(text: string): ParsedReceiptData {
         overall += companyResult.confidence;
         count++;
     }
+    if (categoryResult.category !== null) {
+        overall += categoryResult.confidence;
+        count++;
+    }
 
     return {
         amount: amountResult.amount,
         date: dateResult.date,
         time: timeResult.time,
         companyName: companyResult.companyName,
+        suggestedCategory: categoryResult.category,
         rawText: text,
         confidence: {
             amount: amountResult.confidence,
             date: dateResult.confidence,
             time: timeResult.confidence,
             companyName: companyResult.confidence,
+            category: categoryResult.confidence,
             overall: count > 0 ? Math.round(overall / count) : 0
         }
     };
