@@ -6,11 +6,13 @@
 export interface ParsedReceiptData {
     amount: number | null;
     date: string | null; // ISO format YYYY-MM-DD
+    time: string | null; // HH:MM format
     companyName: string | null; // Store/company name
     rawText: string;
     confidence: {
         amount: number; // 0-100
         date: number;   // 0-100
+        time: number;   // 0-100
         companyName: number; // 0-100
         overall: number; // 0-100
     };
@@ -269,12 +271,66 @@ function extractCompanyName(text: string): { companyName: string | null; confide
     return { companyName: null, confidence: 0 };
 }
 
+// Turkish time patterns
+const TIME_PATTERNS = [
+    /SAAT\s*[:.]?\s*(\d{1,2})[:.:](\d{2})(?:[:.:](\d{2}))?/gi, // SAAT: 14:30 or SAAT: 14:30:45
+    /TIME\s*[:.]?\s*(\d{1,2})[:.:](\d{2})(?:[:.:](\d{2}))?/gi, // TIME: 14:30
+    /(\d{1,2}):(\d{2}):(\d{2})/g, // HH:MM:SS format
+    /\b(\d{1,2}):(\d{2})\b(?![\d])/g, // HH:MM format (not followed by more digits to avoid matching amounts)
+];
+
+/**
+ * Extract time from text
+ */
+function extractTime(text: string): { time: string | null; confidence: number } {
+    const times: { value: string; priority: number }[] = [];
+
+    for (let i = 0; i < TIME_PATTERNS.length; i++) {
+        const pattern = TIME_PATTERNS[i];
+        pattern.lastIndex = 0; // Reset regex
+
+        let match;
+        while ((match = pattern.exec(text)) !== null) {
+            const hour = parseInt(match[1]);
+            const minute = parseInt(match[2]);
+
+            // Validate time
+            if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+                const formattedTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                // Higher priority for earlier patterns (SAAT > TIME > HH:MM:SS > HH:MM)
+                times.push({ value: formattedTime, priority: TIME_PATTERNS.length - i });
+            }
+        }
+    }
+
+    if (times.length === 0) {
+        return { time: null, confidence: 0 };
+    }
+
+    // Sort by priority
+    times.sort((a, b) => b.priority - a.priority);
+
+    const bestMatch = times[0];
+    let confidence = 50 + (bestMatch.priority * 10);
+
+    // If found with SAAT keyword, higher confidence
+    if (bestMatch.priority >= TIME_PATTERNS.length - 1) {
+        confidence += 15;
+    }
+
+    return {
+        time: bestMatch.value,
+        confidence: Math.min(95, confidence)
+    };
+}
+
 /**
  * Parse receipt text and extract relevant data
  */
 export function parseReceiptText(text: string): ParsedReceiptData {
     const amountResult = extractAmount(text);
     const dateResult = extractDate(text);
+    const timeResult = extractTime(text);
     const companyResult = extractCompanyName(text);
 
     // Calculate overall confidence
@@ -289,6 +345,10 @@ export function parseReceiptText(text: string): ParsedReceiptData {
         overall += dateResult.confidence;
         count++;
     }
+    if (timeResult.time !== null) {
+        overall += timeResult.confidence;
+        count++;
+    }
     if (companyResult.companyName !== null) {
         overall += companyResult.confidence;
         count++;
@@ -297,11 +357,13 @@ export function parseReceiptText(text: string): ParsedReceiptData {
     return {
         amount: amountResult.amount,
         date: dateResult.date,
+        time: timeResult.time,
         companyName: companyResult.companyName,
         rawText: text,
         confidence: {
             amount: amountResult.confidence,
             date: dateResult.confidence,
+            time: timeResult.confidence,
             companyName: companyResult.confidence,
             overall: count > 0 ? Math.round(overall / count) : 0
         }

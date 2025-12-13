@@ -31,6 +31,10 @@ export default function TransactionModal({
     const [amount, setAmount] = useState('');
     const [category, setCategory] = useState('Food & Drink');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [time, setTime] = useState(() => {
+        const now = new Date();
+        return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    });
     const [type, setType] = useState<'income' | 'expense'>('expense');
     const [inputCurrency, setInputCurrency] = useState<'USD' | 'EUR' | 'TRY'>(currency);
 
@@ -122,6 +126,14 @@ export default function TransactionModal({
                 setDate(`${year}-${month}-${day}`);
             }
 
+            // Set time if available
+            if (editTransaction.time) {
+                setTime(editTransaction.time);
+            } else {
+                const now = new Date();
+                setTime(`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`);
+            }
+
             setInputCurrency(currency);
             setRecurrence(editTransaction.recurrence || 'once');
             setPriceTiers(editTransaction.priceTiers || []);
@@ -132,6 +144,8 @@ export default function TransactionModal({
             setAmount('');
             setCategory('Food & Drink');
             setDate(new Date().toISOString().split('T')[0]);
+            const now = new Date();
+            setTime(`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`);
             setType('expense');
             setInputCurrency(currency);
             setRecurrence('once');
@@ -221,6 +235,11 @@ export default function TransactionModal({
                     setDate(result.data.date);
                 }
 
+                if (result.data.time) {
+                    console.log('Setting time:', result.data.time); // Debug log
+                    setTime(result.data.time);
+                }
+
                 // Set type to expense (most receipts are expenses)
                 setType('expense');
             } else {
@@ -257,6 +276,7 @@ export default function TransactionModal({
             amount: amountInUsd,
             category,
             date: formattedDate,
+            time,
             type,
             recurrence,
         };
@@ -410,6 +430,14 @@ export default function TransactionModal({
                                             : 'bg-warning/20 text-warning'
                                             }`}>
                                             {language === 'tr' ? 'Tarih' : 'Date'}: {scanResult.date} ({scanResult.confidence.date}%)
+                                        </span>
+                                    )}
+                                    {scanResult.time && (
+                                        <span className={`px-1.5 py-0.5 rounded ${scanResult.confidence.time >= 70
+                                            ? 'bg-success/20 text-success'
+                                            : 'bg-warning/20 text-warning'
+                                            }`}>
+                                            {language === 'tr' ? 'Saat' : 'Time'}: {scanResult.time} ({scanResult.confidence.time}%)
                                         </span>
                                     )}
                                 </div>
@@ -604,8 +632,8 @@ export default function TransactionModal({
                 )
                 }
 
-                {/* Category & Date */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4">
+                {/* Category, Date & Time */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
                     <div>
                         <label className="block text-xs sm:text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
                             {t('category')}
@@ -677,6 +705,17 @@ export default function TransactionModal({
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-1">
+                            {t('time')}
+                        </label>
+                        <input
+                            type="time"
+                            value={time}
+                            onChange={(e) => setTime(e.target.value)}
                             className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary/50"
                         />
                     </div>

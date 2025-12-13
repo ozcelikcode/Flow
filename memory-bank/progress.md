@@ -25,6 +25,7 @@
 - [x] Otomatik dönem ve fiyat güncellemesi
 - [x] CTRL+A ile tüm işlemleri seçme kısayolu
 - [x] Fiş/Fatura OCR tarama (Tesseract.js + PDF.js)
+- [x] İşlem saat bilgisi desteği (time field)
 
 ### Gelir ve Gider Analizi (YENİ)
 - [x] Özelleşmiş Gelir Sayfası (/income)

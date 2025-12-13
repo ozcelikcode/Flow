@@ -22,6 +22,7 @@ export interface Transaction {
     name: string;
     category: string;
     date: string; // İşlem başlangıç tarihi
+    time?: string; // İşlem saati (HH:MM formatında)
     amount: number; // Mevcut dönemin fiyatı (USD bazında)
     type: 'income' | 'expense';
 
